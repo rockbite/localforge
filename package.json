@@ -1,10 +1,10 @@
 {
-  "name": "localforge",
+  "name": "@rockbite/localforge",
   "version": "1.0.0",
   "type": "module",
   "main": "electron/main.js",
   "bin": {
-    "localforge": "./electron/main.js"
+    "localforge": "./cli.js"
   },
   "scripts": {
     "test": "node tests/fileSystemTools.test.js",
