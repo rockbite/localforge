@@ -26,7 +26,7 @@ if (electronSquirrelStartup) {
 let win;
 let serverHasStarted = false; // Flag to track server start attempt
 
-const iconPath = path.join(__dirname, 'assets', 'icon.icns');
+const iconPath = path.join(__dirname, 'assets', 'icon.png'); // Adjust path if needed, normally need to use *.icns
 
 function createWindow() {
   // Create the browser window.
