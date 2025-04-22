@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
-const { execFileSync } = require('child_process');
-const path = require('path');
-const electron = require('electron');
+import { execFileSync } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import electron from 'electron';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Run the actual Electron app
 console.log('Starting Localforge...');
