@@ -11,54 +11,81 @@ const __dirname = path.dirname(__filename);
 export function startServer() {
   const isDev = !app.isPackaged;
   let serverProcess;
-  
-  // Determine base path for the app
-  const basePath = isDev ? path.join(__dirname, '..') : app.getAppPath();
-  console.log(`Starting server from base path: ${basePath}`);
-  
-  // In production, check if we're running from an asar package
-  if (!isDev) {
-    console.log(`Running in production mode from: ${app.getAppPath()}`);
-    console.log(`Executable path: ${app.getPath('exe')}`);
+
+  // Base path calculation
+  const appBasePath = isDev ? path.join(__dirname, '..') : app.getAppPath();
+  console.log(`App base path: ${appBasePath}`);
+
+  // --- Calculate Server Script Path ---
+  let serverScript;
+  if (isDev) {
+    serverScript = path.join(appBasePath, 'src', 'index.js');
+  } else {
+    // In packaged app, check for unpacked version first
+    const unpackedScriptPath = path.join(appBasePath, '..', 'app.asar.unpacked', 'src', 'index.js');
+    // Note: We go '../' from 'app' to get to 'Resources', then into 'app.asar.unpacked'
+    
+    if (fs.existsSync(unpackedScriptPath)) {
+      serverScript = unpackedScriptPath;
+      console.log('Using unpacked server script.');
+    } else {
+      // Fallback (though unlikely if unpackDir is used correctly)
+      serverScript = path.join(appBasePath, 'src', 'index.js');
+      console.warn('Using potentially ASAR-packed server script - this might fail!');
+    }
   }
   
-  // Path to server script
-  const serverScript = path.join(basePath, 'src', 'index.js');
-  
-  console.log(`Server script path: ${serverScript}`);
-  console.log(`File exists: ${fs.existsSync(serverScript) ? 'Yes' : 'No'}`);
-  
-  // Always use direct node process for starting server
-  const nodeExecutable = isDev ? 'node' : process.execPath;
-  const nodeArgs = isDev ? [serverScript] : ['--no-sandbox', serverScript];
-  
-  if (!isDev) {
-    // In production, make sure Node can find the modules
-    process.env.ELECTRON_RUN_AS_NODE = '1';
+  console.log(`Resolved server script path: ${serverScript}`);
+  console.log(`Server script exists: ${fs.existsSync(serverScript) ? 'Yes' : 'No'}`);
+
+  if (!fs.existsSync(serverScript)) {
+    console.error("FATAL: Server script not found at the calculated path!");
+    return; // Don't attempt to start if script doesn't exist
   }
-  
-  console.log(`Starting server with: ${nodeExecutable} ${nodeArgs.join(' ')}`);
-  
+
+  // --- Determine Node Executable and Args ---
+  const nodeExecutable = isDev ? 'node' : process.execPath; 
+  const nodeArgs = [serverScript]; // Just pass the script path as the primary arg
+
+  // --- Determine CWD ---
+  // The CWD should be where the script can find its relative dependencies
+  const serverCwd = isDev ? appBasePath : path.join(appBasePath, '..', 'app.asar.unpacked');
+  console.log(`Setting server CWD to: ${serverCwd}`);
+
+  console.log(`Attempting to start server with:`);
+  console.log(` Executable: ${nodeExecutable}`);
+  console.log(` Args: ${nodeArgs.join(' ')}`);
+  console.log(` CWD: ${serverCwd}`);
+
+  // --- Spawn the Process ---
   serverProcess = spawn(nodeExecutable, nodeArgs, {
-    cwd: basePath,
-    stdio: 'inherit',
+    cwd: serverCwd,
+    stdio: 'inherit', // Keep for debugging
     shell: isDev, // Only use shell in development
     env: {
       ...process.env,
-      ELECTRON_RUN_AS_NODE: '1', // Required for running Node scripts with Electron binary
+      ELECTRON_RUN_AS_NODE: '1',
     }
   });
-  
+
   serverProcess.on('error', (err) => {
     console.error('Failed to start server process:', err);
   });
-  
+
   serverProcess.on('exit', (code, signal) => {
     console.log(`Server process exited with code ${code} and signal ${signal}`);
   });
+
+  // Kill server on main process exit
+  app.on('quit', () => {
+    if (serverProcess && !serverProcess.killed) {
+      console.log('Main app quitting, killing server process.');
+      serverProcess.kill();
+    }
+  });
   
   process.on('exit', () => {
-    if (serverProcess) {
+    if (serverProcess && !serverProcess.killed) {
       console.log('Main process exiting, killing server process');
       serverProcess.kill();
     }

@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { startServer } from './server.js';
@@ -22,6 +22,7 @@ if (electronSquirrelStartup) {
 }
 
 let win;
+let serverHasStarted = false; // Flag to track server start attempt
 
 function createWindow() {
   // Create the browser window.
@@ -35,25 +36,56 @@ function createWindow() {
   });
 
   const isDev = !app.isPackaged;
+  const serverUrl = 'http://localhost:3001';
+  let retryCount = 0;
+  const maxRetries = 10; // Try for 10 seconds
+
   const loadApp = () => {
-    // Always load from localhost - the server needs to be running
-    const serverUrl = 'http://localhost:3001';
-    console.log('Connecting to server at:', serverUrl);
+    console.log(`Attempting to load ${serverUrl} (Attempt ${retryCount + 1})`);
     
-    // Open dev tools in packaged app if started with debug flag
-    if (!isDev && process.argv.includes('--debug')) {
+    if (!win) return; // Window might have been closed
+
+    // Optional: Open dev tools in packaged app if started with debug flag
+    if (!isDev && process.argv.includes('--debug') && !win.webContents.isDevToolsOpened()) {
       win.webContents.openDevTools();
     }
-    
-    win.loadURL(serverUrl).catch(err => {
-      console.error('Failed to connect to server:', err);
-      // Try again after a delay - server might still be starting
-      setTimeout(loadApp, 1000);
-    });
+
+    win.loadURL(serverUrl)
+      .then(() => {
+        console.log(`Successfully loaded ${serverUrl}`);
+        serverHasStarted = true; // Mark as successful
+      })
+      .catch(err => {
+        console.error(`Failed to load ${serverUrl}:`, err.message);
+        retryCount++;
+        if (retryCount < maxRetries && win) {
+          // Try again after a delay - server might still be starting
+          console.log(`Retrying in 1 second...`);
+          setTimeout(loadApp, 1000);
+        } else if (win) {
+          // Max retries reached or window closed
+          console.error('Max retries reached. Could not connect to the server.');
+          // Load an error page or show a dialog
+          if (serverHasStarted) {
+            // If server started once but became unreachable
+            dialog.showErrorBox(
+              'Connection Error',
+              `Lost connection to the local server at ${serverUrl}. Please restart the application.`
+            );
+          } else {
+            // If server never started
+            dialog.showErrorBox(
+              'Server Start Error',
+              `The application server failed to start or become reachable at ${serverUrl}. Please check logs or restart.`
+            );
+          }
+        }
+      });
   };
-  
-  // Give the server a moment to start
-  setTimeout(loadApp, 500);
+
+  // Give the server more time to start initially
+  console.log('Waiting 3 seconds for server to potentially start...');
+  setTimeout(loadApp, 3000); // Increased initial delay
 
   // Open the DevTools in development mode
   if (isDev) {
@@ -67,11 +99,19 @@ function createWindow() {
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.whenReady().then(() => {
-  // Start the server first
-  startServer();
-  // Then create the window that will connect to it
-  createWindow();
+app.whenReady().then(async () => {
+  console.log('App ready, starting server...');
+  try {
+    startServer(); // Start the server process
+    console.log('Server process spawn initiated. Creating window...');
+  } catch (error) {
+    console.error("Error initiating server start:", error);
+    dialog.showErrorBox('Fatal Error', `Could not initiate the server process. The application cannot start.\n\n${error.message}`);
+    app.quit();
+    return;
+  }
+  
+  createWindow(); // Create the window, which will then try to connect
 });
 
 // Quit when all windows are closed, except on macOS.
