@@ -1,0 +1,25 @@
+<div id="right-panel">
+    <div id="tool-panel">
+        <h3>
+            <span class="material-icons">build</span>
+            Tool Execution
+            <div id="cost-display" title="Estimated cost for this chat" class="badge" 
+                 style="margin-left: auto">$0.0000</div>
+        </h3>
+        <!-- Display current models in use and token count -->
+        <div id="model-info">
+            <span class="material-icons">memory</span>
+            <span id="main-model" class="model-badge">-</span>
+            <span id="aux-model" class="model-badge">-</span>
+            <span id="token-count" class="model-badge" style="margin-left: 10px;">0/1,000,000 tokens</span>
+        </div>
+        <div id="working-dir">
+            <span class="material-icons">folder</span>
+            <span id="current-dir">Not set</span>
+        </div>
+        <div id="tool-log"></div>
+    </div>
+    <div id="tasks-panel">
+        <task-tracker-widget id="tracker"></task-tracker-widget>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+{
+  "name": "agent1",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "electron/main.js",
+  "scripts": {
+    "test": "node tests/fileSystemTools.test.js",
+    "test:fs": "npm run test",
+    "test:grep": "node tests/grepTool.test.js",
+    "fe": "vite dev",
+    "server": "node src/index.js",
+    "dev": "concurrently \"npm run fe\" \"npm run server\"",
+    "start": "electron .",
+    "build:web": "vite build",
+    "build:desk": "electron-builder",
+    "release": "npm run build:web && npm run build:desk"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google/genai": "^0.8.0",
+    "@mozilla/readability": "^0.6.0",
+    "@shoelace-style/shoelace": "^2.12.0",
+    "axios": "^1.8.4",
+    "conf": "^13.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "glob": "^11.0.1",
+    "jsdom": "^26.1.0",
+    "level": "^9.0.0",
+    "level-read-stream": "^2.0.0",
+    "lit": "^3.3.0",
+    "micromatch": "^4.0.8",
+    "openai": "^4.94.0",
+    "puppeteer": "^22.15.0",
+    "socket.io": "^4.8.1",
+    "tippy.js": "^6.3.7",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "concurrently": "^9.1.2",
+    "electron": "^35.2.0",
+    "electron-builder": "^26.0.12",
+    "nodemon": "^3.1.9"
+  }
+}

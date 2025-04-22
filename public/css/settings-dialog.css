@@ -1,0 +1,408 @@
+/* Settings Dialog Specific Styles */
+.settings-modal-content {
+    width: 95%;
+    max-width: 700px; /* Wider modal for settings */
+    height: 80vh; /* Fixed height, content scrolls */
+    max-height: 700px; /* Max height */
+    display: flex;
+    flex-direction: column;
+    padding: 0; /* Remove padding, handle inside */
+    background-color: var(--secondary-bg) !important; /* Force background color */
+    animation: settings-modal-slide-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important; /* Override animation */
+    border: 1px solid var(--border-color) !important; /* Use simple border instead of gradient */
+}
+
+/* Custom animation specifically for settings modal */
+@keyframes settings-modal-slide-in {
+    from {
+        transform: translateY(30px) scale(0.98);
+        opacity: 0;
+        background-color: var(--secondary-bg);
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        background-color: var(--secondary-bg);
+    }
+}
+
+.settings-modal-content h2 {
+    /* Header is sticky */
+    position: sticky;
+    top: 0;
+    z-index: 6; /* Above tabs and content */
+    background-color: var(--secondary-bg); /* Match modal bg */
+    padding: 24px 24px 12px 24px; /* Padding */
+    margin-bottom: 0; /* Remove bottom margin */
+    font-size: 20px; /* Slightly smaller title */
+    border-bottom: 1px solid var(--border-color); /* Separator */
+}
+
+.settings-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0; /* No margin below tabs */
+    position: sticky;
+    top: 69px; /* Position below the sticky header (adjust based on header height) */
+    background-color: var(--secondary-bg);
+    z-index: 5; /* Below header, above content */
+    padding: 0 24px; /* Align with content padding */
+    flex-shrink: 0; /* Prevent tabs shrinking */
+}
+
+.settings-tab {
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    color: var(--secondary-text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    border-bottom: 2px solid transparent; /* Placeholder for active indicator */
+    margin-bottom: -1px; /* Overlap container border */
+}
+
+.settings-tab:hover {
+    color: var(--text-color);
+}
+
+.settings-tab.active {
+    color: #40A2E3; /* End gradient color */
+    border-bottom-color: #40A2E3; /* Use solid color for indicator */
+}
+
+/* Removed ::after indicator, using border directly */
+/* .settings-tab.active::after { ... } */
+
+
+.settings-tab-content {
+    flex: 1; /* Take remaining vertical space */
+    overflow-y: auto; /* Scrollable content area */
+    padding: 24px; /* Padding for content */
+    position: relative; /* For potential absolute elements inside */
+    background-color: var(--secondary-bg); /* Ensure consistent background */
+}
+
+/* Removed redundant scroll area wrappers */
+/* .content-scroll-area { ... } */
+
+.settings-section {
+    margin-bottom: 24px; /* More space between sections */
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-section.compact {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    padding-left: 0; /* No extra padding */
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0; /* No padding at the very end */
+}
+
+.settings-section h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 16px; /* More space below heading */
+    color: var(--text-color);
+}
+
+.settings-form-group {
+    margin-bottom: 16px; /* Default spacing */
+    width: 100%;
+}
+
+.settings-form-group.compact {
+    margin-bottom: 8px;
+}
+
+/* For inline elements like checkboxes next to labels */
+.settings-form-group.inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px; /* Still needs some bottom margin */
+    width: 100%; /* Ensure it takes width */
+}
+
+.settings-form-group label {
+    display: block; /* Default block display */
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--secondary-text);
+    font-weight: 500; /* Slightly bolder labels */
+}
+
+.settings-form-group.inline label {
+    margin-bottom: 0; /* No margin for inline labels */
+    flex: 1; /* Allow label to take space */
+}
+
+/* Model Row specific styles */
+.model-row {
+    margin-bottom: 16px;
+    padding: 12px; /* Consistent padding */
+    background-color: rgba(30, 30, 30, 0.5); /* Slightly darker background */
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.model-row.compact {
+    padding: 10px; /* Slightly less padding */
+    margin-bottom: 12px;
+}
+
+.model-row-label {
+    font-weight: 500;
+    margin-bottom: 12px; /* Space below label */
+    color: var(--text-color);
+    font-size: 14px;
+    display: block; /* Ensure it's block */
+}
+
+.model-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Default two columns */
+    gap: 12px; /* Space between controls */
+}
+
+/* Input and Select styles within settings */
+.settings-modal-content input[type="text"],
+.settings-modal-content input[type="password"],
+.settings-modal-content input[type="number"], /* Added number type */
+.settings-modal-content select {
+    background-color: var(--input-bg); /* Use specific input background */
+    color: var(--text-color);
+    border: 1px solid #444; /* Match modal input border */
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    height: 38px; /* Consistent height */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-modal-content input:focus,
+.settings-modal-content select:focus {
+    outline: none; /* Remove default outline */
+    border-color: #40A2E3; /* Use end gradient color for focus */
+    box-shadow: 0 0 0 2px rgba(64, 162, 227, 0.3); /* Subtle focus ring */
+}
+
+/* Checkbox specific styles */
+.settings-form-group.checkbox-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none; /* Prevent text selection on click */
+    margin-bottom: 0; /* Override default label margin */
+}
+
+.checkbox-container {
+    position: relative;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.checkbox-container input[type="checkbox"] {
+    opacity: 0; /* Hide actual checkbox */
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2; /* Above custom box */
+}
+
+.custom-checkbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    background-color: var(--input-bg); /* Match input background */
+    border: 1px solid #444; /* Match input border */
+    border-radius: 3px;
+    pointer-events: none; /* Click handled by label/input */
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Style checkmark */
+.custom-checkbox::after {
+    content: '';
+    position: absolute;
+    left: 5px; /* Position checkmark */
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid transparent; /* Start transparent */
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0); /* Hide initially */
+    transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+/* Checked state */
+.checkbox-container input[type="checkbox"]:checked + .custom-checkbox {
+    background-color: #40A2E3; /* Use end gradient color */
+    border-color: #40A2E3;
+}
+
+.checkbox-container input[type="checkbox"]:checked + .custom-checkbox::after {
+    border-color: white; /* White checkmark */
+    transform: rotate(45deg) scale(1); /* Show checkmark */
+}
+
+/* Focus state for checkbox */
+.checkbox-container input[type="checkbox"]:focus-visible + .custom-checkbox {
+    box-shadow: 0 0 0 2px rgba(64, 162, 227, 0.3); /* Focus ring */
+}
+
+
+/* Select dropdown styles */
+.select-container {
+    position: relative;
+    width: 100%; /* Ensure container takes width */
+}
+
+.select-container select {
+    appearance: none; /* Remove default arrow */
+    width: 100%;
+    padding: 8px 30px 8px 12px; /* Make room for custom arrow */
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    height: 38px; /* Match input height */
+}
+
+/* Custom dropdown arrow */
+.select-container::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 12px; /* Position arrow */
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--secondary-text); /* Arrow color */
+    pointer-events: none; /* Don't interfere with select */
+    transition: border-color 0.2s ease;
+}
+
+.select-container:hover::after {
+    border-top-color: var(--text-color); /* Lighten arrow on hover */
+}
+
+/* Password/Key input specific styles */
+.key-input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex; /* Align input and button */
+}
+
+.key-input-wrapper input[type="password"],
+.key-input-wrapper input[type="text"] {
+    /* Ensure input takes full width minus button */
+    padding-right: 40px; /* Make space for toggle button */
+    flex: 1;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0; /* Position inside the input padding */
+    top: 0;
+    height: 100%; /* Match input height */
+    background: none;
+    border: none;
+    color: var(--secondary-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px; /* Padding for the icon */
+    z-index: 1; /* Above input */
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: var(--text-color);
+}
+
+.toggle-password .material-icons {
+    font-size: 20px; /* Icon size */
+}
+
+/* Settings Modal Footer */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end; /* Align buttons right */
+    margin-top: auto; /* Push footer to bottom */
+    gap: 12px;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--secondary-bg); /* Match modal bg */
+    padding: 16px 24px; /* Padding */
+    border-top: 1px solid var(--border-color); /* Separator */
+    z-index: 5; /* Below header/tabs, above content */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Reusable Button styles within Settings Footer */
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500; /* Bolder buttons */
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    min-width: 90px; /* Minimum width */
+}
+
+.btn.primary {
+    background: linear-gradient(90deg, var(--gradient-mid2), var(--gradient-end)); /* Agent gradient */
+    color: white;
+}
+
+.btn.secondary {
+    background-color: #3a3f4f; /* Match cancel button color */
+    border: none; /* No border needed */
+    color: var(--text-color);
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px); /* Subtle lift */
+}
+
+.btn:active {
+    transform: translateY(0px); /* Reset lift on click */
+    opacity: 1;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    background: var(--border-color);
+}
+
+/* Adjustments for single column model controls if needed */
+@media (max-width: 600px) { /* Example breakpoint */
+    .model-controls {
+        grid-template-columns: 1fr; /* Stack controls */
+        gap: 12px;
+    }
+}

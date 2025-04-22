@@ -1,0 +1,128 @@
+/* Header styles */
+header {
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--header-height);
+    border-bottom: 1px solid var(--border-color);
+    position: relative; /* For potential dropdowns or absolute elements */
+    z-index: 10; /* Keep header above scrolling content */
+}
+
+/* Right-side controls container */
+header .right-controls {
+    display: flex;
+    align-items: center;
+}
+
+.greeting {
+    margin-bottom: 0;
+}
+
+.greeting h1 {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    background: linear-gradient(90deg, #FFD166 0%, #FF715B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent; /* Standard property */
+}
+
+.greeting h2 {
+    font-size: 16px;
+    font-weight: 400;
+    margin: 0;
+    color: #888;
+}
+
+header h1 .material-icons {
+    margin-right: 10px;
+    background: linear-gradient(90deg, #FFD166 0%, #FF715B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent; /* Standard property */
+}
+
+#status-indicator {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: var(--secondary-text);
+    background-color: var(--secondary-bg);
+    padding: 6px 16px;
+    border-radius: 18px;
+    border: 1px solid #333;
+    margin-right: 12px;
+}
+
+#settings-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--secondary-bg);
+    border: 1px solid #333;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#settings-button:hover {
+    background-color: #252525;
+    transform: rotate(30deg);
+}
+
+#settings-button .material-icons {
+    font-size: 20px;
+    color: var(--secondary-text);
+}
+
+#status-dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    background-color: #555; /* Default off state */
+    margin-left: 10px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+#status-dot.idle {
+    background-color: #888;
+}
+
+#status-dot.thinking {
+    background-color: var(--warning-color);
+    animation: pulse 1.5s infinite;
+}
+
+#status-dot.active {
+    background-color: var(--success-color);
+}
+
+#status-dot.error {
+    background-color: var(--error-color);
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.7;
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0.7;
+        transform: scale(0.9);
+    }
+}

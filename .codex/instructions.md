@@ -1,0 +1,2 @@
+- Only use git commands if I explicitly mention you should
+- Don' run npm servers that will occupy ports, ask me to do it instead

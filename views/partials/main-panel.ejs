@@ -1,0 +1,42 @@
+<div id="main-panel">
+    <div id="chat-header">
+        <div class="chat-info">
+            <span id="project-name"></span>
+            <span class="separator">•</span>
+            <span id="session-name"></span>
+        </div>
+        <div class="chat-buttons">
+            <button id="show-context-button" class="secondary-button">
+                <span class="material-icons">subject</span>
+                Show Context
+            </button>
+            <button id="clear-chat-button" class="secondary-button">
+                <span class="material-icons">delete_sweep</span>
+                Clear Chat
+            </button>
+            <button id="stop-button" class="secondary-button danger-button" style="display: none;">
+                <span class="material-icons">stop</span>
+                Stop
+            </button>
+        </div>
+    </div>
+    <div id="chat-container">
+        <div id="messages"></div>
+    </div>
+    <footer>
+        <form id="message-form">
+            <div class="prompt-container">
+                <div class="textarea-container">
+                    <span class="attachments-icon material-icons" id="attachment-button">attach_file</span>
+                    <!-- Hidden file input for images -->
+                    <input type="file" id="file-input" accept="image/*" style="display:none" />
+                    <textarea id="message-input" placeholder="Ask me to help with a coding task..." disabled></textarea>
+                    <span class="prompt-label">⌘+ENTER</span>
+                </div>
+            </div>
+            <button type="submit" id="send-button" disabled>
+                <span class="material-icons">send</span>
+            </button>
+        </form>
+    </footer>
+</div>

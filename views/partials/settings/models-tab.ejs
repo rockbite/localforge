@@ -1,0 +1,67 @@
+<div class="settings-tab-content" id="models-tab" style="visibility:visible; position:relative; z-index:1">
+    <div class="content-scroll-area">
+        <div class="settings-section compact">
+            <div class="model-row-label">OpenAI API Key</div>
+            <div class="key-input-wrapper">
+                <input type="text" id="openaiApiKey" placeholder="sk-..." />
+            </div>
+        </div>
+        
+        <div class="settings-section compact">
+            <div class="model-row compact">
+                <div class="model-row-label">Main Model</div>
+                <div class="model-controls">
+                    <div class="settings-form-group inline">
+                        <select id="mainModelProvider" title="Provider">
+                            <option value="openai">OpenAI</option>
+                            <option value="anthropic">Anthropic</option>
+                            <option value="google">Google</option>
+                        </select>
+                    </div>
+                    
+                    <div class="settings-form-group inline">
+                        <input type="text" id="mainModelName" placeholder="Model name (e.g. gpt-4.1)" value="gpt-4.1" title="Model Name" />
+                    </div>
+                </div>
+            </div>
+            
+            <div class="model-row compact">
+                <div class="model-row-label">Expert Model</div>
+                <div class="model-controls">
+                    <div class="settings-form-group inline">
+                        <select id="expertModelProvider" title="Provider">
+                            <option value="openai">OpenAI</option>
+                            <option value="anthropic">Anthropic</option>
+                            <option value="google">Google</option>
+                        </select>
+                    </div>
+                    
+                    <div class="settings-form-group inline">
+                        <input type="text" id="expertModelName" placeholder="Model name (e.g. o3)" value="o3" title="Model Name" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-section compact">
+            <div class="model-row-label">Web Integration</div>
+            <div class="settings-form-group checkbox-group compact">
+                <label for="usePuppeteer">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="usePuppeteer">
+                        <span class="custom-checkbox"></span>
+                    </div>
+                    <span>Use Puppeteer for web browsing</span>
+                </label>
+            </div>
+            
+            <div class="settings-form-group compact">
+                <input type="text" id="googleCseId" placeholder="Google CSE ID" />
+
+            </div>
+            <div class="settings-form-group compact">
+                <input type="text" id="googleApiKey" placeholder="Google API Key" />
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+# Environment variables
+.env
+
+# Dependency directories
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build directories
+dist/
+build/
+out/
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-*
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+sandbox/
+# App local config
+.config/**

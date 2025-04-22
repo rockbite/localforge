@@ -1,0 +1,173 @@
+/* Footer styles */
+footer {
+    background-color: var(--primary-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 16px 24px;
+    height: var(--footer-height); /* Use variable height */
+    position: relative; /* For potential absolute elements */
+    overflow: hidden; /* Prevent content spillover */
+    z-index: 10; /* Keep above main content if overlap occurs */
+    flex-shrink: 0; /* Prevent footer from shrinking */
+}
+
+#message-form {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin: 0 auto; /* Centering if max-width were used */
+    align-items: flex-end; /* Align items to bottom, esp. for multi-line input */
+    gap: 12px;
+    height: 100%; /* Fill the footer height */
+}
+
+/* Animated textarea container with gradient border */
+.prompt-container {
+    position: relative;
+    border-radius: var(--border-radius);
+    background: var(--secondary-bg); /* Fallback background */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column; /* Stack textarea and potential attachments */
+    padding: 0; /* Padding applied inside */
+    overflow: hidden;
+    flex: 1; /* Take available space */
+    min-height: 0; /* Allow shrinking in flex layout */
+}
+
+.prompt-container::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid1), var(--gradient-mid2), var(--gradient-end));
+    background-size: 400% 400%;
+    z-index: 0; /* Behind the textarea container */
+    border-radius: var(--border-radius);
+    margin: -1px; /* Create the border effect */
+    animation: gradientAnimation 6s ease infinite;
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.textarea-container {
+    position: relative;
+    z-index: 1; /* Above the gradient border */
+    margin: 1px; /* Fit inside the gradient border */
+    border-radius: calc(var(--border-radius) - 1px); /* Match parent radius */
+    background: var(--secondary-bg); /* Actual input background */
+    padding: 16px;
+    display: flex;
+    align-items: center; /* Center single-line text vertically */
+    flex: 1; /* Allow this container to grow/shrink */
+    min-height: 0;
+}
+
+#message-input {
+    resize: none; /* Disable manual resizing */
+    background: transparent;
+    appearance: none; /* Remove default OS styling */
+    caret-color: var(--gradient-start); /* Use start gradient for caret */
+    border: none;
+    outline: none;
+    overflow-y: auto; /* Allow scrolling for multi-line input */
+    color: var(--text-color);
+    box-sizing: border-box;
+    padding: 0; /* Remove padding here, handled by container */
+    font-family: inherit; /* Use body font */
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px; /* Control line height */
+    flex: 1; /* Take available horizontal space */
+    width: 100%; /* Ensure it tries to fill */
+    /* Height is dynamic, controlled by content and max-height */
+    max-height: calc(var(--footer-height) - 32px - 2px); /* Estimate max height based on footer padding */
+    min-height: 24px; /* Minimum height for one line */
+}
+
+#message-input::placeholder {
+    color: #8b98a9; /* Standard placeholder color */
+}
+
+/* Attachment icon - now actually used */
+.attachments-icon {
+    color: #555; /* Default icon color */
+    margin-right: 8px;
+    cursor: pointer;
+    flex-shrink: 0; /* Prevent shrinking */
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.attachments-icon:hover {
+    color: var(--gradient-start);
+    transform: scale(1.1);
+}
+
+.attachments-icon.attached {
+    color: var(--success-color); /* Indicate attached state */
+    animation: pulse-success 2s infinite;
+}
+
+@keyframes pulse-success {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Optional label (example) */
+.prompt-label {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    color: #555;
+    font-size: 12px;
+    background: #252525;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 2; /* Above textarea */
+}
+
+#send-button {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid1)); /* User gradient */
+    color: white;
+    border: none;
+    border-radius: 22px; /* Make it circular */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* Prevent button shrinking */
+    align-self: flex-end; /* Align to bottom with multi-line text */
+    margin-bottom: 6px; /* Align roughly with text baseline */
+}
+
+#send-button .material-icons {
+    font-size: 20px;
+}
+
+#send-button:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+#send-button:active {
+    transform: scale(0.95);
+}
+
+#send-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none; /* Disable hover/active transforms */
+    background: var(--border-color); /* Grey out disabled button */
+}

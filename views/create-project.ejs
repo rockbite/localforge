@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Project</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--primary-bg);
+            font-family: var(--font-family);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .create-project-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--primary-bg);
+            padding: 0;
+        }
+        
+        .create-project-card {
+            background-color: var(--secondary-bg);
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 550px;
+            padding: 32px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            animation: modal-slide-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        
+        @keyframes modal-slide-in {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .create-project-card::before {
+            display: none;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 1;
+            background: var(--secondary-bg);
+            border-radius: calc(var(--border-radius) - 1px);
+            padding: 32px;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            font-size: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        h1 .material-icons {
+            color: #FFD166;
+        }
+
+        .description {
+            color: var(--secondary-text);
+            margin-bottom: 32px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary-text);
+            font-size: 14px;
+        }
+
+        input {
+            outline: none;
+            flex: 1 1 auto;
+            min-width: 0;
+            border: none;
+            background-color: #00000000;
+            padding: 16px;
+            color: var(--text-color);
+            font-size: 14px;
+            width: 100%;
+        }
+        
+        /* Remove focus outline and replace with border color change */
+        input:focus-visible {
+            outline: none;
+            box-shadow: none;
+        }
+        
+        .input-container:focus-within {
+            border-color: #666;
+            box-shadow: none;
+        }
+
+        /* Override input-container styles from our local styles to match global css */
+        .input-container {
+            position: relative;
+            margin-bottom: 24px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .browse-button {
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            padding: 0 16px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: -1px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .browse-button:hover {
+            background-color: #555;
+        }
+        
+        .browse-button .material-icons {
+            font-size: 18px;
+            margin-right: 4px;
+        }
+        
+        .create-button {
+            background: linear-gradient(90deg, #FF715B, #FFD166);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 8px;
+        }
+        
+        .create-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            opacity: 0.9;
+        }
+        
+        .create-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="create-project-container">
+        <div class="create-project-card">
+            <div class="card-content">
+                <h1><span class="material-icons">add_circle</span>Create New Project</h1>
+                <p class="description">Let's set up your first project! Enter a name and select a folder to work with.</p>
+                
+                <form id="create-project-form">
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <div class="input-container">
+                            <div class="input-inner">
+                                <input type="text" id="project-name" placeholder="My Awesome Project" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="project-directory">Project Directory</label>
+                        <div class="input-container">
+                            <div class="input-inner" style="display: flex;">
+                                <input type="text" id="project-directory" placeholder="/path/to/project" required>
+                                <button type="button" class="browse-button" id="browse-button">
+                                    <span class="material-icons">folder_open</span>Browse
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="create-button">Create Project</button>
+                </form>
+                
+                <div class="error-message" id="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('create-project-form');
+            const nameInput = document.getElementById('project-name');
+            const directoryInput = document.getElementById('project-directory');
+            const errorMessage = document.getElementById('error-message');
+            const browseButton = document.getElementById('browse-button');
+            
+            // Since browser security doesn't allow getting just a folder path,
+            // we'll simulate this with a mock path for the demo
+            browseButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // In a real app with Node.js/Electron this would use dialog.showOpenDialog
+                // For this web demo, just set a sample path
+                const username = (navigator && navigator.userInfo) ? 
+                    navigator.userInfo.username : 
+                    'user' + Math.floor(Math.random() * 1000);
+                    
+                directoryInput.value = `/Users/${username}/Projects/my-project`;
+                
+                // Show a tooltip or message explaining this is just a demo
+                const tooltip = document.createElement('div');
+                tooltip.textContent = "This is a demo - in a real app, this would open a folder picker";
+                tooltip.style.position = 'absolute';
+                tooltip.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                tooltip.style.color = 'white';
+                tooltip.style.padding = '5px 10px';
+                tooltip.style.borderRadius = '4px';
+                tooltip.style.fontSize = '12px';
+                tooltip.style.zIndex = '1000';
+                tooltip.style.top = `${browseButton.offsetTop - 30}px`;
+                tooltip.style.left = `${browseButton.offsetLeft}px`;
+                
+                document.body.appendChild(tooltip);
+                
+                // Remove tooltip after 3 seconds
+                setTimeout(() => {
+                    document.body.removeChild(tooltip);
+                }, 3000);
+            });
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const projectName = nameInput.value.trim();
+                const projectDirectory = directoryInput.value.trim();
+                
+                if (!projectName || !projectDirectory) {
+                    errorMessage.textContent = 'Please fill in all fields';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/projects', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            title: projectName,
+                            directory: projectDirectory
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to create project');
+                    }
+                    
+                    // Project created successfully, redirect to main app
+                    window.location.href = '/';
+                } catch (error) {
+                    console.error('Error creating project:', error);
+                    errorMessage.textContent = error.message || 'Error creating project';
+                    errorMessage.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

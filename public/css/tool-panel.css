@@ -1,0 +1,354 @@
+/* Tool panel content styles */
+#tool-panel {
+    /* Basic layout handled in layout.css */
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    /* Removed border-left, now on #right-panel in layout.css */
+}
+
+#tool-panel h3 {
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 500;
+    background: linear-gradient(90deg, #FFD166 0%, #FF715B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent; /* Standard property */
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between; /* Push cost display to the right */
+    width: 100%;
+    flex-shrink: 0; /* Prevent header shrinking */
+}
+
+#cost-display {
+    font-family: var(--code-font);
+    font-weight: 600;
+    font-size: 12px;
+    background: linear-gradient(90deg, var(--gradient-mid2), var(--gradient-end)); /* Use Agent gradient */
+    color: white;
+    border: none;
+    border-radius: 4px; /* Add radius */
+    text-align: center;
+    min-width: 80px;
+    -webkit-text-fill-color: white; /* Override parent's transparent text */
+    background-clip: initial; /* Reset background-clip */
+    -webkit-background-clip: initial;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+
+#tool-panel h3 .material-icons {
+    font-size: 20px;
+    background: linear-gradient(90deg, #FFD166 0%, #FF715B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent; /* Standard property */
+    flex-shrink: 0; /* Prevent icon shrinking */
+}
+
+#working-dir, #model-info {
+    margin-bottom: 16px;
+    font-size: 13px;
+    padding: 12px 16px;
+    background-color: var(--secondary-bg);
+    border-radius: 6px;
+    color: var(--secondary-text);
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    gap: 8px;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+#working-dir {
+    word-break: break-all; /* Allow long paths to wrap */
+}
+
+#working-dir .material-icons,
+#model-info .material-icons {
+    margin-right: 8px;
+    font-size: 18px;
+    color: #ff715b; /* Use start gradient color for icons */
+    flex-shrink: 0;
+}
+
+/* Specific style for token count within model info */
+#token-count {
+    background-color: transparent !important; /* Override */
+    color: var(--secondary-text) !important; /* Override */
+    margin-left: auto !important; /* Push to the right */
+    font-family: var(--code-font);
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.2) !important; /* Subtle background */
+}
+
+#tool-log {
+    font-size: 14px;
+    font-family: var(--code-font);
+    overflow-y: auto; /* Scroll log entries */
+    flex: 1; /* Take remaining space */
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.tool-entry {
+    margin-bottom: 8px;
+    padding: 10px 14px;
+    background-color: #252525; /* Slightly different bg for entry */
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.tool-entry.compact {
+    display: block; /* Default display */
+}
+
+.tool-entry .compact-content {
+    display: flex;
+    align-items: center;
+    cursor: pointer; /* Indicate clickable to expand */
+}
+
+.tool-entry.expanded {
+    padding-bottom: 16px; /* More padding when expanded */
+}
+
+.tool-timestamp {
+    font-size: 12px;
+    color: var(--secondary-text);
+    margin-bottom: 8px; /* Space below timestamp when expanded */
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+}
+
+.tool-content {
+    /* Removed duplicate, styles applied directly or within specific states */
+    width: 100%;
+}
+
+.tool-name {
+    font-weight: 500;
+    color: #FFD166; /* Mid1 gradient color */
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px; /* Space below name when expanded */
+    font-size: 14px;
+}
+
+.tool-entry.compact .tool-name {
+    margin-bottom: 0; /* No bottom margin in compact view */
+    margin-right: 8px; /* Space between name and status text */
+    white-space: nowrap; /* Prevent wrapping in compact */
+}
+
+.tool-name .material-icons {
+    font-size: 16px;
+    margin-right: 8px;
+    color: #ff715b; /* Start gradient color */
+}
+
+.tool-status-text {
+    margin: 0 4px;
+    color: var(--text-color);
+    font-size: 12px;
+    max-width: 100%; /* Should be constrained by flex parent */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1; /* Allow status to take space but ellipsis if needed */
+    min-width: 0; /* Prevent pushing out other elements */
+    text-align: left; /* Ensure alignment */
+}
+
+.tool-execution-timer {
+    font-family: var(--code-font);
+    font-size: 11px;
+    color: var(--secondary-text);
+    margin-right: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 2px 5px;
+    border-radius: 3px;
+    display: inline-block;
+    min-width: 32px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.tool-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 113, 91, 0.3); /* Lighter version of start color */
+    border-radius: 50%;
+    border-top-color: #ff715b; /* Start color for active part */
+    animation: spin 1s linear infinite;
+    margin-left: 8px; /* Space from text/name */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.compact-content .info-icon {
+    margin-left: auto; /* Push icon to the far right */
+    color: var(--secondary-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    transition: color 0.2s ease;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.tool-entry .compact-content:hover .info-icon {
+    color: #FFD166; /* Mid1 gradient color on hover */
+}
+
+.tool-details {
+    display: none; /* Hidden by default */
+    margin-top: 12px;
+    width: 100%;
+}
+
+.tool-entry.expanded .tool-details {
+    display: block; /* Show details when expanded */
+}
+
+.tool-entry.expanded .tool-content.compact {
+    /* This selector seems wrong - compact content shouldn't be inside expanded details */
+    /* Assuming it refers to the header part when expanded */
+    margin-bottom: 8px; /* Space between header and details */
+}
+
+.tool-args, .tool-result {
+    margin-top: 12px;
+    color: var(--text-color);
+    background-color: #1E1E1E; /* Slightly different dark bg */
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    border: 1px solid var(--border-color);
+    max-height: 200px; /* Limit height and allow scroll */
+    overflow-y: auto;
+    word-break: break-word; /* Allow long args/results to wrap */
+    white-space: pre-wrap; /* Preserve whitespace formatting */
+    font-family: var(--code-font); /* Use code font */
+}
+
+.tool-result {
+    max-height: 300px; /* Allow more space for results */
+    line-height: 1.5;
+}
+
+/* Styling for <pre> specifically within tool results if needed */
+.tool-result pre {
+    background-color: #252525; /* Match tool entry bg */
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    max-height: 200px; /* Limit nested pre height */
+    overflow: auto;
+    margin: 8px 0;
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap; /* Ensure wrapping within pre */
+    word-break: break-all; /* Force breaks if needed */
+}
+
+.result-section {
+    margin-bottom: 12px;
+}
+
+.result-section strong {
+    color: #FFD166; /* Mid1 gradient color for headings */
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.result-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Duplicates .tool-result pre, might be removable if styling is identical */
+/* .result-section pre { ... } */
+
+.new-entry {
+    animation: entry-appear 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes entry-appear {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Thinking Widget Styles */
+.thinking-widget {
+    margin-bottom: 8px;
+    padding: 10px 14px;
+    background-color: rgba(64, 162, 227, 0.1); /* Use end-gradient color base */
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    font-family: var(--code-font); /* Match tool log font */
+}
+
+.thinking-widget .thinking-text {
+    color: #40A2E3; /* End gradient color */
+    font-size: 14px;
+    margin-left: 8px;
+}
+
+.thinking-widget .material-icons {
+    color: #40A2E3; /* End gradient color */
+    font-size: 16px;
+}
+
+/* Thinking dots animation */
+@keyframes thinkingDot {
+    0%, 20% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.thinking-dots span {
+    display: inline-block;
+    animation: thinkingDot 1.4s infinite;
+    margin-left: 1px; /* Spacing between dots */
+    margin-right: 1px;
+}
+
+.thinking-dots span:nth-child(1) { animation-delay: 0.0s; }
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* This selector seems overly complex and might not be needed */
+/* .tool-content.compact span:not(.tool-name):not(.material-icons):not(.tool-status-text) { ... } */

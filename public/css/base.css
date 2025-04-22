@@ -1,0 +1,57 @@
+/* Global styles - VS Code/Firebase Studio inspired */
+:root {
+    /* Dark mode theme colors */
+    --primary-bg: #121212;
+    --secondary-bg: #1A1A1A;
+    --input-bg: #1A1A1A;
+    --text-color: #d9dfe7;
+    --secondary-text: #888;
+
+    /* Loading screen transitions */
+    --loading-fade-duration: 300ms;
+
+    /* Gradient colors */
+    --gradient-start: #FF715B;
+    --gradient-mid1: #FFD166;
+    --gradient-mid2: #7B61FF;
+    --gradient-end: #40A2E3;
+
+    /* UI elements */
+    --border-color: #333;
+    --border-radius: 12px;
+    --header-height: 64px;
+    --footer-height: 160px;
+    --tool-panel-width: 420px; /* Initial width, updated in responsive.css */
+
+    /* Status colors */
+    --success-color: #7dd1c1;
+    --warning-color: #ffcc80;
+    --error-color: #f8a5a6;
+
+    /* Font settings */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --code-font: 'Roboto Mono', monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    width: 100%;
+}
+
+.container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}

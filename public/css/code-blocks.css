@@ -1,0 +1,276 @@
+/* Code rendering with Prism.js */
+pre {
+    background-color: #1E1E1E; /* Specific dark background for code */
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto; /* Allow horizontal scrolling for long lines */
+    margin: 16px 0; /* Space around code blocks */
+    position: relative; /* For pseudo-elements and copy button */
+    border: 1px solid #333;
+    max-height: 500px; /* Limit vertical height */
+    max-width: 100%; /* Ensure it doesn't overflow container */
+    font-family: var(--code-font); /* Ensure code font */
+    font-size: 14px; /* Base size */
+    line-height: 1.6; /* Spacing */
+}
+
+/* Gradient line accent */
+pre::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-mid1));
+    border-top-left-radius: 8px; /* Match parent radius */
+    border-bottom-left-radius: 8px; /* Match parent radius */
+}
+
+/* Base Prism styles */
+pre[class*="language-"] {
+    margin: 16px 0; /* Consistent margin */
+    background-color: #1E1E1E; /* Ensure background consistency */
+    color: #f8f8f2; /* Base text color (light grey/white) */
+    text-shadow: 0 1px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+    padding-left: 20px; /* Add padding to not overlap the gradient line */
+}
+
+code {
+    font-family: var(--code-font);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Code block specific styles */
+code[class*="language-"] {
+    font-family: var(--code-font);
+    font-size: 14px;
+    direction: ltr; /* Left-to-right text */
+    text-align: left;
+    white-space: pre; /* Preserve whitespace */
+    word-spacing: normal;
+    word-break: normal; /* Default word breaking */
+    tab-size: 4; /* Standard tab size */
+    hyphens: none; /* No automatic hyphenation */
+    color: inherit; /* Inherit color from pre */
+}
+
+/* --- Prism Token Colors (Tomorrow Night theme inspired) --- */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #8292a2; /* Grey */
+}
+
+.token.punctuation {
+    color: #f8f8f2; /* Base text color */
+}
+
+.token.namespace {
+    opacity: 0.7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #f92672; /* Pink/Red */
+}
+
+.token.boolean,
+.token.number {
+    color: #ae81ff; /* Purple */
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #a6e22e; /* Green */
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+    color: #f8f8f2; /* Base text color */
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+    color: #e6db74; /* Yellow */
+}
+
+.token.keyword {
+    color: #66d9ef; /* Cyan */
+}
+
+.token.regex,
+.token.important {
+    color: #fd971f; /* Orange */
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help; /* Indicate possible tooltip */
+}
+/* --- End Prism Token Colors --- */
+
+/* Language marker - ONLY for chat messages */
+#messages pre[class*="language-"]::after {
+    content: attr(data-lang); /* Use a data attribute if possible, fallback to class */
+    position: absolute;
+    top: 0;
+    right: 44px; /* Make room for copy button */
+    font-family: var(--font-family); /* Use UI font */
+    font-size: 11px;
+    color: #888;
+    background: rgba(30, 30, 30, 0.9); /* Dark semi-transparent background */
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px; /* Rounded bottom corners */
+    padding: 3px 8px;
+    text-transform: uppercase;
+    z-index: 1; /* Above code, below button */
+}
+
+/* Prism line numbers plugin styling - ONLY for chat messages */
+#messages pre.line-numbers {
+    padding-left: 3.8em; /* Make space for line numbers */
+    counter-reset: linenumber; /* Initialize counter */
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 16px; /* Match pre padding */
+    left: 0; /* Align to the left edge */
+    font-size: 100%; /* Match pre font size */
+    width: 3em; /* Fixed width for numbers */
+    letter-spacing: -1px;
+    border-right: 1px solid #333; /* Separator line */
+    user-select: none;
+    padding-right: 10px; /* Space between number and border */
+    margin-right: 10px; /* Space between border and code */
+}
+
+.line-numbers-rows > span {
+    pointer-events: none;
+    display: block;
+    counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+    content: counter(linenumber);
+    color: #666; /* Dim color for line numbers */
+    display: block;
+    padding-right: 0.8em;
+    text-align: right;
+}
+
+/* Copy button styling - ONLY for chat messages */
+#messages .copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(37, 37, 37, 0.8); /* Semi-transparent bg */
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 0; /* Remove padding, use flex align */
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    color: #888; /* Default icon color */
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7; /* Slightly faded */
+    z-index: 2; /* Above language marker and code */
+}
+
+.copy-button .material-icons {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+#messages pre:hover .copy-button {
+    opacity: 1; /* Fully visible on hover */
+}
+
+.copy-button:hover {
+    background-color: #333; /* Darker bg on hover */
+    color: #FFD166; /* Mid1 gradient color */
+    transform: scale(1.05);
+}
+
+.copy-button:active {
+    transform: scale(0.95);
+}
+
+.copy-button.copied {
+    background-color: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.copy-button.copied .material-icons {
+    content: 'done'; /* Change icon visually (requires JS or specific setup) */
+    /* If just changing color, it's handled by .copied color */
+}
+
+/* Tooltip for copy button (optional) */
+.copy-tooltip {
+    position: absolute;
+    bottom: 100%; /* Position above the button */
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px); /* Center and add small gap */
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: var(--font-family); /* Use UI font */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    white-space: nowrap;
+    pointer-events: none; /* Don't interfere with button */
+    z-index: 3; /* Above button */
+}
+
+/* Optional tooltip arrow */
+.copy-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+}
+
+/* Show tooltip (typically managed by JS on hover/focus) */
+.copy-button:hover .copy-tooltip,
+.copy-button:focus .copy-tooltip {
+    /* Example - JS would likely add a class like 'show' */
+    /* visibility: visible; */
+    /* opacity: 1; */
+}

@@ -1,0 +1,22 @@
+<!-- Settings Dialog Modal -->
+<div id="settings-modal" class="modal">
+    <div class="modal-content settings-modal-content">
+        <h2>
+            <span class="material-icons">settings</span>
+            Settings
+        </h2>
+        
+        <div class="settings-tabs">
+            <button class="settings-tab active" data-tab="models">Models</button>
+            <button class="settings-tab" data-tab="security">Security</button>
+        </div>
+        
+        <%- include('settings/models-tab') %>
+        <%- include('settings/security-tab') %>
+        
+        <div class="modal-footer">
+            <button type="button" id="settings-cancel" class="btn secondary">Cancel</button>
+            <button type="button" id="settings-save" class="btn primary">Save Changes</button>
+        </div>
+    </div>
+</div>

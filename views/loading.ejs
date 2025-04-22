@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Projects</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--primary-bg);
+            font-family: var(--font-family);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--primary-bg);
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-left-color: #FF715B;
+            border-top-color: #FFD166;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: var(--text-color);
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .loading-subtext {
+            color: var(--secondary-text);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Projects</div>
+        <div class="loading-subtext">Please wait...</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/projects');
+                if (!response.ok) {
+                    throw new Error('Failed to load projects');
+                }
+                
+                const projects = await response.json();
+                
+                if (projects.length === 0) {
+                    // No projects, show create project view
+                    window.location.replace('/create-project');
+                } else {
+                    // Projects exist, continue to main view - use 'replace' to prevent back button issues
+                    // Add a timestamp parameter to prevent browser cache issues
+                    window.location.replace('/index?t=' + Date.now());
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                // If there's an error, still go to main page
+                window.location.replace('/index?t=' + Date.now());
+            }
+        });
+    </script>
+</body>
+</html>
