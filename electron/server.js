@@ -19,77 +19,73 @@ export function startServer() {
   // --- Calculate Server Script Path ---
   let serverScript;
   if (isDev) {
-    serverScript = path.join(appBasePath, 'src', 'index.js');
+    serverScript = path.join(appBasePath, 'src', 'index.js'); // Assuming server entry is src/index.js in dev
   } else {
-    // In packaged app, check for unpacked version first
-    const unpackedScriptPath = path.join(appBasePath, '..', 'app.asar.unpacked', 'src', 'index.js');
-    // Note: We go '../' from 'app' to get to 'Resources', then into 'app.asar.unpacked'
-    
-    if (fs.existsSync(unpackedScriptPath)) {
-      serverScript = unpackedScriptPath;
-      console.log('Using unpacked server script.');
-    } else {
-      // Fallback (though unlikely if unpackDir is used correctly)
-      serverScript = path.join(appBasePath, 'src', 'index.js');
-      console.warn('Using potentially ASAR-packed server script - this might fail!');
-    }
+    serverScript = path.join(appBasePath, 'src', 'index.js'); // Adjust 'src/index.js' if needed
+    console.log('Using ASAR-packed server script.');
   }
-  
-  console.log(`Resolved server script path: ${serverScript}`);
-  console.log(`Server script exists: ${fs.existsSync(serverScript) ? 'Yes' : 'No'}`);
 
-  if (!fs.existsSync(serverScript)) {
-    console.error("FATAL: Server script not found at the calculated path!");
-    return; // Don't attempt to start if script doesn't exist
+  console.log(`Resolved server script path: ${serverScript}`);
+  // fs.existsSync might not work reliably for ASAR paths, but should for unpacked
+  if (!isDev && !fs.existsSync(serverScript)) {
+    console.warn(`Warning: fs.existsSync returned false for unpacked script path, proceeding anyway.`);
   }
+
 
   // --- Determine Node Executable and Args ---
-  const nodeExecutable = isDev ? 'node' : process.execPath; 
-  const nodeArgs = [serverScript]; // Just pass the script path as the primary arg
+  // Use process.execPath (the Electron executable) in packaged app
+  const nodeExecutable = isDev ? 'node' : process.execPath;
+  const nodeArgs = [serverScript]; // Pass the script to be run
 
   // --- Determine CWD ---
-  // The CWD should be where the script can find its relative dependencies
-  const serverCwd = isDev ? appBasePath : path.join(appBasePath, '..', 'app.asar.unpacked');
-  console.log(`Setting server CWD to: ${serverCwd}`);
+  // Let Node.js determine the CWD based on the script location in packaged mode.
+  // Setting it explicitly can interfere with module resolution (especially with ASAR).
+  const serverCwd = isDev ? appBasePath : undefined; // Use project root in dev, undefined in packaged
+  console.log(`Setting server CWD to: ${serverCwd ?? 'default (undefined)'}`);
 
   console.log(`Attempting to start server with:`);
   console.log(` Executable: ${nodeExecutable}`);
   console.log(` Args: ${nodeArgs.join(' ')}`);
-  console.log(` CWD: ${serverCwd}`);
+  console.log(` CWD: ${serverCwd ?? 'default (undefined)'}`);
 
   // --- Spawn the Process ---
-  serverProcess = spawn(nodeExecutable, nodeArgs, {
-    cwd: serverCwd,
-    stdio: 'inherit', // Keep for debugging
-    shell: isDev, // Only use shell in development
-    env: {
-      ...process.env,
-      ELECTRON_RUN_AS_NODE: '1',
-    }
-  });
+  try {
+    serverProcess = spawn(nodeExecutable, nodeArgs, {
+      cwd: serverCwd, // Use calculated CWD
+      stdio: 'inherit', // Show server's console output in Electron's console
+      shell: isDev, // Use shell conveniences only in dev
+      env: {
+        ...process.env,
+        ELECTRON_RUN_AS_NODE: '1', // Essential for running node script via Electron executable
+        // NODE_ENV: isDev ? 'development' : 'production', // Good practice to set NODE_ENV
+      }
+    });
 
-  serverProcess.on('error', (err) => {
-    console.error('Failed to start server process:', err);
-  });
+    serverProcess.on('error', (err) => {
+      console.error('Failed to start server process:', err);
+    });
 
-  serverProcess.on('exit', (code, signal) => {
-    console.log(`Server process exited with code ${code} and signal ${signal}`);
-  });
+    serverProcess.on('exit', (code, signal) => {
+      console.log(`Server process exited with code ${code} and signal ${signal}`);
+      // Optionally add retry logic here if needed
+    });
 
-  // Kill server on main process exit
-  app.on('quit', () => {
+  } catch (error) {
+    console.error("Error during server spawn:", error);
+    return; // Stop if spawn fails immediately
+  }
+
+
+  // --- Cleanup ---
+  const cleanup = () => {
     if (serverProcess && !serverProcess.killed) {
-      console.log('Main app quitting, killing server process.');
+      console.log('Terminating server process...');
       serverProcess.kill();
     }
-  });
-  
-  process.on('exit', () => {
-    if (serverProcess && !serverProcess.killed) {
-      console.log('Main process exiting, killing server process');
-      serverProcess.kill();
-    }
-  });
-  
+  };
+
+  app.on('quit', cleanup);
+  process.on('exit', cleanup); // Ensure cleanup on various exit scenarios
+
   return serverProcess;
 }
