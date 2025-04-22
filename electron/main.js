@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { app, BrowserWindow, dialog } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';

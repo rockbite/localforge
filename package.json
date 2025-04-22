@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "main": "electron/main.js",
+  "bin": {
+    "localforge": "./electron/main.js"
+  },
   "scripts": {
     "test": "node tests/fileSystemTools.test.js",
     "test:fs": "npm run test",
