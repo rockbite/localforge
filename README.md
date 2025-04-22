@@ -6,10 +6,10 @@
 ![localforge](https://github.com/user-attachments/assets/94966e7c-0f9b-440a-b76d-f9e3cf53314b)
 
 
-[![Build](<badge-link-build>)](<actions-url>)
+[![Latest release](https://img.shields.io/github/v/release/rockbite/localforge)](https://github.com/rockbite/localforge/releases)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Stars](https://img.shields.io/github/stars/rockbite/localforge?style=social)
-[Join the Discord](https://discord.gg/AbC123XYZ)
+[![Discord](https://img.shields.io/discord/123456789012345678?label=chat&logo=discord&logoColor=white&style=for-the-badge)](https://discord.gg/KJrTd6cw8D)
 
 ## Quick Start
 
@@ -20,5 +20,14 @@
 2. Start
    ```
    npm run start
+
+
+[![Latest release](https://img.shields.io/github/v/release/rockbite/localforge)](https://github.com/rockbite/localforge/releases)
+**Downloads**
+
+* **macOS** – [`Localforge.dmg`](https://github.com/rockbite/localforge/releases/latest/download/Localforge.dmg)
+* **Windows** – [`Localforge.exe`](https://github.com/rockbite/localforge/releases/latest/download/Localforge%20Setup.exe)
+* **Linux** – [`Localforge.AppImage`](https://github.com/rockbite/localforge/releases/latest/download/Localforge.AppImage)
+
 
 

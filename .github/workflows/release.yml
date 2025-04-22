@@ -1,0 +1,18 @@
+name: Build & Release
+on:
+  push:
+    tags: ["v*.*.*"]      # only when you tag
+jobs:
+  release:
+    strategy:
+      matrix:
+        os: [macos-14, windows-2022, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 18 }
+      - run: npm ci
+      - uses: electron-builder/complete-action@v1   # tiny wrapper around electron-builder
+        with:
+          release: always                           # auto‑create GitHub Release
