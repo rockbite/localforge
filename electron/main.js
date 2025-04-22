@@ -31,11 +31,24 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1280,
     height: 800,
+    icon: path.join(__dirname, 'assets', 'icon.png'), // Adjust path if needed
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
+
+  // --- MODIFIED DEVTOOLS LOGIC ---
+  const isGlobalInstall = process.env.GLOBAL_NPM_INSTALL === 'true';
+  const isDebugFlag = process.argv.includes('--debug');
+  // Optional: A more robust way to detect local dev, e.g., set NODE_ENV=development when running locally
+  const isLocalDevEnvironment = process.env.NODE_ENV === 'development';
+  if ((isDebugFlag || isLocalDevEnvironment) && !isGlobalInstall) {
+    console.log('Opening DevTools (Debug flag or Local Dev Environment detected, not global install)');
+    win.webContents.openDevTools();
+  } else if (isGlobalInstall) {
+    console.log('Running from global install, DevTools will not be opened by default.');
+  }
 
   const isDev = !app.isPackaged;
   const serverUrl = 'http://localhost:3001';
@@ -46,12 +59,6 @@ function createWindow() {
     console.log(`Attempting to load ${serverUrl} (Attempt ${retryCount + 1})`);
     
     if (!win) return; // Window might have been closed
-
-    // Only open dev tools in debug mode when explicitly requested
-    // In npm global installation we don't want to show dev tools
-    if (!isDev && process.argv.includes('--debug') && !win.webContents.isDevToolsOpened() && !process.env.GLOBAL_NPM_INSTALL) {
-      win.webContents.openDevTools();
-    }
 
     win.loadURL(serverUrl)
       .then(() => {
@@ -89,11 +96,6 @@ function createWindow() {
   // Give the server more time to start initially
   console.log('Waiting 3 seconds for server to potentially start...');
   setTimeout(loadApp, 3000); // Increased initial delay
-
-  // Open the DevTools only in development mode
-  if (isDev) {
-    win.webContents.openDevTools();
-  }
 
   win.on('closed', () => {
     win = null;
