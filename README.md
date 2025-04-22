@@ -6,6 +6,10 @@
 ![localforge](https://github.com/user-attachments/assets/94966e7c-0f9b-440a-b76d-f9e3cf53314b)
 
 
+[![Build](<badge-link-build>)](<actions-url>)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Stars](https://img.shields.io/github/stars/rockbite/localforge?style=social)
+
 ## Quick Start
 
 1. Install dependencies:
