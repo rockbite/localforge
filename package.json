@@ -1,5 +1,5 @@
 {
-  "name": "agent1",
+  "name": "localforge",
   "version": "1.0.0",
   "type": "module",
   "main": "electron/main.js",
@@ -13,6 +13,7 @@
     "start": "electron .",
     "build:web": "vite build",
     "build:desk": "electron-builder",
+    "dist": "electron-builder",
     "release": "npm run build:web && npm run build:desk"
   },
   "keywords": [],
@@ -47,5 +48,14 @@
     "electron": "^35.2.0",
     "electron-builder": "^26.0.12",
     "nodemon": "^3.1.9"
+  },
+  "build": {
+    "productName": "Localforge",
+    "appId": "com.rockbite.localforge",
+    "files": ["dist/**", "node_modules/**"],
+    "mac": { "target": ["dmg", "zip"] },
+    "win": { "target": ["nsis"] },
+    "linux": { "target": ["AppImage"] },
+    "publish": [{ "provider": "github" }]
   }
 }

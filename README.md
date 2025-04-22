@@ -9,6 +9,7 @@
 [![Build](<badge-link-build>)](<actions-url>)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Stars](https://img.shields.io/github/stars/rockbite/localforge?style=social)
+[Join the Discord](https://discord.gg/AbC123XYZ)
 
 ## Quick Start
 
@@ -20,4 +21,4 @@
    ```
    npm run start
 
-[Join the Discord](https://discord.gg/AbC123XYZ)
+
