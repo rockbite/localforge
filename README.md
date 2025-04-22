@@ -9,7 +9,7 @@
 [![Latest release](https://img.shields.io/github/v/release/rockbite/localforge)](https://github.com/rockbite/localforge/releases)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Stars](https://img.shields.io/github/stars/rockbite/localforge?style=social)
-[![Discord](https://discord.com/api/guilds/123456789012345678/widget.png?style=shield)](https://discord.gg/KJrTd6cw8D)
+[![Discord](https://img.shields.io/discord/1364256724206223521?label=chat&logo=discord&style=shield)](https://discord.gg/KJrTd6cw8D)
 
 ## Quick Start
 
@@ -23,11 +23,10 @@
 
 
 [![Latest release](https://img.shields.io/github/v/release/rockbite/localforge)](https://github.com/rockbite/localforge/releases)
+
+
 **Downloads**
 
 * **macOS** – [`Localforge.dmg`](https://github.com/rockbite/localforge/releases/latest/download/Localforge.dmg)
-* **Windows** – [`Localforge.exe`](https://github.com/rockbite/localforge/releases/latest/download/Localforge%20Setup.exe)
-* **Linux** – [`Localforge.AppImage`](https://github.com/rockbite/localforge/releases/latest/download/Localforge.AppImage)
-
 
 
