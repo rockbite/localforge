@@ -12,12 +12,12 @@
     "dev": "concurrently \"npm run fe\" \"npm run server\"",
     "start": "electron .",
     "build:web": "vite build",
-    "package": "npm run build:web && electron-packager . Localforge --out=dist --icon=build/icons/png/512x512.png --overwrite",
-    "package:mac": "npm run build:web && electron-packager . Localforge --platform=darwin --arch=arm64 --out=dist --icon=build/icons/mac/icon.icns --overwrite",
-    "package:win": "npm run build:web && electron-packager . Localforge --platform=win32 --arch=x64 --out=dist --icon=build/icons/win/icon.ico --overwrite",
-    "package:linux": "npm run build:web && electron-packager . Localforge --platform=linux --arch=x64 --out=dist --icon=build/icons/png/512x512.png --overwrite",
+    "package": "electron-packager . Localforge --out=dist --icon=build/icons/png/512x512.png --overwrite",
+    "package:mac": "electron-packager . Localforge --platform=darwin --arch=arm64 --out=dist --icon=build/icons/mac/icon.icns --overwrite",
+    "package:win": "electron-packager . Localforge --platform=win32 --arch=x64 --out=dist --icon=build/icons/win/icon.ico --overwrite",
+    "package:linux": "electron-packager . Localforge --platform=linux --arch=x64 --out=dist --icon=build/icons/png/512x512.png --overwrite",
     "release": "npm run package",
-    "create-dmg": "electron-installer-dmg ./dist/Localforge-darwin-arm64/Localforge.app Localforge --out=dist/installers --icon=build/icons/mac/icon.icns"
+    "create-dmg": "electron-installer-dmg ./dist/Localforge-darwin-arm64/Localforge.app Localforge --out=dist/installers --icon=build/icons/mac/icon.icns --overwrite"
   },
   "keywords": [],
   "author": "Rockbite",
@@ -64,7 +64,9 @@
       "node_modules/**",
       "public/**",
       "src/**",
-      "views/**"
+      "views/**",
+      "prompts/**",
+      "tools/**"
     ],
     "directories": {
       "output": "release-builds"

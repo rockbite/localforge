@@ -36,15 +36,19 @@ function createWindow() {
 
   const isDev = !app.isPackaged;
   const loadApp = () => {
-    // In production, we need to look for the index.html in the resources directory
-    const prodPath = path.join(path.dirname(__dirname), 'dist', 'index.html');
-    console.log('Trying to load from path:', isDev ? 'http://localhost:3001' : `file://${prodPath}`);
+    // Always load from localhost - the server needs to be running
+    const serverUrl = 'http://localhost:3001';
+    console.log('Connecting to server at:', serverUrl);
     
-    win.loadURL(
-      isDev ? 'http://localhost:3001' : `file://${prodPath}`
-    ).catch(err => {
-      console.error('Failed to load URL:', err);
-      setTimeout(loadApp, 500); // Try again after a brief delay if server isn't ready
+    // Open dev tools in packaged app if started with debug flag
+    if (!isDev && process.argv.includes('--debug')) {
+      win.webContents.openDevTools();
+    }
+    
+    win.loadURL(serverUrl).catch(err => {
+      console.error('Failed to connect to server:', err);
+      // Try again after a delay - server might still be starting
+      setTimeout(loadApp, 1000);
     });
   };
   
