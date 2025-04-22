@@ -47,8 +47,9 @@ function createWindow() {
     
     if (!win) return; // Window might have been closed
 
-    // Optional: Open dev tools in packaged app if started with debug flag
-    if (!isDev && process.argv.includes('--debug') && !win.webContents.isDevToolsOpened()) {
+    // Only open dev tools in debug mode when explicitly requested
+    // In npm global installation we don't want to show dev tools
+    if (!isDev && process.argv.includes('--debug') && !win.webContents.isDevToolsOpened() && !process.env.GLOBAL_NPM_INSTALL) {
       win.webContents.openDevTools();
     }
 
@@ -89,7 +90,7 @@ function createWindow() {
   console.log('Waiting 3 seconds for server to potentially start...');
   setTimeout(loadApp, 3000); // Increased initial delay
 
-  // Open the DevTools in development mode
+  // Open the DevTools only in development mode
   if (isDev) {
     win.webContents.openDevTools();
   }
