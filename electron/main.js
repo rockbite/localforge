@@ -26,12 +26,15 @@ if (electronSquirrelStartup) {
 let win;
 let serverHasStarted = false; // Flag to track server start attempt
 
+const iconPath = path.join(__dirname, 'assets', 'icon.icns');
+
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
     width: 1280,
     height: 800,
     icon: path.join(__dirname, 'assets', 'icon.png'), // Adjust path if needed
+    backgroundColor: '#222222',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -49,6 +52,11 @@ function createWindow() {
   } else if (isGlobalInstall) {
     console.log('Running from global install, DevTools will not be opened by default.');
   }
+
+  win.once('ready-to-show', () => {
+    console.log('Window ready to show, making visible.');
+    win.show();
+  });
 
   const isDev = !app.isPackaged;
   const serverUrl = 'http://localhost:3001';
@@ -106,6 +114,17 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 app.whenReady().then(async () => {
   console.log('App ready, starting server...');
+
+  // This MUST be done after app is ready and only on macOS
+  if (process.platform === 'darwin') {
+    console.log('Setting Dock icon for macOS using path:', iconPath);
+    // Optional: Check if file exists before setting
+    // try { fs.accessSync(iconPath, fs.constants.R_OK); console.log('Icon file exists for Dock.'); } catch (err) { console.error('ICON FILE ERROR for Dock:', err); }
+
+    // Set the Dock icon using the file path
+    app.dock.setIcon(iconPath);
+  }
+
   try {
     startServer(); // Start the server process
     console.log('Server process spawn initiated. Creating window...');
