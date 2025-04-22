@@ -19,3 +19,5 @@
 2. Start
    ```
    npm run start
+
+[Join the Discord](https://discord.gg/AbC123XYZ)
