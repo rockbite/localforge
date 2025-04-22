@@ -12,14 +12,17 @@
     "dev": "concurrently \"npm run fe\" \"npm run server\"",
     "start": "electron .",
     "build:web": "vite build",
-    "build:desk": "electron-builder",
-    "dist": "electron-builder",
-    "release": "npm run build:web && npm run build:desk"
+    "package": "npm run build:web && electron-packager . Localforge --out=dist --icon=build/icons/png/512x512.png --overwrite",
+    "package:mac": "npm run build:web && electron-packager . Localforge --platform=darwin --arch=arm64 --out=dist --icon=build/icons/mac/icon.icns --overwrite",
+    "package:win": "npm run build:web && electron-packager . Localforge --platform=win32 --arch=x64 --out=dist --icon=build/icons/win/icon.ico --overwrite",
+    "package:linux": "npm run build:web && electron-packager . Localforge --platform=linux --arch=x64 --out=dist --icon=build/icons/png/512x512.png --overwrite",
+    "release": "npm run package",
+    "create-dmg": "electron-installer-dmg ./dist/Localforge-darwin-arm64/Localforge.app Localforge --out=dist/installers --icon=build/icons/mac/icon.icns"
   },
   "keywords": [],
-  "author": "",
+  "author": "Rockbite",
   "license": "ISC",
-  "description": "",
+  "description": "Localforge - Local AI dev assistant",
   "dependencies": {
     "@google/genai": "^0.8.0",
     "@mozilla/readability": "^0.6.0",
@@ -43,19 +46,58 @@
     "turndown": "^7.2.0"
   },
   "devDependencies": {
+    "@electron/packager": "^18.3.6",
     "@types/express": "^5.0.1",
     "concurrently": "^9.1.2",
     "electron": "^35.2.0",
     "electron-builder": "^26.0.12",
+    "electron-installer-dmg": "^5.0.1",
+    "electron-packager": "^17.1.2",
     "nodemon": "^3.1.9"
   },
   "build": {
     "productName": "Localforge",
     "appId": "com.rockbite.localforge",
-    "files": ["dist/**", "node_modules/**"],
-    "mac": { "target": ["dmg", "zip"] },
-    "win": { "target": ["nsis"] },
-    "linux": { "target": ["AppImage"] },
-    "publish": [{ "provider": "github" }]
+    "files": [
+      "electron/**",
+      "dist/**",
+      "node_modules/**",
+      "public/**",
+      "src/**",
+      "views/**"
+    ],
+    "directories": {
+      "output": "release-builds"
+    },
+    "forceCodeSigning": false,
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icons/mac/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "hardenedRuntime": false
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icons/win/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "signAndEditExecutable": false
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "build/icons/png",
+      "category": "Development"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
   }
 }

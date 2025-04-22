@@ -9,7 +9,7 @@
 [![Latest release](https://img.shields.io/github/v/release/rockbite/localforge)](https://github.com/rockbite/localforge/releases)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Stars](https://img.shields.io/github/stars/rockbite/localforge?style=social)
-[![Discord](https://img.shields.io/discord/123456789012345678?label=chat&logo=discord&logoColor=white&style=for-the-badge)](https://discord.gg/KJrTd6cw8D)
+[![Discord](https://discord.com/api/guilds/123456789012345678/widget.png?style=shield)](https://discord.gg/KJrTd6cw8D)
 
 ## Quick Start
 

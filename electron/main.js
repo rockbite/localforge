@@ -36,8 +36,12 @@ function createWindow() {
 
   const isDev = !app.isPackaged;
   const loadApp = () => {
+    // In production, we need to look for the index.html in the resources directory
+    const prodPath = path.join(path.dirname(__dirname), 'dist', 'index.html');
+    console.log('Trying to load from path:', isDev ? 'http://localhost:3001' : `file://${prodPath}`);
+    
     win.loadURL(
-      isDev ? 'http://localhost:3001' : `file://${path.join(__dirname, 'dist/index.html')}`
+      isDev ? 'http://localhost:3001' : `file://${prodPath}`
     ).catch(err => {
       console.error('Failed to load URL:', err);
       setTimeout(loadApp, 500); // Try again after a brief delay if server isn't ready

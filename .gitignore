@@ -26,3 +26,7 @@ Thumbs.db
 sandbox/
 # App local config
 .config/**
+# Ignore release builds directory at any level
+release-builds/
+# Ignore packaged apps directory
+packaged-apps/
