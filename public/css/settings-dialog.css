@@ -94,8 +94,8 @@
 }
 
 .settings-section.compact {
-    padding-bottom: 12px;
-    margin-bottom: 12px;
+    padding-bottom: 16px; /* Slightly more padding to create better spacing */
+    margin-bottom: 16px; /* Increase section spacing */
     padding-left: 0; /* No extra padding */
 }
 
@@ -125,9 +125,9 @@
 .settings-form-group.inline {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 12px; /* Still needs some bottom margin */
-    width: 100%; /* Ensure it takes width */
+    gap: 8px;
+    margin-bottom: 0; /* No bottom margin for compact layout */
+    flex: 1; /* Equal space distribution */
 }
 
 .settings-form-group label {
@@ -153,22 +153,61 @@
 }
 
 .model-row.compact {
-    padding: 10px; /* Slightly less padding */
-    margin-bottom: 12px;
+    padding: 8px; /* Reduced padding */
+    margin-bottom: 10px;
+    /* More compact model row */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .model-row-label {
     font-weight: 500;
-    margin-bottom: 12px; /* Space below label */
+    margin-bottom: 0; /* Remove bottom margin for compact layout */
     color: var(--text-color);
     font-size: 14px;
     display: block; /* Ensure it's block */
+    min-width: 100px; /* Fixed width for alignment */
+}
+
+/* Section title with bottom margin for separation */
+.section-title {
+    margin-bottom: 12px !important; /* Add bottom margin for section titles */
+    font-weight: 600; /* Make section titles slightly bolder */
+}
+
+/* Info note styling */
+.settings-note {
+    display: flex;
+    align-items: center;
+    background-color: rgba(227, 122, 3, 0.07); /* Very transparent orange */
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    border-left: 3px solid rgba(227, 122, 3, 0.4); /* Orange border */
+}
+
+.note-icon {
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    color: rgba(227, 122, 3, 0.8); /* Orange icon */
+}
+
+.note-icon .material-icons {
+    font-size: 16px;
+}
+
+.note-text {
+    color: var(--secondary-text);
+    font-size: 13px;
+    font-style: italic;
 }
 
 .model-controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Default two columns */
-    gap: 12px; /* Space between controls */
+    display: flex;
+    gap: 8px; /* Reduced gap for more compact layout */
+    flex: 1;
 }
 
 /* Input and Select styles within settings */
@@ -180,12 +219,20 @@
     color: var(--text-color);
     border: 1px solid #444; /* Match modal input border */
     border-radius: 6px;
-    padding: 8px 12px;
+    padding: 6px 10px; /* Reduced padding */
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;
-    height: 38px; /* Consistent height */
+    height: 34px; /* Reduced height */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Style for readonly/disabled fields */
+.settings-modal-content input[readonly],
+.settings-modal-content select[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: var(--secondary-bg);
 }
 
 .settings-modal-content input:focus,
