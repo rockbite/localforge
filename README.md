@@ -60,4 +60,5 @@ Get priority on discord, and help the project grow!
 
 Example Results:
 
-![snakes](https://github.com/user-attachments/assets/153dda0e-a41f-46ad-84bc-71d32b883b67)
+<img src="https://github.com/user-attachments/assets/153dda0e-a41f-46ad-84bc-71d32b883b67" alt="snakes" width="50%">
+
