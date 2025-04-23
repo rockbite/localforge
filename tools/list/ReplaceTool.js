@@ -2,18 +2,18 @@ import { fsTools } from '../utils/fileSystemUtils.js';
 const replaceFn = fsTools.Replace;
 
 export default {
-  name: 'Replace',
+  name: 'OverwriteFile',
   schema: {
     type: 'function',
     function: {
-      name: 'Replace',
-      description: "Write a file to the local filesystem. Overwrites the existing file if there is one.\n\nBefore using this tool:\n\n1. Use the ReadFile tool to understand the file's contents and context\n\n2. Directory Verification (only applicable when creating new files):\n   - Use the LS tool to verify the parent directory exists and is the correct location",
+      name: 'OverwriteFile',
+      description: "Write a file to the local filesystem as new. WARNING: This tool COMPLETELY OVERWRITES the entire content of a file if it existed, It DELETES the existing content and replaces it with the new content.\n\nBefore using this tool:\n\n1. Use the ReadFile tool to understand the file's contents and context\n\n2. Directory Verification (only applicable when creating new files):\n   - Use the LS tool to verify the parent directory exists and is the correct location",
       parameters: {
         type: 'object',
         properties: {
           file_path: {
             type: 'string',
-            description: 'The absolute path to the file to write (must be absolute, not relative)'
+            description: 'The absolute path to the file to write (must be absolute, not relative). If the file exists, its entire content will be replaced.'
           },
           content: {
             type: 'string',
