@@ -50,3 +50,9 @@ npm run start
 ### License
 
 This project is released under the [MIT License](LICENSE).
+
+
+Want to support us?
+[Buy Supporter Edition →](https://azakhary.gumroad.com/l/htqavs)
+
+Get priority on discord, and help the project grow!
