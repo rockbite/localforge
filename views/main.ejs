@@ -181,15 +181,16 @@
         
         <!-- Chat Context View modal -->
         <%- include('partials/chat-context-view-modal') %>
-        
-        <!-- Confirmation dialog -->
-        <sl-dialog id="confirmation-dialog" label="Confirm Action">
-            <p id="confirmation-message">Are you sure you want to proceed?</p>
-            <strong id="confirmation-item-name" style="display: block; margin-top: 8px; color: var(--warning-color);"></strong>
-            <sl-button slot="footer" variant="neutral" class="cancel-button">Cancel</sl-button>
-            <sl-button slot="footer" variant="danger" class="confirm-button">Confirm</sl-button>
-        </sl-dialog>
     </div>
+    
+    <!-- Global Modal Dialogs - Must be outside all panels to avoid z-index issues -->
+    <!-- Confirmation dialog -->
+    <sl-dialog id="confirmation-dialog" label="Confirm Action">
+        <p id="confirmation-message">Are you sure you want to proceed?</p>
+        <strong id="confirmation-item-name" style="display: block; margin-top: 8px; color: var(--warning-color);"></strong>
+        <sl-button slot="footer" variant="neutral" class="cancel-button">Cancel</sl-button>
+        <sl-button slot="footer" variant="danger" class="confirm-button">Confirm</sl-button>
+    </sl-dialog>
     
     <!-- Load scripts -->
     <script type="module" src="js/cost-animator.js"></script>

@@ -373,6 +373,14 @@
 
 
 /* --- Shoelace Confirmation Dialog Styling --- */
+/* Style the dialog itself to ensure highest z-index */
+sl-dialog {
+    --sl-z-index-dialog: 9999; /* Ensure all dialogs have highest z-index */
+}
+sl-dialog#confirmation-dialog {
+    z-index: 9999; /* Also set explicit z-index on the element */
+}
+
 /* Style the backdrop */
 sl-dialog#confirmation-dialog::part(overlay) {
     backdrop-filter: blur(4px);
@@ -386,7 +394,7 @@ sl-dialog#confirmation-dialog::part(panel) {
     border: 1px solid var(--border-color);
     max-width: 500px;
     color: var(--text-color);
-    /* animation: modal-slide-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); */ /* Reuse animation */
+    animation: modal-slide-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); /* Add animation */
 }
 
 /* Style the header */
