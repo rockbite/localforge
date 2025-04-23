@@ -248,7 +248,7 @@ io.on('connection', (socket) => {
     };
     
     // Send current model configuration to client
-    socket.emit('model_info', { mainModel: MAIN_MODEL, auxModel: AUX_MODEL });
+    socket.emit('model_info', { expertModel: "o3", mainModel: MAIN_MODEL, auxModel: AUX_MODEL });
     
     // Handle session joining
     socket.on('join_session', async ({ sessionId, projectId }) => {

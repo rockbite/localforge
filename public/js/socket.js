@@ -493,8 +493,10 @@ export function setupSocketEventHandlers(socket) {
     // Handle Model Info updates (from legacy main-legacy.js)
     socket.on('model_info', (data) => {
         // console.log("Model info update:", data);
+        const expertSpan = document.getElementById('expert-model');
         const mainSpan = document.getElementById('main-model');
         const auxSpan = document.getElementById('aux-model');
+        if (expertSpan && data.expertModel) expertSpan.textContent = data.expertModel;
         if (mainSpan && data.mainModel) mainSpan.textContent = data.mainModel;
         if (auxSpan && data.auxModel) auxSpan.textContent = data.auxModel;
     });
@@ -591,7 +593,7 @@ export function setupSocketEventHandlers(socket) {
             try {
                 const formattedCurrent = data.current.toLocaleString();
                 const formattedMax = data.max.toLocaleString();
-                tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax} tokens`;
+                tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax}`;
             } catch(e) {
                 console.error("Error formatting token count:", e);
                 tokenCountSpan.textContent = `Error`;
