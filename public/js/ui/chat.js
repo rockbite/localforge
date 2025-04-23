@@ -330,6 +330,12 @@ export function addAgentMessage(message) {
     messageContent.innerHTML = marked.parse(processedContent /*, { sanitize: true } */);
     // If not using built-in sanitize:
     // messageContent.innerHTML = DOMPurify.sanitize(marked.parse(processedContent));
+    
+    // Modify all links to open in new window/tab
+    messageContent.querySelectorAll('a').forEach(link => {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
+    });
 
     // 3. Handle custom widget post-processing (if any)
     if (window.fileTreeWidget && message.includes('```filetree')) {
