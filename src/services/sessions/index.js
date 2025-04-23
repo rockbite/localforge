@@ -523,6 +523,14 @@ class ProjectSessionManager {
         if (sessionEntry) {
             console.log(`[${sessionId}] Interruption requested.`);
             sessionEntry.interruptionRequested = true;
+            
+            // Emit an event to provide immediate feedback, which is especially useful for
+            // when a bash tool command or other long-running tool is executing
+            sessionAgentStateEvents.emit('interrupt_requested', { 
+                sessionId: sessionId,
+                timestamp: Date.now() 
+            });
+            
             return true;
         }
         console.warn(`[${sessionId}] Interruption requested for inactive/unknown session.`);

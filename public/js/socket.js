@@ -5,6 +5,10 @@ import { io } from "https://cdn.socket.io/4.7.4/socket.io.esm.min.js"; // Using 
 import { appState } from './state.js';
 import * as api from './api.js'; // Needed for loading settings on API key error
 
+// Track whether a content message is currently being displayed via streaming
+// to avoid duplicate content display
+let isMessageContentDisplayed = false;
+
 // Import UI update functions from their respective modules
 import { addAgentMessage, addUserMessage, clearMessages, enableChatInput, scrollToBottom } from './ui/chat.js';
 import { setStatus } from './ui/status.js'; // Assuming ui/status.js exports setStatus
@@ -402,14 +406,23 @@ export function setupSocketEventHandlers(socket) {
         // No special handling needed for reconnected clients
         // The correct message is automatically broadcast to all clients
 
-        if (response.message && response.message.content) {
-            // Don't check for duplicates as it's causing issues
+        // Display content ONLY if this is a content-only response (without tool_calls)
+        // AND we haven't already displayed it via interim_content
+        if (response.message && response.message.content && !response.message.tool_calls && !isMessageContentDisplayed) {
+            console.log("Displaying final text content from agent_response.");
             addAgentMessage(response.message.content);
-        } else {
+        } else if (!response.message?.content) {
             console.warn("Received agent_response without message content:", response);
-            // Add a fallback message if appropriate
-            addAgentMessage("Received an empty response from the agent.");
+            // Only add a fallback message if there's no content at all (don't add for tool-only responses)
+            if (!response.message?.tool_calls) {
+                addAgentMessage("Received an empty response from the agent.");
+            }
+        } else {
+            console.log("Final agent_response received, but content already shown or contains tool calls.");
         }
+        
+        // Reset the flag for the next message
+        isMessageContentDisplayed = false;
 
         // Update token count if included in the final response (from legacy)
         const tokenCountSpan = document.getElementById('token-count');
@@ -448,6 +461,28 @@ export function setupSocketEventHandlers(socket) {
         setStatus('error', 'Setup Error');
         showDirectoryModal(); // Re-show modal on error
         enableChatInput(false); // Disable input until directory is fixed
+    });
+    
+    // Handle interim content (text part of a message that also has tool calls)
+    socket.on('interim_content', (data) => {
+        console.log('Interim content received before tool execution.');
+        
+        // Only process if it's for the current session
+        if (!isCurrentSession(data.sessionId)) {
+            console.log(`Ignoring interim content for session ${data.sessionId} (current: ${appState.currentSessionId})`);
+            return;
+        }
+        
+        // Display the content immediately
+        if (data.content) {
+            console.log("Displaying interim content from LLM before tool execution.");
+            addAgentMessage(data.content);
+            
+            // Mark that we've displayed content, so we don't duplicate it in agent_response
+            isMessageContentDisplayed = true;
+        }
+        
+        // Don't change agent state or enable input - tools will be executed next
     });
     
     // Handle interruption events

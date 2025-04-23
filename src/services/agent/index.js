@@ -371,11 +371,39 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, llmModel, wo
         // Add LLM's response to the messages list
         loopMessages.push(llmResponse);
         
+        // Analyze the response - check if it has content, tool calls, or both
+        const hasContent = llmResponse.content && llmResponse.content.trim().length > 0;
+        const hasToolCalls = llmResponse.tool_calls && llmResponse.tool_calls.length > 0;
+        
         // If response contains tool calls, execute them
-        if (llmResponse.tool_calls && llmResponse.tool_calls.length > 0) {
+        if (hasToolCalls) {
             console.log(`LLM requested ${llmResponse.tool_calls.length} tool calls`);
             
-            // Save assistant message with tool_use (only for main agents)
+            // If we have both content and tool calls, handle content first
+            if (hasContent) {
+                console.log(`[${sessionId}] LLM response has BOTH content and tool calls.`);
+                
+                // Persist text content first (only for main agents)
+                if (!sessionId.startsWith('sub_')) {
+                    console.log(`[${sessionId}] Persisting text content part first.`);
+                    await projectSessionManager.appendAssistantMessage(sessionId, {
+                        role: 'assistant',
+                        content: llmResponse.content
+                        // No tool_calls here
+                    });
+                }
+                
+                // Notify frontend about interim content to display immediately
+                if (streamCallback) {
+                    streamCallback({
+                        type: 'interim_content',
+                        content: llmResponse.content,
+                        sessionId: sessionId // Include sessionId for proper session tracking
+                    });
+                }
+            }
+            
+            // Then save tool_use message (only for main agents)
             if (!sessionId.startsWith('sub_')) {
                 // Persist the tool use query in history
                 await projectSessionManager.appendAssistantMessage(sessionId, {
@@ -707,8 +735,13 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
         }
 
         // 10. Append assistant response to history (only for main agents, not sub-agents)
-        if (!sessionId.startsWith('sub_')) {
+        // Only append the message if it's a content-only message without tool calls
+        // Messages with tool calls are already persisted within the runAgentLoop
+        if (!sessionId.startsWith('sub_') && finalAssistantMessage.content && !finalAssistantMessage.tool_calls) {
+            console.log(`[${sessionId}] Persisting final content-only assistant message.`);
             await projectSessionManager.appendAssistantMessage(sessionId, finalAssistantMessage);
+        } else if (!sessionId.startsWith('sub_')) {
+            console.log(`[${sessionId}] Skipping final persistence - message likely involved tools (already persisted) or was empty.`);
         }
         
         // Set agent state back to idle (only for main agents, not sub-agents)
