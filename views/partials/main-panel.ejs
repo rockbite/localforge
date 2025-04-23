@@ -23,6 +23,11 @@
     <div id="chat-container">
         <div id="messages"></div>
     </div>
+    <div id="footer-drag-handle">
+        <div class="handle-icon">
+            <span class="material-icons">drag_handle</span>
+        </div>
+    </div>
     <footer>
         <form id="message-form">
             <div class="prompt-container">
@@ -30,7 +35,7 @@
                     <span class="attachments-icon material-icons" id="attachment-button">attach_file</span>
                     <!-- Hidden file input for images -->
                     <input type="file" id="file-input" accept="image/*" style="display:none" />
-                    <textarea id="message-input" placeholder="Ask me to help with a coding task..." disabled></textarea>
+                    <textarea id="message-input" style="padding-left: 32px;" placeholder="Ask me to help with a coding task..." disabled></textarea>
                     <span class="prompt-label">⌘+ENTER</span>
                 </div>
             </div>

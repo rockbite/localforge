@@ -1,14 +1,17 @@
 // src/ui/layout.js
-// Purpose: Handles general layout adjustments (drag bar) and the initial loading screen.
+// Purpose: Handles general layout adjustments (drag bars) and the initial loading screen.
 
 // DOM Elements specific to layout
 const loadingScreen = document.getElementById('loading-screen');
 const mainContent = document.getElementById('main-content');
 const dragBar = document.getElementById('drag-bar');
+const footerDragHandle = document.getElementById('footer-drag-handle');
 const mainPanel = document.getElementById('main-panel');
 const projectsPanel = document.getElementById('projects-panel');
 const rightPanel = document.getElementById('right-panel');
 const container = document.querySelector('.container');
+const footer = document.querySelector('footer');
+const chatContainer = document.getElementById('chat-container');
 
 /**
  * Initializes the drag bar functionality for resizing panels.
@@ -17,6 +20,13 @@ export function initDragBar() {
     if (!dragBar || !mainPanel || !projectsPanel || !rightPanel || !container) {
         console.warn("Drag bar elements not found, skipping initialization.");
         return;
+    }
+    
+    // Initialize the footer drag handle if it exists
+    if (footerDragHandle && footer && chatContainer) {
+        initFooterDragHandle();
+    } else {
+        console.warn("Footer drag elements not found, skipping initialization.");
     }
 
     let dragging = false;
@@ -86,6 +96,61 @@ export function initDragBar() {
     });
 
     console.log("Drag bar initialized.");
+}
+
+/**
+ * Initializes the footer drag handle for resizing the message input area.
+ */
+function initFooterDragHandle() {
+    let dragging = false;
+    let startY, startFooterHeight;
+    
+    // Store the initial footer height in a CSS variable
+    const initialFooterHeight = footer.offsetHeight;
+    document.documentElement.style.setProperty('--footer-height', `${initialFooterHeight}px`);
+    
+    footerDragHandle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        dragging = true;
+        startY = e.clientY;
+        startFooterHeight = footer.offsetHeight;
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'ns-resize';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        
+        // Calculate the new footer height based on mouse movement
+        // Moving up decreases footer height, moving down increases it
+        const deltaY = startY - e.clientY;
+        let newFooterHeight = startFooterHeight + deltaY;
+        
+        // Set reasonable min/max constraints
+        const minHeight = 220; // Increased minimum footer height
+        const maxHeight = Math.min(window.innerHeight * 0.4, 500); // Max 40% of viewport height or 500px
+        
+        newFooterHeight = Math.max(minHeight, Math.min(newFooterHeight, maxHeight));
+        
+        // Update the footer height
+        footer.style.height = `${newFooterHeight}px`;
+        
+        // Update CSS variable to store the value
+        document.documentElement.style.setProperty('--footer-height', `${newFooterHeight}px`);
+        
+        // No need to manually adjust textarea height anymore
+        // It will automatically fill the container based on CSS
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (dragging) {
+            dragging = false;
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+        }
+    });
+    
+    console.log("Footer drag handle initialized.");
 }
 
 /**
