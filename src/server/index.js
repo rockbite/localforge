@@ -8,7 +8,6 @@ import fs from 'fs';
 import * as agentLogic from '../services/agent/index.js';
 import { callLLM } from '../services/llm/index.js';
 import { MAIN_MODEL, AUX_MODEL } from '../config/llm.js';
-import { setWorkingDirectory, createToolRegistry, getAllToolNames } from '../../tools/index.js';
 import { 
     projectSessionManager, 
     sessionTaskEvents, 
@@ -341,7 +340,6 @@ io.on('connection', (socket) => {
             if (directory === undefined || directory === null) {
                 // Allow null/undefined directory
                 await projectSessionManager.setWorkingDirectory(sessionId, null);
-                setWorkingDirectory(null);
                 
                 // Send current tasks list to initialize the widget
                 const tasks = await projectSessionManager.getTasks(sessionId);
@@ -369,11 +367,6 @@ io.on('connection', (socket) => {
             
             // Store the working directory in the session and set it for tools
             await projectSessionManager.setWorkingDirectory(sessionId, directory);
-            const setResult = setWorkingDirectory(directory);
-            if (!setResult) {
-                socket.emit('setup_error', { message: 'Failed to set working directory for tools' });
-                return;
-            }
             
             console.log(`Set working directory for session ${sessionId}: ${directory}`);
             

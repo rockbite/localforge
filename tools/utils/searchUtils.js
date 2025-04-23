@@ -2,12 +2,9 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { glob } from 'glob';
 
-// The working directory will be dynamically provided via the socket connection
-let TOOL_ALLOWED_BASE = process.cwd();
-
-async function globTool({ pattern, path: searchPath = process.cwd() }) {
-    const basePath = searchPath || process.cwd();
-    if(!path.resolve(basePath).startsWith(TOOL_ALLOWED_BASE)) {
+async function globTool({ pattern, path: searchPath, workingDirectory }) {
+    const basePath = searchPath || workingDirectory;
+    if(!path.resolve(basePath).startsWith(workingDirectory)) {
         return { error: 'Access denied' };
     }
     
@@ -37,13 +34,13 @@ async function globTool({ pattern, path: searchPath = process.cwd() }) {
     }
 }
 
-async function grepTool({ pattern, path: searchPath = process.cwd(), include = '*' }) {
+async function grepTool({ pattern, path: searchPath = process.cwd(), include = '*', workingDirectory }) {
     // Ensure searchPath is not undefined or null
     const basePath = searchPath || process.cwd();
     console.log(`[GrepTool] Searching with pattern "${pattern}", include: "${include}", path: "${basePath}"`);
     
-    if(!path.resolve(basePath).startsWith(TOOL_ALLOWED_BASE)) {
-        console.log(`[GrepTool] Access denied for path "${basePath}". TOOL_ALLOWED_BASE: "${TOOL_ALLOWED_BASE}"`);
+    if(!path.resolve(basePath).startsWith(workingDirectory)) {
+        console.log(`[GrepTool] Access denied for path "${basePath}". workingDirectory: "${workingDirectory}"`);
         return { error: 'Access denied' };
     }
     
@@ -154,15 +151,5 @@ async function grepTool({ pattern, path: searchPath = process.cwd(), include = '
     }
 }
 
-/**
- * Sets the allowed base path for search tools
- * @param {string} basePath - Path to set as allowed base
- */
-function setAllowedBasePath(basePath) {
-    if (basePath && typeof basePath === 'string') {
-        TOOL_ALLOWED_BASE = basePath;
-        console.log(`Search tools base path set to: ${TOOL_ALLOWED_BASE}`);
-    }
-}
 
-export { globTool, grepTool, setAllowedBasePath };
+export { globTool, grepTool };

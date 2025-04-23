@@ -411,9 +411,9 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, llmModel, wo
                         ? JSON.parse(call.function.arguments)
                         : call.function.arguments;
                     
-                    // Update registry with sessionId 
+                    // Update registry with sessionId
                     agentTools.sessionId = sessionId;
-                    
+
                     // Get the descriptive text if the method exists
                     let descriptiveText = null;
                     if (toolImpl && toolImpl.getDescriptiveText) {

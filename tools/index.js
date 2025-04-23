@@ -1,7 +1,4 @@
 import path from 'path';
-// Base path setters and tool imports for a manual registry
-import { setAllowedBasePath } from './utils/fileSystemUtils.js';
-import { setAllowedBasePath as setSearchBasePath } from './utils/searchUtils.js';
 import Bash from './list/BashTool.js';
 import BatchTool from './list/BatchTool.js';
 import dispatch_agent from './list/DispatchAgentTool.js';
@@ -72,6 +69,9 @@ function createToolRegistry(allowedToolNames) {
       const toolContext = {
         sessionId: this.sessionId
       };
+
+      // this is a shit-code, but it will work for now, we should fix this machine generated shit later
+      args.workingDirectory = workingDirectory;
       
       try {
         // For file system related tools, ensure workingDirectory is set if not specified
@@ -99,7 +99,7 @@ function createToolRegistry(allowedToolNames) {
               success: false
             };
           }*/
-          
+
           // Execute command with working directory
           const result = await TOOL_IMPLEMENTATIONS[toolName]({
             ...args,
@@ -125,32 +125,9 @@ function createToolRegistry(allowedToolNames) {
   };
 }
 
-/**
- * Set the working directory for tools (FS and search)
- * @param {string} directory
- */
-function setWorkingDirectory(directory) {
-  if (!directory) {
-    // Handle null/undefined directory case
-    setAllowedBasePath(process.cwd());
-    setSearchBasePath(process.cwd());
-    return true;
-  }
-  
-  try {
-    const resolved = path.resolve(directory);
-    setAllowedBasePath(resolved);
-    setSearchBasePath(resolved);
-    process.chdir(resolved);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 export { 
   getAllToolNames, 
-  createToolRegistry, 
-  setWorkingDirectory,
+  createToolRegistry,
   TOOL_REGISTRY  // Export the tool registry for metadata access
 };

@@ -48,11 +48,11 @@ async function walk(dir, depthLeft, ignore, stats) {
 }
 
 
-const ls = async ({ path: dirPath, depth = 1, ignore = [] }) => {
+const ls = async ({ path: dirPath, depth = 1, ignore = [], workingDirectory }) => {
     const abs = path.resolve(dirPath);
 
     // security – stay inside sandbox
-    if (!abs.startsWith(TOOL_ALLOWED_BASE)) {
+    if (!abs.startsWith(workingDirectory)) {
         return { error: 'Access denied' };
     }
 
@@ -73,14 +73,14 @@ const ls = async ({ path: dirPath, depth = 1, ignore = [] }) => {
     }
 }
 
-const view = async ({ file_path, offset = 0, limit = 2000 }) => {
-    if(!path.resolve(file_path).startsWith(TOOL_ALLOWED_BASE)) return { error: 'Access denied' };
+const view = async ({ file_path, offset = 0, limit = 2000, workingDirectory }) => {
+    if(!path.resolve(file_path).startsWith(workingDirectory)) return { error: 'Access denied' };
     const data = await fs.readFile(file_path, 'utf-8');
     return { contents: data.split('\n').slice(offset, offset+limit).join('\n') };
 };
 
-const edit = async ({ file_path, old_string, new_string }) => {
-    if(!path.resolve(file_path).startsWith(TOOL_ALLOWED_BASE)) return { error: 'Access denied' };
+const edit = async ({ file_path, old_string, new_string, workingDirectory }) => {
+    if(!path.resolve(file_path).startsWith(workingDirectory)) return { error: 'Access denied' };
     let data = await fs.readFile(file_path, 'utf-8');
     if(!data.includes(old_string)) return { error: 'Old string not found' };
     data = data.replace(old_string, new_string);
@@ -88,23 +88,12 @@ const edit = async ({ file_path, old_string, new_string }) => {
     return { success: true };
 };
 
-const replace = async ({ file_path, content }) => {
-    if(!path.resolve(file_path).startsWith(TOOL_ALLOWED_BASE)) return { error: 'Access denied' };
+const replace = async ({ file_path, content, workingDirectory }) => {
+    if(!path.resolve(file_path).startsWith(workingDirectory)) return { error: 'Access denied' };
     await fs.writeFile(file_path, content);
     return { success: true };
 };
 
 const fsTools = { LS: ls, View: view, Edit: edit, Replace: replace };
 
-/**
- * Sets the allowed base path for file system operations
- * @param {string} basePath - Path to set as allowed base
- */
-function setAllowedBasePath(basePath) {
-    if (basePath && typeof basePath === 'string') {
-        TOOL_ALLOWED_BASE = basePath;
-        console.log(`File system tools base path set to: ${TOOL_ALLOWED_BASE}`);
-    }
-}
-
-export { fsTools, setAllowedBasePath };
+export { fsTools };
