@@ -28,8 +28,9 @@ export default {
       }
     }
   },
-  execute: async ({ command, timeout, description, workingDirectory }) => {
-    return await executeBash(command, timeout, workingDirectory);
+  execute: async ({ command, timeout, description, workingDirectory, signal, sessionId }) => {
+    // Pass the signal and sessionId to executeBash for interruption support
+    return await executeBash(command, timeout, workingDirectory, signal, sessionId);
   },
   getDescriptiveText: (args) => {
     // If description is provided, use it

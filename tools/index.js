@@ -56,7 +56,7 @@ function createToolRegistry(allowedToolNames) {
     .map(t => t.schema);
   return {
     getSchemas: () => allowedSchemas,
-    async run(call, workingDirectory) {
+    async run(call, workingDirectory, signal = null) {
       const toolName = call.function.name;
       if (!allowedToolNames.includes(toolName)) {
         return { error: `Tool \"${toolName}\" is not available.` };
@@ -100,10 +100,12 @@ function createToolRegistry(allowedToolNames) {
             };
           }*/
 
-          // Execute command with working directory
+          // Execute command with working directory, signal and sessionId for interruption support
           const result = await TOOL_IMPLEMENTATIONS[toolName]({
             ...args,
-            workingDirectory
+            workingDirectory,
+            signal,
+            sessionId: this.sessionId
           });
           
           // Extract file paths if successful
