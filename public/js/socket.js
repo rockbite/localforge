@@ -110,7 +110,6 @@ export function initializeSocket() {
 export function setupSocketEventHandlers(socket) {
 
     socket.on('session_joined', (data) => {
-        console.log('Successfully joined session:', data);
         try {
             // Store current session and project IDs
             appState.currentSessionId = data.sessionId;

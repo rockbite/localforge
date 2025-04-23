@@ -88,9 +88,6 @@ async function callLLM({
         // Determine which provider to use (from parameter, environment variable, or default)
         const providerKey = provider || LLM_PROVIDER;
         
-        // Log which provider and model are being used
-        console.log(`Calling ${providerKey} provider with model ${modelName}, ${messages.length} messages${stream ? ' (streaming)' : ''}`);
-        
         // Get the middleware for the provider
         const middleware = openai;
 

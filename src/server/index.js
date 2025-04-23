@@ -239,7 +239,6 @@ app.post('/agent/generate-gerund', async (req, res) => {
 
 // Socket.IO connections
 io.on('connection', (socket) => {
-    console.log(`New client connected: ${socket.id}`);
     
     // Initialize socket user data
     socket.userData = {
@@ -274,8 +273,6 @@ io.on('connection', (socket) => {
                 sessionSocketMap.set(sessionId, new Set());
             }
             sessionSocketMap.get(sessionId).add(socket);
-            
-            console.log(`Socket ${socket.id} joined session ${sessionId}`);
             
             // Send initial state for the joined session
             const sessionData = await projectSessionManager.getSession(sessionId);
@@ -457,7 +454,6 @@ io.on('connection', (socket) => {
             };
             
             // IMMEDIATELY persist the user message before starting agent processing
-            console.log(`[${sessionId}] Persisting user message immediately.`);
             await projectSessionManager.appendUserMessageOnly(sessionId, message);
             
             // Stream callback to send updates to the client
@@ -487,7 +483,6 @@ io.on('connection', (socket) => {
                 // BROADCAST the final response to all sockets currently in the session room
                 const socketsInSession = sessionSocketMap.get(sessionId);
                 if (socketsInSession && socketsInSession.size > 0) {
-                    console.log(`[${sessionId}] Broadcasting agent_response to ${socketsInSession.size} socket(s).`);
                     // Include the sessionId in the payload for the client-side check
                     const responsePayload = {
                         ...agentResponse,
@@ -562,14 +557,12 @@ io.on('connection', (socket) => {
     
     // Handle disconnection
     socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
         const sessionId = socket.userData?.currentSessionId;
         if (sessionId && sessionSocketMap.has(sessionId)) {
             const sessionSockets = sessionSocketMap.get(sessionId);
             sessionSockets.delete(socket);
             
             if (sessionSockets.size === 0) {
-                console.log(`Session ${sessionId} has no more connected sockets.`);
                 sessionSocketMap.delete(sessionId);
                 // No need to explicitly unload - the ProjectSessionManager will do it when inactive
             }
@@ -609,7 +602,6 @@ export { app, server, startServer };
 sessionTaskEvents.on('task_diff_update', ({ sessionId, type, task, taskId }) => {
     const sockets = sessionSocketMap.get(sessionId);
     if (sockets) {
-        console.log(`Broadcasting task update (${type}) for session ${sessionId} to ${sockets.size} sockets.`);
         sockets.forEach(socket => {
             socket.emit('task_diff_update', { sessionId, type, task, taskId });
         });
@@ -620,7 +612,6 @@ sessionTaskEvents.on('task_diff_update', ({ sessionId, type, task, taskId }) => 
 sessionAccountingEvents.on('updated', (data) => {
     const sockets = sessionSocketMap.get(data.sessionId);
     if (sockets) {
-        console.log(`Broadcasting cost update for session ${data.sessionId} to ${sockets.size} sockets.`);
         sockets.forEach(socket => {
             // data already contains sessionId so no need to add it
             socket.emit('cost_update', data);
@@ -632,7 +623,6 @@ sessionAccountingEvents.on('updated', (data) => {
 sessionToolLogEvents.on('append', ({ sessionId, logEntry }) => {
     const sockets = sessionSocketMap.get(sessionId);
     if (sockets) {
-        console.log(`Broadcasting tool log append for session ${sessionId} to ${sockets.size} sockets.`);
         sockets.forEach(socket => {
             socket.emit('tool_log_append', { sessionId, logEntry });
         });

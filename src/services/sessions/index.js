@@ -130,7 +130,6 @@ class ProjectSessionManager {
         }
 
         try {
-            console.log(`Loading session ${sessionId} from DB`);
             const rawData = await store.getSessionData(sessionId);
             
             // Normalize the data using our canonical schema
@@ -180,7 +179,7 @@ class ProjectSessionManager {
         // Use setSessionData to guarantee replacement instead of updateSessionData
         const savePromise = store.setSessionData(sessionId, saveData)
             .then(() => {
-                console.log(`Session ${sessionId} saved successfully.`);
+                // do nothing
             })
             .catch(err => {
                 console.error(`Failed to save session ${sessionId}:`, err);
