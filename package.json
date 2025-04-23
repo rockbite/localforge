@@ -1,6 +1,6 @@
 {
   "name": "@rockbite/localforge",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "main": "electron/main.js",
   "bin": {
