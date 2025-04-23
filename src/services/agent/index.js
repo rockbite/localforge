@@ -44,7 +44,7 @@ async function initializePrompts(config = {}) {
         // Default agent name is "Jeff" but can be overridden
         const agentName = config.agentName;
         
-        MAIN_SYSTEM_PROMPT = await loadPrompt('main-system-new', { agentName });
+        MAIN_SYSTEM_PROMPT = await loadPrompt('main-system', { agentName });
         TOPIC_DETECTION_PROMPT = await loadPrompt('topic-detection');
         WHIMSICAL_GERUND_PROMPT = await loadPrompt('whimsical-gerund');
         console.log(`Prompt templates loaded successfully for agent: ${agentName}`);
