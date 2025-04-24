@@ -41,7 +41,7 @@ footer {
     overflow: hidden; /* Prevent content spillover */
     z-index: 10; /* Keep above main content if overlap occurs */
     flex-shrink: 0; /* Prevent footer from shrinking */
-    transition: height 0.05s ease-out; /* Smooth transition for height changes */
+    /* Removed transition to improve resize responsiveness */
 }
 
 #message-form {
