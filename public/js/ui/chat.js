@@ -16,7 +16,7 @@ import { clearLogs as clearToolLogs } from './toolLog.js'; // For clearing tool 
 // DOM Elements specific to chat
 const messagesContainer = document.getElementById('messages');
 const messageForm = document.getElementById('message-form');
-const messageInput = document.getElementById('message-input');
+const promptEditorContainer = document.getElementById('prompt-editor-container');
 const sendButton = document.getElementById('send-button');
 const projectNameElement = document.getElementById('project-name');
 const sessionNameElement = document.getElementById('session-name');
@@ -24,22 +24,42 @@ const clearChatButton = document.getElementById('clear-chat-button');
 const stopButton = document.getElementById('stop-button');
 const attachmentButton = document.getElementById('attachment-button');
 const fileInput = document.getElementById('file-input');
+const attachedFilename = document.getElementById('attached-filename');
 
-// Variable to store pending image data
+// Variable to store pending image data and the prompt editor instance
 let pendingImageDataUrl = null;
+let promptEditor = null;
 
 /**
  * Initializes the chat form listeners (submit, Cmd+Enter) and chat header functionality.
  */
 export function initChatForm() {
-    if (!messageForm || !messageInput || !sendButton) {
+    if (!messageForm || !promptEditorContainer || !sendButton) {
         console.warn("Chat form elements not found, skipping initialization.");
         return;
     }
 
+    // Initialize prompt editor
+    if (typeof promptEditorBoot === 'function') {
+        promptEditor = promptEditorBoot(promptEditorContainer, {
+            placeholder: "Ask me to help with a coding task..."
+        });
+        console.log("Prompt editor initialized");
+    } else {
+        console.error("promptEditorBoot function not found - prompt editor will not work");
+    }
+
     messageForm.addEventListener('submit', handleFormSubmit);
 
-    messageInput.addEventListener('keydown', handleInputKeydown);
+    // Add key handlers to capture Cmd+Enter in the prompt editor
+    document.addEventListener('keydown', function(event) {
+        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+            event.preventDefault();
+            if (appState.currentAgentState.status === 'idle') {
+                messageForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+        }
+    });
 
     // Initialize attachment button functionality
     if (attachmentButton && fileInput) {
@@ -146,7 +166,20 @@ export function initChatForm() {
  */
 function handleFormSubmit(event) {
     event.preventDefault();
-    const messageText = messageInput.value.trim();
+    
+    // Get message text from prompt editor
+    let messageText = '';
+    if (promptEditor) {
+        const json = promptEditor.getPTJson();
+        if (json && json.blocks) {
+            // Get text from all non-muted blocks
+            messageText = json.blocks
+                .filter(block => !block.muted)
+                .map(block => block.content)
+                .join('\n\n')
+                .trim();
+        }
+    }
 
     // Check if agent is responding using currentAgentState instead of isAgentResponding flag
     if ((messageText || pendingImageDataUrl) && appState.currentAgentState.status === 'idle') {
@@ -162,16 +195,22 @@ function handleFormSubmit(event) {
         }
 
         sendMessage(contentToSend);
-        messageInput.value = ''; // Clear input after sending
-        messageInput.style.height = 'auto'; // Reset height after clearing
-        messageInput.focus(); // Keep focus on input
+        
+        // Clear the prompt editor
+        if (promptEditor) {
+            // Clear by creating a new block with empty content
+            const json = { blocks: [{ id: Math.random().toString(16).slice(2, 8), content: '', muted: false }] };
+            promptEditor.loadFromPTJson(json);
+        }
         
         // Reset attachment state
         pendingImageDataUrl = null;
         fileInput.value = '';
         if (attachmentButton) {
             attachmentButton.classList.remove('attached');
-            attachmentButton.removeAttribute('title');
+        }
+        if (attachedFilename) {
+            attachedFilename.textContent = '';
         }
     } else if (appState.currentAgentState.status !== 'idle') {
         console.log("Agent is busy, message not sent.");
@@ -179,28 +218,7 @@ function handleFormSubmit(event) {
     }
 }
 
-/**
- * Handles keydown events on the message input (for Cmd/Ctrl+Enter).
- * @param {KeyboardEvent} event - The keydown event.
- */
-function handleInputKeydown(event) {
-    // Auto-resize textarea height based on content
-    // Simple auto-resize - consider a library for more robustness
-    setTimeout(() => { // Use timeout to allow value to update before resizing
-        messageInput.style.height = 'auto'; // Reset height
-        messageInput.style.height = `${messageInput.scrollHeight}px`;
-    }, 0);
-
-
-    // Handle Cmd/Ctrl+Enter for sending
-    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-        event.preventDefault(); // Prevent default newline behavior
-        // Trigger form submission if valid
-        if (appState.currentAgentState.status === 'idle' && (messageInput.value.trim() || pendingImageDataUrl)) {
-            messageForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-        }
-    }
-}
+// handleInputKeydown function has been replaced by document-level event listener
 
 /**
  * Processes and sends a user message.
@@ -506,7 +524,11 @@ function handleFileSelection(event) {
     // Update UI to show file is selected
     if (attachmentButton) {
         attachmentButton.classList.add('attached');
-        attachmentButton.setAttribute('title', `Selected: ${file.name}`);
+    }
+    
+    // Show the filename in the toolbar
+    if (attachedFilename) {
+        attachedFilename.textContent = file.name;
     }
     
     // Convert to data URL (base64)
@@ -520,6 +542,7 @@ function handleFileSelection(event) {
         alert('Error preparing file. Please try again.');
         fileInput.value = ''; // Clear the file input
         if (attachmentButton) attachmentButton.classList.remove('attached');
+        if (attachedFilename) attachedFilename.textContent = '';
         pendingImageDataUrl = null;
     };
     reader.readAsDataURL(file);
@@ -549,14 +572,17 @@ function formatFileSize(bytes) {
  * @param {boolean} enable - True to enable, false to disable.
  */
 export function enableChatInput(enable) {
-    if (messageInput) {
-        messageInput.disabled = !enable;
-    }
+    // No direct way to disable the prompt editor, but we can disable the form and send button
     if (sendButton) {
         sendButton.disabled = !enable;
     }
     if (stopButton) {
         stopButton.style.display = enable ? 'none' : 'inline-flex';
+    }
+    // Add/remove disabled class to prompt container
+    const promptContainer = document.querySelector('.prompt-container');
+    if (promptContainer) {
+        promptContainer.classList.toggle('disabled', !enable);
     }
     // Optionally change appearance when disabled
     messageForm?.classList.toggle('disabled', !enable);

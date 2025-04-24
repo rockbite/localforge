@@ -34,7 +34,6 @@
 /* Footer styles */
 footer {
     background-color: var(--primary-bg);
-    padding: 16px 24px;
     min-height: 220px; /* Increased minimum height for footer */
     max-height: 40vh; /* Maximum height as percentage of viewport */
     height: var(--footer-height, 130px); /* Increased default height if variable not set */
@@ -55,51 +54,63 @@ footer {
     height: 100%; /* Fill the footer height */
 }
 
-/* Animated textarea container with gradient border */
+/* Prompt container for the new editor */
 .prompt-container {
     position: relative;
-    border-radius: var(--border-radius);
-    background: var(--secondary-bg); /* Fallback background */
+    border-top-right-radius: var(--border-radius);
+    background: var(--secondary-bg);
     box-sizing: border-box;
     display: flex;
-    flex-direction: column; /* Stack textarea and potential attachments */
-    padding: 0; /* Padding applied inside */
+    flex-direction: column;
+    padding: 0;
     overflow: hidden;
-    flex: 1; /* Take available space */
-    min-height: 0; /* Allow shrinking in flex layout */
-    height: 100%; /* Fill the available height */
-}
-
-.prompt-container::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid1), var(--gradient-mid2), var(--gradient-end));
-    background-size: 400% 400%;
-    z-index: 0; /* Behind the textarea container */
-    border-radius: var(--border-radius);
-    margin: -1px; /* Create the border effect */
-    animation: gradientAnimation 6s ease infinite;
-}
-
-@keyframes gradientAnimation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.textarea-container {
-    position: relative;
-    z-index: 1; /* Above the gradient border */
-    margin: 1px; /* Fit inside the gradient border */
-    border-radius: calc(var(--border-radius) - 1px); /* Match parent radius */
-    background: var(--secondary-bg); /* Actual input background */
-    padding: 16px;
-    display: flex;
-    align-items: flex-start; /* Changed to flex-start for better text layout */
-    flex: 1; /* Allow this container to grow/shrink */
+    flex: 1;
     min-height: 0;
-    height: 100%; /* Fill the available height */
+    height: 100%;
+}
+
+/* Remove the animated gradient border */
+.prompt-container::before {
+    display: none;
+}
+
+/* Style for the prompt editor container */
+.prompt-editor-container {
+    position: relative;
+    z-index: 1;
+    background: var(--secondary-bg);
+    flex: 1;
+    min-height: 0;
+    height: calc(100% - 40px); /* Make room for the toolbar */
+    overflow: hidden;
+}
+
+/* Toolbar below the editor */
+.prompt-toolbar {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    background: var(--secondary-bg);
+    border-top: 1px solid var(--border-color);
+}
+
+.prompt-toolbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.prompt-toolbar-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Attached filename display */
+.attached-filename {
+    font-size: 12px;
+    color: var(--success-color);
+    margin-left: 4px;
 }
 
 #message-input {
@@ -128,16 +139,13 @@ footer {
     color: #8b98a9; /* Standard placeholder color */
 }
 
-/* Attachment icon - now actually used */
+/* Attachment icon - now in the toolbar */
 .attachments-icon {
     color: #555; /* Default icon color */
-    margin-right: 8px;
     cursor: pointer;
     flex-shrink: 0; /* Prevent shrinking */
     transition: color 0.3s ease, transform 0.2s ease;
-    position: absolute; /* Position it absolutely within container */
-    top: 16px; /* Match container padding */
-    left: 16px; /* Match container padding */
+    position: relative;
 }
 
 .attachments-icon:hover {
@@ -147,7 +155,6 @@ footer {
 
 .attachments-icon.attached {
     color: var(--success-color); /* Indicate attached state */
-    animation: pulse-success 2s infinite;
 }
 
 @keyframes pulse-success {
@@ -162,17 +169,13 @@ footer {
     }
 }
 
-/* Optional label (example) */
+/* Command Enter label - now in the toolbar */
 .prompt-label {
-    position: absolute;
-    top: 8px;
-    right: 12px;
     color: #555;
     font-size: 12px;
     background: #252525;
     padding: 2px 6px;
     border-radius: 4px;
-    z-index: 2; /* Above textarea */
 }
 
 #send-button {
@@ -210,4 +213,10 @@ footer {
     cursor: not-allowed;
     transform: none; /* Disable hover/active transforms */
     background: var(--border-color); /* Grey out disabled button */
+}
+
+/* Disabled state for prompt container */
+.prompt-container.disabled {
+    opacity: 0.7;
+    pointer-events: none; 
 }

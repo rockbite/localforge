@@ -31,12 +31,17 @@
     <footer>
         <form id="message-form">
             <div class="prompt-container">
-                <div class="textarea-container">
-                    <span class="attachments-icon material-icons" id="attachment-button">attach_file</span>
-                    <!-- Hidden file input for images -->
-                    <input type="file" id="file-input" accept="image/*" style="display:none" />
-                    <textarea id="message-input" style="padding-left: 32px;" placeholder="Ask me to help with a coding task..." disabled></textarea>
-                    <span class="prompt-label">⌘+ENTER</span>
+                <div id="prompt-editor-container" class="prompt-editor-container"></div>
+                <div class="prompt-toolbar">
+                    <div class="prompt-toolbar-left">
+                        <span class="attachments-icon material-icons" id="attachment-button">attach_file</span>
+                        <span id="attached-filename" class="attached-filename"></span>
+                        <!-- Hidden file input for images -->
+                        <input type="file" id="file-input" accept="image/*" style="display:none" />
+                    </div>
+                    <div class="prompt-toolbar-right">
+                        <span class="prompt-label">⌘+ENTER</span>
+                    </div>
                 </div>
             </div>
             <button type="submit" id="send-button" disabled>

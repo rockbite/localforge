@@ -9,6 +9,7 @@ prompt-editor.css
     background-color: #1a1a1a;
     color: #ffffff;
     box-sizing: border-box;
+    width: 100%;
 }
 
 .prompt-editor-container .tab-content-container {

@@ -433,7 +433,7 @@ class BlockEditor {
             if (!ta || !topSeg || !bottomSeg || !addBtn || !textBtn) return;
 
             ta.style.height = 'auto';
-            let h = ta.scrollHeight-7;
+            let h = ta.scrollHeight-1;
             h = Math.min(h, 200);
             ta.style.height = `${h}px`;
 
