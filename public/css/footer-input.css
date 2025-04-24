@@ -46,18 +46,17 @@ footer {
 
 #message-form {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
     margin: 0 auto; /* Centering if max-width were used */
     align-items: stretch; /* Changed to stretch to fill height */
-    gap: 12px;
     height: 100%; /* Fill the footer height */
 }
 
 /* Prompt container for the new editor */
 .prompt-container {
     position: relative;
-    border-top-right-radius: var(--border-radius);
+    border-radius: 0; /* Remove border radius */
     background: var(--secondary-bg);
     box-sizing: border-box;
     display: flex;
@@ -67,6 +66,7 @@ footer {
     flex: 1;
     min-height: 0;
     height: 100%;
+    width: 100%;
 }
 
 /* Remove the animated gradient border */
@@ -91,7 +91,7 @@ footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 5px;
     background: var(--secondary-bg);
     border-top: 1px solid var(--border-color);
 }
@@ -176,39 +176,37 @@ footer {
     background: #252525;
     padding: 2px 6px;
     border-radius: 4px;
+    margin-right: 12px;
 }
 
-#send-button {
-    width: 44px;
-    height: 44px;
+.prompt-toolbar-right {
+    display: flex;
+    align-items: center;
+}
+
+/* New send button in toolbar */
+.toolbar-send-button {
     background: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid1)); /* User gradient */
     color: white;
     border: none;
-    border-radius: 22px; /* Make it circular */
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition: all 0.2s ease;
-    flex-shrink: 0; /* Prevent button shrinking */
-    align-self: flex-start; /* Align to top of message form */
-    margin-top: 16px; /* Match textarea padding */
 }
 
-#send-button .material-icons {
-    font-size: 20px;
-}
-
-#send-button:hover {
+.toolbar-send-button:hover {
     opacity: 0.9;
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
-#send-button:active {
-    transform: scale(0.95);
+.toolbar-send-button:active {
+    transform: scale(0.98);
 }
 
-#send-button:disabled {
+.toolbar-send-button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
     transform: none; /* Disable hover/active transforms */
