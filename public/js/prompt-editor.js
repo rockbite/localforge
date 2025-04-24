@@ -1,10 +1,11 @@
 class BlockEditor {
-    constructor(container) {
+    constructor(container, options = {}) {
         this.container = container;
         this.blocks = [];
         this.ghost = null;     // dragging clone
         this.draggingEl = null;
         this.offsetY = 0;
+        this.options = options;
         this.init();
     }
 
@@ -587,7 +588,7 @@ class BlockEditor {
     }
 }
 
-function promptEditorBoot(container) {
+function promptEditorBoot(container, options = {}) {
 
     if(container.innerHTML.trim() === '') {
         container.innerHTML = `    <div class="tab-container">
@@ -612,7 +613,11 @@ function promptEditorBoot(container) {
     const editorContainer = container.querySelector('.editor-container');
     const textarea        = container.querySelector('.plain-text');
     const tabs            = container.querySelectorAll('.tab');
-    const editor          = new BlockEditor(editorContainer);
+    const editor          = new BlockEditor(editorContainer, options);
+
+    options.placeholder = options.placeholder || 'Prompt text…';
+
+    textarea.placeholder = options.placeholder;
 
     makeSmartTextarea(textarea);
 
