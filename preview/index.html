@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Interface</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+        }
+    </style>
+</head>
+<link rel="stylesheet" href="prompt-editor.css">
+<script src="prompt-editor.js" ></script>
+<body>
+
+<div class="prompt-editor-container" id="test-editor"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Kick-off
+        promptEditorBoot(document.querySelector('#test-editor'));
+    });
+</script>
+</body>
+</html>
