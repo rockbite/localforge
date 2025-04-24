@@ -170,14 +170,25 @@ function handleFormSubmit(event) {
     // Get message text from prompt editor
     let messageText = '';
     if (promptEditor) {
-        const json = promptEditor.getPTJson();
-        if (json && json.blocks) {
-            // Get text from all non-muted blocks
-            messageText = json.blocks
-                .filter(block => !block.muted)
-                .map(block => block.content)
-                .join('\n\n')
-                .trim();
+        // Check which tab is active
+        const activeTab = document.querySelector('.prompt-editor-container .tab.active');
+        if (activeTab && activeTab.dataset.tab === 'text') {
+            // Get text from the plain text editor
+            const textarea = document.querySelector('.prompt-editor-container .raw-textarea');
+            if (textarea) {
+                messageText = textarea.value.trim();
+            }
+        } else {
+            // Get text from blocks editor
+            const json = promptEditor.getPTJson();
+            if (json && json.blocks) {
+                // Get text from all non-muted blocks
+                messageText = json.blocks
+                    .filter(block => !block.muted)
+                    .map(block => block.content)
+                    .join('\n\n')
+                    .trim();
+            }
         }
     }
 
@@ -198,7 +209,13 @@ function handleFormSubmit(event) {
         
         // Clear the prompt editor
         if (promptEditor) {
-            // Clear by creating a new block with empty content
+            // Clear the text tab
+            const textarea = document.querySelector('.prompt-editor-container .raw-textarea');
+            if (textarea) {
+                textarea.value = '';
+            }
+            
+            // Clear the prompt editor blocks
             const json = { blocks: [{ id: Math.random().toString(16).slice(2, 8), content: '', muted: false }] };
             promptEditor.loadFromPTJson(json);
         }

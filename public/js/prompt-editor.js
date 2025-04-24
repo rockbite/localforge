@@ -620,6 +620,18 @@ function promptEditorBoot(container, options = {}) {
     textarea.placeholder = options.placeholder;
 
     makeSmartTextarea(textarea);
+    
+    // Add Cmd+Enter handling for the plain text textarea
+    textarea.addEventListener('keydown', function(event) {
+        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+            event.preventDefault();
+            // Find the nearest form and submit it
+            const form = container.closest('form');
+            if (form) {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+        }
+    });
 
     /* tab switching ---------------------------------------------------------- */
     tabs.forEach(tab => {

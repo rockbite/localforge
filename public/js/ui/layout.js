@@ -120,24 +120,25 @@ function initFooterDragHandle() {
     
     document.addEventListener('mousemove', (e) => {
         if (!dragging) return;
-        
+
         // Calculate the new footer height based on mouse movement
         // Moving up decreases footer height, moving down increases it
         const deltaY = startY - e.clientY;
         let newFooterHeight = startFooterHeight + deltaY;
-        
+
+
         // Set reasonable min/max constraints
         const minHeight = 220; // Increased minimum footer height
-        const maxHeight = Math.min(window.innerHeight * 0.4, 500); // Max 40% of viewport height or 500px
-        
+        const maxHeight = Math.min(window.innerHeight * 0.8, 1000); // Max 40% of viewport height or 500px
+
         newFooterHeight = Math.max(minHeight, Math.min(newFooterHeight, maxHeight));
-        
+
         // Update the footer height
         footer.style.height = `${newFooterHeight}px`;
-        
+
         // Update CSS variable to store the value
         document.documentElement.style.setProperty('--footer-height', `${newFooterHeight}px`);
-        
+
         // No need to manually adjust textarea height anymore
         // It will automatically fill the container based on CSS
     });

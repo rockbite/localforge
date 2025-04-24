@@ -35,7 +35,7 @@
 footer {
     background-color: var(--primary-bg);
     min-height: 220px; /* Increased minimum height for footer */
-    max-height: 40vh; /* Maximum height as percentage of viewport */
+    max-height: 90vh; /* Maximum height as percentage of viewport - increased to 90% */
     height: var(--footer-height, 130px); /* Increased default height if variable not set */
     position: relative; /* For potential absolute elements */
     overflow: hidden; /* Prevent content spillover */

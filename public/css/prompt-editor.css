@@ -15,7 +15,7 @@ prompt-editor.css
 .prompt-editor-container .tab-content-container {
     margin: 0 auto;
     position: relative;
-    height: 400px;
+    height: 100%;
     width: 100%;
     border-bottom: 1px solid #444;
     overflow-y: scroll;
