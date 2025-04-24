@@ -126,7 +126,7 @@ class BlockEditor {
         textarea.rows = 1;
         textarea.addEventListener('input', () => this.updateAllBlockLayouts());
         blockContent.appendChild(textarea);
-        makeSmartTextarea(textarea);
+        makeSmartTextarea(textarea, {}, this);
 
         // inside createBlockElement(), just after textarea is created
         textarea.addEventListener('keydown', e => {
@@ -412,7 +412,7 @@ class BlockEditor {
             if (!ta || !topSeg || !bottomSeg || !addBtn || !textBtn) return;
 
             ta.style.height = 'auto';
-            let h = ta.scrollHeight-8;
+            let h = ta.scrollHeight-7;
             h = Math.min(h, 200);
             ta.style.height = `${h}px`;
 
@@ -594,6 +594,8 @@ function promptEditorBoot(container) {
     const tabs            = container.querySelectorAll('.tab');
     const editor          = new BlockEditor(editorContainer);
 
+    makeSmartTextarea(textarea);
+
     /* tab switching ---------------------------------------------------------- */
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -618,6 +620,8 @@ function promptEditorBoot(container) {
             }
         });
     });
+
+    return editor;
 }
 
 function syncTextareaToEditor(textarea, editor) {
@@ -714,7 +718,7 @@ function rawTextToPt(text) {
  * @param {number} [opts.tabSize=4]   – how many spaces a “tab” inserts
  * @param {number} [opts.maxUndo=200] – max history snapshots to keep
  */
-function makeSmartTextarea(ta, opts = {}) {
+function makeSmartTextarea(ta, opts = {}, editor) {
     const TAB     = " ".repeat(opts.tabSize ?? 4);
     const MAX_UNDO = opts.maxUndo ?? 200;
 
@@ -728,6 +732,7 @@ function makeSmartTextarea(ta, opts = {}) {
         history.push({ value: ta.value, start: ta.selectionStart, end: ta.selectionEnd });
         if (history.length > MAX_UNDO) history.shift();
         index = history.length - 1;
+        if(editor) editor.updateAllBlockLayouts();
     };
     const apply = delta => {
         if (!history.length) return;
@@ -735,6 +740,7 @@ function makeSmartTextarea(ta, opts = {}) {
         const snap = history[index];
         ta.value = snap.value;
         ta.setSelectionRange(snap.start, snap.end);
+        if(editor) editor.updateAllBlockLayouts();
     };
     push();               // initial snapshot
     ta.addEventListener("input", push, { passive: true });   // new snapshot on any change
@@ -784,6 +790,7 @@ function makeSmartTextarea(ta, opts = {}) {
                 ta.selectionStart = s + TAB.length;
                 ta.selectionEnd   = ePos + delta;
             }
+            if(editor) editor.updateAllBlockLayouts();
             return;
         }
 
@@ -801,12 +808,13 @@ function makeSmartTextarea(ta, opts = {}) {
             ta.value = value.slice(0, s) + nl + value.slice(ePos);
             const pos = s + nl.length;
             ta.setSelectionRange(pos, pos);
+            if(editor) editor.updateAllBlockLayouts();
             return;
         }
 
         // ---------------------- bracket / quote pair ---------------------------
         const PAIRS = { "(":")", "[":"]", "{":"}", "'":"'", '"':'"' };
-        if (PAIRS[key] && !mod && !shiftKey) {
+        if (PAIRS[key] && !mod) {
             const { selectionStart: s, selectionEnd: ePos, value } = ta;
             e.preventDefault();
             const open = key, close = PAIRS[key];
@@ -814,6 +822,7 @@ function makeSmartTextarea(ta, opts = {}) {
             ta.value = value.slice(0, s) + open + inside + close + value.slice(ePos);
             const cursor = inside ? ePos + 2 : s + 1;
             ta.setSelectionRange(inside ? s : cursor, inside ? ePos + 2 : cursor);
+            if(editor) editor.updateAllBlockLayouts();
             return;
         }
     });
