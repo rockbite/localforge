@@ -95,7 +95,7 @@ class BlockEditor {
         blockHeader.className = 'block-header';
         blockHeader.innerHTML = `
       <div class="block-id">
-        <svg width="14" height="14" viewBox="0 0 256 256">
+        <svg width="14" height="14" viewBox="0 0 256 256" class="block-collapse">
           <path fill="currentColor" d="m208 96l-80 80l-80-80Z"/>
         </svg>
         <span class="block-label" style="color:#71717a;">Block#${id}</span>
@@ -116,6 +116,26 @@ class BlockEditor {
           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="icon iconify iconify--ph" width="1em" height="1em" viewBox="0 0 256 256"><path fill="currentColor" d="M216 48h-40v-8a24 24 0 0 0-24-24h-48a24 24 0 0 0-24 24v8H40a8 8 0 0 0 0 16h8v144a16 16 0 0 0 16 16h128a16 16 0 0 0 16-16V64h8a8 8 0 0 0 0-16M96 40a8 8 0 0 1 8-8h48a8 8 0 0 1 8 8v8H96Zm96 168H64V64h128Zm-80-104v64a8 8 0 0 1-16 0v-64a8 8 0 0 1 16 0m48 0v64a8 8 0 0 1-16 0v-64a8 8 0 0 1 16 0"></path></svg>
         </div>
       </div>`;
+
+        let editorThis = this;
+        /* ───────── Collapse / expand functionality ───────── */
+        const collapseIcon = blockHeader.querySelector('.block-collapse');
+        if (collapseIcon) {
+            collapseIcon.style.cursor = 'pointer';
+            collapseIcon.addEventListener('click', () => {
+                const content = blockDiv.querySelector('.block-content');
+                const footer  = blockDiv.querySelector('.block-footer');
+
+                const isCollapsed = content.style.display === 'none';
+                content.style.display = isCollapsed ? '' : 'none';
+                footer.style.display  = isCollapsed ? '' : 'none';
+
+                /* Rotate the chevron for visual feedback */
+                collapseIcon.style.transform = isCollapsed ? 'rotate(0deg)'
+                    : 'rotate(-90deg)';
+                editorThis.updateAllBlockLayouts();
+            });
+        }
 
         const blockContent = document.createElement('div');
         blockContent.className = 'block-content';
