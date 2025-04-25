@@ -73,7 +73,7 @@ import store from "../../db/store.js";
  *       "message": {
  *         "role": "assistant",
  *         "content": "This is a photo of a cat sitting on a windowsill.",
- *         "tool_calls": [
+ *         "tools": [
  *           {
  *             "id": "call_abc123",
  *             "type": "function",
