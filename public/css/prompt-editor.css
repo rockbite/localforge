@@ -84,9 +84,10 @@ prompt-editor.css
     border: none;
     border-radius: 0; /* Removing border radius */
     padding: 10px 15px;
-    color: #ffffff;
-    font-size: 14px;
-    font-family: inherit;
+    color: #adbccc;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+    line-height: 1.5;
     resize: none;
     box-sizing: border-box;
 }
@@ -172,9 +173,9 @@ prompt-editor.css
     background-color: #222;
     border: none;
     border-radius: 4px;
-    color: #ffffff;
-    font-size: 14px;
-    font-family: inherit;
+    color: #adbccc;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
     resize: none;
 }
 
