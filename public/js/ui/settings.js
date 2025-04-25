@@ -455,9 +455,9 @@ function populateProviderSelects(providers) {
         const currentValue = select.value;
         
         // Clear options
-        select.innerHTML = '<option value="">Select Provider</option>';
+        select.innerHTML = '';
         
-        // Add provider options
+        // Add provider options - only actual providers from the list
         providers.forEach(provider => {
             const option = document.createElement('option');
             option.value = provider.name;
@@ -468,6 +468,9 @@ function populateProviderSelects(providers) {
         // Restore selected value if it exists in new options
         if (currentValue && [...select.options].some(option => option.value === currentValue)) {
             select.value = currentValue;
+        } else if (select.options.length > 0) {
+            // Select first option if no match
+            select.value = select.options[0].value;
         }
     });
 }
@@ -601,9 +604,16 @@ function setLoadingState(isLoading) {
 function showProviderEditModal(providerData = null) {
     if (!providerEditModal) return;
     
+    const isEditMode = !!providerData;
+    
     // Update modal title based on mode
     if (providerEditTitle) {
-        providerEditTitle.textContent = providerData ? 'Edit Provider' : 'Add Provider';
+        providerEditTitle.textContent = isEditMode ? 'Edit Provider' : 'Add Provider';
+    }
+    
+    // Update save button text
+    if (providerEditSaveButton) {
+        providerEditSaveButton.textContent = isEditMode ? 'Save Provider' : 'Add Provider';
     }
     
     // Clear or pre-fill form fields
