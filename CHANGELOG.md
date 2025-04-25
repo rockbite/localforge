@@ -4,7 +4,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) co
 
 ---
 
-## [0.0.11] – 2025-04-25
+## [1.0.11] – 2025-04-25
 ### Added
 - **Prompt Editor** – edit prompts as drag-n-drop blocks (foundation for a future system-prompt library).
 - **New LLM providers**: Anthropic (Claude), Google Gemini, Google Vertex AI, and **Ollama**.
