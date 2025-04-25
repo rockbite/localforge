@@ -146,7 +146,5 @@ async function callModel(prompt) {
         max_completion_tokens: 8192
     });
 
-    let text = response.then((completion) => completion.choices?.[0]?.message?.content || '');
-
-    return text;
+    return response.content;
 }
