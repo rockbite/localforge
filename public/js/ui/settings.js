@@ -43,6 +43,8 @@ const enableWebAccessCheckbox = document.getElementById('enableWebAccess');
 // Store settings data
 let settingsData = {};
 let providerTypes = [];
+// Global models data that persists between UI operations
+let globalModelsData = null;
 
 /**
  * Initializes the settings dialog functionality (button, tabs, save/cancel).
@@ -98,22 +100,7 @@ export function initSettingsDialog() {
  * Initializes the provider edit modal functionality
  */
 function initProviderEditModal() {
-    // Initialize password toggle functionality
-    const togglePasswordButton = document.querySelector('.toggle-password');
-    if (togglePasswordButton) {
-        togglePasswordButton.addEventListener('click', function() {
-            const passwordInput = this.parentElement.querySelector('input');
-            const iconElement = this.querySelector('.material-icons');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                iconElement.textContent = 'visibility';
-            } else {
-                passwordInput.type = 'password';
-                iconElement.textContent = 'visibility_off';
-            }
-        });
-    }
+    // No password toggle needed anymore - API key is a regular text field
 
     // Add provider button functionality
     if (addProviderButton) {
@@ -289,40 +276,41 @@ export function populateSettingsForm(data = {}) { // Export needed if called fro
     // Store the data
     settingsData = data;
     
-    // Parse models data
-    let modelsData;
+    // Parse models data and store it globally
     try {
         // Parse models data if it exists and isn't empty
         if (typeof data.models === 'string' && data.models) {
-            modelsData = JSON.parse(data.models);
+            globalModelsData = JSON.parse(data.models);
             
             // Check that parsed data has expected structure
-            if (!modelsData.providers || !Array.isArray(modelsData.providers)) {
-                modelsData.providers = [];
+            if (!globalModelsData.providers || !Array.isArray(globalModelsData.providers)) {
+                globalModelsData.providers = [];
             }
             
-            if (!modelsData.llmConfig) {
-                modelsData.llmConfig = {};
+            if (!globalModelsData.llmConfig) {
+                globalModelsData.llmConfig = {};
             }
             
             // If the structure is empty, use default data
-            if (modelsData.providers.length === 0) {
-                modelsData = createDefaultModelsData();
+            if (globalModelsData.providers.length === 0) {
+                globalModelsData = createDefaultModelsData();
             }
         } else {
             // If no models data, use default
-            modelsData = createDefaultModelsData();
+            globalModelsData = createDefaultModelsData();
         }
     } catch (error) {
         console.error('Error parsing models data:', error);
-        modelsData = createDefaultModelsData();
+        globalModelsData = createDefaultModelsData();
     }
     
+    console.log('Initial global models data:', globalModelsData);
+    
     // Populate providers list
-    populateProvidersList(modelsData.providers || []);
+    populateProvidersList(globalModelsData.providers || []);
     
     // Populate LLM configs
-    populateLlmConfigs(modelsData.providers || [], modelsData.llmConfig || {});
+    populateLlmConfigs(globalModelsData.providers || [], globalModelsData.llmConfig || {});
     
     // Web tab
     if (usePuppeteerCheckbox) usePuppeteerCheckbox.checked = data.usePuppeteer === true;
@@ -394,15 +382,19 @@ function populateProvidersList(providers) {
             const providerItem = this.closest('.provider-item');
             const providerName = providerItem.dataset.name;
             
-            // Get current models data
-            let modelsData = getCurrentModelsData();
+            // Ensure global models data exists
+            if (!globalModelsData) {
+                globalModelsData = createDefaultModelsData();
+            }
             
             // Filter out the provider with this name
-            modelsData.providers = modelsData.providers.filter(p => p.name !== providerName);
+            globalModelsData.providers = globalModelsData.providers.filter(p => p.name !== providerName);
+            
+            console.log('Global models data after provider deletion:', globalModelsData);
             
             // Update the UI
-            populateProvidersList(modelsData.providers);
-            populateLlmConfigs(modelsData.providers, modelsData.llmConfig);
+            populateProvidersList(globalModelsData.providers);
+            populateLlmConfigs(globalModelsData.providers, globalModelsData.llmConfig);
         });
     });
 }
@@ -476,42 +468,18 @@ function populateProviderSelects(providers) {
 }
 
 /**
- * Gets the current models data from the UI
- * @returns {object} The current models data
+ * Updates the global models data with current UI values
+ * This updates only the LLM config part as providers are already managed directly
  */
-function getCurrentModelsData() {
-    let modelsData;
-    
-    try {
-        modelsData = typeof settingsData.models === 'string' && settingsData.models ? 
-                     JSON.parse(settingsData.models) : 
-                     createDefaultModelsData();
-    } catch (error) {
-        console.error('Error parsing models data:', error);
-        modelsData = createDefaultModelsData();
+function updateModelsDataFromUI() {
+    // Ensure global models data exists
+    if (!globalModelsData) {
+        globalModelsData = createDefaultModelsData();
+        return;
     }
     
-    // Get providers from the UI
-    const providers = [];
-    const providerItems = providersListElement ? providersListElement.querySelectorAll('.provider-item') : [];
-    
-    providerItems.forEach(item => {
-        const name = item.dataset.name;
-        const type = item.dataset.type;
-        
-        // Find existing provider to get options
-        const existingProvider = modelsData.providers.find(p => p.name === name);
-        const options = existingProvider ? existingProvider.options : { apiKey: '', url: '' };
-        
-        providers.push({
-            name,
-            type,
-            options
-        });
-    });
-    
-    // Get LLM configs from the UI
-    const llmConfig = {
+    // Update LLM configs from the UI
+    globalModelsData.llmConfig = {
         aux: {
             provider: auxModelProviderSelect ? auxModelProviderSelect.value : '',
             model: auxModelNameInput ? auxModelNameInput.value : ''
@@ -526,10 +494,7 @@ function getCurrentModelsData() {
         }
     };
     
-    return {
-        providers,
-        llmConfig
-    };
+    console.log('Updated global models data from UI:', globalModelsData);
 }
 
 /**
@@ -539,8 +504,11 @@ function getCurrentModelsData() {
 function collectSettingsFromForm() { // Internal helper
     const settings = {};
     
-    // Get models data
-    settings.models = JSON.stringify(getCurrentModelsData());
+    // Update global models data from UI
+    updateModelsDataFromUI();
+    
+    // Get models data from global state
+    settings.models = JSON.stringify(globalModelsData);
     
     // Web tab
     if (usePuppeteerCheckbox) settings.usePuppeteer = usePuppeteerCheckbox.checked;
@@ -629,13 +597,7 @@ function showProviderEditModal(providerData = null) {
     
     if (providerApiKeyInput) {
         providerApiKeyInput.value = providerData ? providerData.apiKey : '';
-        providerApiKeyInput.type = 'password'; // Always reset to password type
-        
-        // Reset visibility icon if exists
-        const visibilityIcon = providerEditModal.querySelector('.toggle-password .material-icons');
-        if (visibilityIcon) {
-            visibilityIcon.textContent = 'visibility_off';
-        }
+        // Don't change type - it's already a text field in the HTML
     }
     
     if (providerApiUrlInput) {
@@ -678,11 +640,13 @@ function saveProviderData() {
         return;
     }
     
-    // Get current models data
-    let modelsData = getCurrentModelsData();
+    // Ensure global models data exists
+    if (!globalModelsData) {
+        globalModelsData = createDefaultModelsData();
+    }
     
     // Check if name already exists (unless it's the same provider being edited)
-    if (name !== originalName && modelsData.providers.some(p => p.name === name)) {
+    if (name !== originalName && globalModelsData.providers.some(p => p.name === name)) {
         alert('A provider with this name already exists');
         return;
     }
@@ -697,29 +661,33 @@ function saveProviderData() {
         }
     };
     
+    console.log('Saving provider with options:', provider.options);
+    
     // Update or add provider
     if (originalName) {
         // Edit existing provider
-        modelsData.providers = modelsData.providers.map(p => 
+        globalModelsData.providers = globalModelsData.providers.map(p => 
             p.name === originalName ? provider : p
         );
         
         // Update the LLM config references if the name changed
         if (originalName !== name) {
-            for (const configKey in modelsData.llmConfig) {
-                if (modelsData.llmConfig[configKey].provider === originalName) {
-                    modelsData.llmConfig[configKey].provider = name;
+            for (const configKey in globalModelsData.llmConfig) {
+                if (globalModelsData.llmConfig[configKey].provider === originalName) {
+                    globalModelsData.llmConfig[configKey].provider = name;
                 }
             }
         }
     } else {
         // Add new provider
-        modelsData.providers.push(provider);
+        globalModelsData.providers.push(provider);
     }
     
+    console.log('Global models data after provider update:', globalModelsData);
+    
     // Update UI
-    populateProvidersList(modelsData.providers);
-    populateLlmConfigs(modelsData.providers, modelsData.llmConfig);
+    populateProvidersList(globalModelsData.providers);
+    populateLlmConfigs(globalModelsData.providers, globalModelsData.llmConfig);
     
     // Close modal
     closeProviderEditModal();
