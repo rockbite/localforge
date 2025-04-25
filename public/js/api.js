@@ -293,6 +293,23 @@ export async function loadSettingsFromServer() {
 }
 
 /**
+ * Loads settings schema and provider types from the server.
+ * @returns {Promise<object>} The schema and provider types.
+ */
+export async function loadSettingsSchema() {
+    try {
+        const response = await fetch('/api/settings/schema');
+        if (!response.ok) {
+            throw new Error(`Failed to load settings schema: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error loading settings schema:', error);
+        return { schema: {}, providerTypes: [] };
+    }
+}
+
+/**
  * Saves application settings to the server.
  * @param {object} settings - The settings object to save.
  * @returns {Promise<object>} The response data.

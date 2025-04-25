@@ -21,6 +21,70 @@ export class Store {
     getSetting(key, def)   { return this.conf.get(key, def); }
     setSetting(key, value) { this.conf.set(key, value); }
     getAllSettings()       { return this.conf.store; }
+    
+    /* ─────────── Model Settings Helpers ─────────── */
+    getModelConfigFor(llmConfigName) {
+        const models = this.getSetting('models', '{}');
+        let modelsData;
+        
+        try {
+            modelsData = typeof models === 'string' ? JSON.parse(models) : models;
+        } catch (error) {
+            console.error('Error parsing models data:', error);
+            return null;
+        }
+        
+        const { providers = [], llmConfig = {} } = modelsData;
+        
+        if (!llmConfig[llmConfigName]) {
+            return null;
+        }
+        
+        const config = llmConfig[llmConfigName];
+        const provider = providers.find(p => p.name === config.provider);
+        
+        if (!provider) {
+            return null;
+        }
+        
+        return {
+            config: llmConfigName,
+            model: config.model,
+            provider: {
+                name: provider.name,
+                type: provider.type,
+                options: provider.options || {}
+            }
+        };
+    }
+    
+    getProviderList() {
+        const models = this.getSetting('models', '{}');
+        let modelsData;
+        
+        try {
+            modelsData = typeof models === 'string' ? JSON.parse(models) : models;
+        } catch (error) {
+            console.error('Error parsing models data:', error);
+            return [];
+        }
+        
+        return modelsData.providers || [];
+    }
+    
+    getLlmConfigList() {
+        const models = this.getSetting('models', '{}');
+        let modelsData;
+        
+        try {
+            modelsData = typeof models === 'string' ? JSON.parse(models) : models;
+        } catch (error) {
+            console.error('Error parsing models data:', error);
+            return {};
+        }
+        
+        return modelsData.llmConfig || {};
+    }
 
     /* ─────────── Projects ─────────── */
     async createProject(name) {

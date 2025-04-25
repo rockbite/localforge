@@ -4,12 +4,7 @@
         <div class="settings-section compact">
             <div class="model-row-label section-title">Available Provider Types</div>
             <div class="provider-types-list">
-                <span class="provider-type-badge">openai</span>
-                <span class="provider-type-badge">gemini</span>
-                <span class="provider-type-badge">anthropic</span>
-                <span class="provider-type-badge">ollama</span>
-                <span class="provider-type-badge">bedrock</span>
-                <span class="provider-type-badge">vertex.ai</span>
+                <!-- Provider types will be populated dynamically by JS -->
             </div>
             <div class="settings-note">
                 <div class="note-icon"><span class="material-icons">info</span></div>
@@ -28,47 +23,7 @@
             
             <div class="providers-list-wrapper">
                 <div class="providers-list">
-                    <!-- Example provider -->
-                    <div class="provider-item">
-                        <div class="provider-header">
-                            <span class="provider-name">OpenAI Default</span>
-                            <div class="provider-info">
-                                <span class="provider-type-label">openai</span>
-                            </div>
-                            <div class="provider-actions">
-                                <button class="mini-button edit-provider" title="Edit"><span class="material-icons">edit</span></button>
-                                <button class="mini-button delete-provider" title="Delete"><span class="material-icons">delete</span></button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Example provider 2 -->
-                    <div class="provider-item">
-                        <div class="provider-header">
-                            <span class="provider-name">Gemini Pro</span>
-                            <div class="provider-info">
-                                <span class="provider-type-label">gemini</span>
-                            </div>
-                            <div class="provider-actions">
-                                <button class="mini-button edit-provider" title="Edit"><span class="material-icons">edit</span></button>
-                                <button class="mini-button delete-provider" title="Delete"><span class="material-icons">delete</span></button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Add more example providers if needed -->
-                    <div class="provider-item">
-                        <div class="provider-header">
-                            <span class="provider-name">Ollama Local</span>
-                            <div class="provider-info">
-                                <span class="provider-type-label">openai</span>
-                            </div>
-                            <div class="provider-actions">
-                                <button class="mini-button edit-provider" title="Edit"><span class="material-icons">edit</span></button>
-                                <button class="mini-button delete-provider" title="Delete"><span class="material-icons">delete</span></button>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Providers will be dynamically populated by JS -->
                 </div>
             </div>
         </div>
@@ -85,12 +40,11 @@
                         <div class="settings-form-group compact">
                             <select id="auxModelProvider" title="Provider">
                                 <option value="">Select Provider</option>
-                                <option value="openai-default">OpenAI Default</option>
-                                <option value="gemini-pro">Gemini Pro</option>
+                                <!-- Provider options will be populated dynamically -->
                             </select>
                         </div>
                         <div class="settings-form-group compact">
-                            <input type="text" id="auxModelName" placeholder="Model name (e.g. gpt-3.5)" />
+                            <input type="text" id="auxModelName" placeholder="Model name (e.g. gpt-4.1-mini)" />
                         </div>
                     </div>
                 </div>
@@ -102,12 +56,11 @@
                         <div class="settings-form-group compact">
                             <select id="mainModelProvider" title="Provider">
                                 <option value="">Select Provider</option>
-                                <option value="openai-default">OpenAI Default</option>
-                                <option value="gemini-pro">Gemini Pro</option>
+                                <!-- Provider options will be populated dynamically -->
                             </select>
                         </div>
                         <div class="settings-form-group compact">
-                            <input type="text" id="mainModelName" placeholder="Model name (e.g. gpt-4)" />
+                            <input type="text" id="mainModelName" placeholder="Model name (e.g. gpt-4.1)" />
                         </div>
                     </div>
                 </div>
@@ -119,12 +72,11 @@
                         <div class="settings-form-group compact">
                             <select id="expertModelProvider" title="Provider">
                                 <option value="">Select Provider</option>
-                                <option value="openai-default">OpenAI Default</option>
-                                <option value="gemini-pro">Gemini Pro</option>
+                                <!-- Provider options will be populated dynamically -->
                             </select>
                         </div>
                         <div class="settings-form-group compact">
-                            <input type="text" id="expertModelName" placeholder="Model name (e.g. claude-3)" />
+                            <input type="text" id="expertModelName" placeholder="Model name (e.g. o3)" />
                         </div>
                     </div>
                 </div>

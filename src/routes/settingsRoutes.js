@@ -34,6 +34,7 @@ try {
 
 // Import the store singleton that's already configured
 import store from '../db/store.js';
+import providers from '../middleware/providers/index.js';
 
 // ------------------------------------------------------------------
 // Settings schema (simple edition)
@@ -42,17 +43,11 @@ import store from '../db/store.js';
 
 export const SETTINGS_SCHEMA = {
   // ---------- Models tab ----------
-  openaiApiKey:        { type: 'string',  default: '' },
-  geminiApiKey:        { type: 'string',  default: '' },
+  models:               { type: 'string',  default: '' },
 
-  mainModelProvider:   { type: 'string',  default: 'openai' },
-  mainModelName:       { type: 'string',  default: 'gpt-4.1' },
-
-  expertModelProvider: { type: 'string',  default: 'openai' },
-  expertModelName:     { type: 'string',  default: 'o3' },
-
-  usePuppeteer:        { type: 'boolean', default: true },
-  googleCseId:         { type: 'string',  default: '' },
+  // ---------- Web tab ----------
+  usePuppeteer:         { type: 'boolean', default: true },
+  googleCseId:          { type: 'string',  default: '' },
   googleApiKey:         { type: 'string',  default: '' },
 
   // ---------- Security tab ----------
@@ -120,10 +115,19 @@ router.get('/', (_req, res) => {
   }
 });
 
-// GET /api/settings/schema - return the schema definition
+// GET /api/settings/schema - return the schema definition and provider types
 router.get('/schema', (_req, res) => {
   try {
-    res.json(SETTINGS_SCHEMA);
+    // Get available provider types from providers/index.js
+    const providerTypes = Object.keys(providers).map(key => ({
+      name: key,
+      type: key
+    }));
+    
+    res.json({
+      schema: SETTINGS_SCHEMA,
+      providerTypes
+    });
   } catch (err) {
     console.error('Error reading settings schema:', err);
     res.status(500).json({ error: 'Failed to load settings schema' });
