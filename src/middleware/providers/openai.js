@@ -4,6 +4,109 @@ import OpenAI from "openai";
 import store from "../../db/store.js";
 
 /** @type {LLMProvider} */
+
+/**
+ * expected options format:
+ *
+ * {
+ *   "model": "modelname",
+ *   "messages": [
+ *     {
+ *       "role": "system",
+ *       "content": ""
+ *     },
+ *     {
+ *       "role": "user",
+ *       "content": [
+ *         {
+ *           "type": "text",
+ *           "text": "Text"
+ *         },
+ *         {
+ *           "type": "image_url",
+ *           "image_url": {
+ *             // always base64: "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD..."
+ *           }
+ *         }
+ *       ]
+ *     }
+ *   ],
+ *   "tools": [
+ *     {
+ *       "type": "function",
+ *       "function": {
+ *         "name": "name",
+ *         "description": "description of the function",
+ *         "parameters": {
+ *           "type": "object",
+ *           "properties": {
+ *             "param_name": {
+ *               "type": "string",
+ *               "description": "description"
+ *             }
+ *           },
+ *           "required": ["param_name"]
+ *         }
+ *       }
+ *     }
+ *   ],
+ *   "tool_choice": "auto",
+ *   "temperature": 0.7,
+ *   "stream": false,
+ *   "max_tokens": 1024,
+ * }
+ *
+ */
+
+
+/**
+ * expected response format:
+ *
+ * {
+ *   "id": "chatcmpl-abc123",
+ *   "object": "chat.completion",
+ *   "created": 1689377102,
+ *   "model": "gpt-4-vision-preview",
+ *   "choices": [
+ *     {
+ *       "index": 0,
+ *       "message": {
+ *         "role": "assistant",
+ *         "content": "This is a photo of a cat sitting on a windowsill.",
+ *         "tool_calls": [
+ *           {
+ *             "id": "call_abc123",
+ *             "type": "function",
+ *             "function": {
+ *               "name": "extract_face_info",
+ *               "arguments": "{ \"face_id\": \"face_1\" }"
+ *             }
+ *           }
+ *         ]
+ *       },
+ *       "finish_reason": "tool_calls" // or "stop", "length", "content_filter"
+ *     }
+ *   ],
+ *   "usage": {
+ *     "prompt_tokens": 1024,
+ *     "completion_tokens": 105,
+ *     "total_tokens": 1129
+ *   },
+ *   "system_fingerprint": "fp_xyz456"
+ * }
+ *
+ */
+
+function processOptions(options) {
+    // our standard is already /v1/chat/completions so no change needed for openai.js provider
+    return  options;
+}
+
+function processResponse(response) {
+    // our standard is already /v1/chat/completions so no change needed for openai.js provider
+    return response;
+}
+
 export default {
     name: 'openai',
 
