@@ -17,8 +17,7 @@ const providerEditModal = document.getElementById('provider-edit-modal');
 const providerEditTitle = document.getElementById('provider-edit-title');
 const providerNameInput = document.getElementById('providerName');
 const providerTypeSelect = document.getElementById('providerType');
-const providerApiKeyInput = document.getElementById('providerApiKey');
-const providerApiUrlInput = document.getElementById('providerApiUrl');
+const providerSpecificSettingsContainer = document.getElementById('provider-specific-settings');
 const providerEditCancelButton = document.getElementById('provider-edit-cancel');
 const providerEditSaveButton = document.getElementById('provider-edit-save');
 const addProviderButton = document.querySelector('.add-provider-btn');
@@ -43,6 +42,8 @@ const enableWebAccessCheckbox = document.getElementById('enableWebAccess');
 // Store settings data
 let settingsData = {};
 let providerTypes = [];
+// Map of provider type to settings array
+let providerTypeSettings = {};
 // Global models data that persists between UI operations
 let globalModelsData = null;
 
@@ -140,10 +141,15 @@ export async function showSettingsModal() {
     setLoadingState(true);
 
     try {
-        // Get schema data (includes provider types)
+        // Get schema data (includes provider types and their settings)
         const schemaData = await api.loadSettingsSchema();
         if (schemaData.providerTypes) {
             providerTypes = schemaData.providerTypes;
+            // Build map of provider type to settings
+            providerTypeSettings = {};
+            providerTypes.forEach(provider => {
+                providerTypeSettings[provider.type] = provider.settings || [];
+            });
             updateProviderTypeOptions();
         }
         
@@ -370,7 +376,8 @@ function populateProvidersList(providers) {
                     name: provider.name,
                     type: provider.type,
                     apiKey: provider.options?.apiKey || '',
-                    apiUrl: provider.options?.url || ''
+                    apiUrl: provider.options?.url || '',
+                    options: provider.options || {}
                 });
             }
         });
@@ -592,16 +599,15 @@ function showProviderEditModal(providerData = null) {
     }
     
     if (providerTypeSelect) {
-        providerTypeSelect.value = providerData ? providerData.type : (providerTypeSelect.options.length > 0 ? providerTypeSelect.options[0].value : 'openai');
-    }
-    
-    if (providerApiKeyInput) {
-        providerApiKeyInput.value = providerData ? providerData.apiKey : '';
-        // Don't change type - it's already a text field in the HTML
-    }
-    
-    if (providerApiUrlInput) {
-        providerApiUrlInput.value = providerData ? providerData.apiUrl : '';
+        const providerType = providerData ? providerData.type : (providerTypeSelect.options.length > 0 ? providerTypeSelect.options[0].value : 'openai');
+        providerTypeSelect.value = providerType;
+        // Update dynamic settings fields based on provider type
+        updateProviderSpecificSettings(providerType, providerData ? providerData.options : {});
+        
+        // Add change listener to update fields when provider type changes
+        providerTypeSelect.addEventListener('change', function() {
+            updateProviderSpecificSettings(this.value, {});
+        });
     }
     
     // Update save button event handler
@@ -620,12 +626,10 @@ function showProviderEditModal(providerData = null) {
  * Saves the provider data from the edit modal
  */
 function saveProviderData() {
-    if (!providerNameInput || !providerTypeSelect || !providerApiKeyInput || !providerApiUrlInput) return;
+    if (!providerNameInput || !providerTypeSelect) return;
     
     const name = providerNameInput.value.trim();
     const type = providerTypeSelect.value;
-    const apiKey = providerApiKeyInput.value;
-    const apiUrl = providerApiUrlInput.value.trim();
     const originalName = providerNameInput.dataset.originalName || '';
     
     // Validate name
@@ -651,15 +655,21 @@ function saveProviderData() {
         return;
     }
     
-    // Create provider object
+    // Create provider object with empty options
     const provider = {
         name,
         type,
-        options: {
-            apiKey,
-            url: apiUrl
-        }
+        options: {}
     };
+    
+    // Add all settings from provider-specific fields
+    const settings = providerTypeSettings[type] || [];
+    settings.forEach(setting => {
+        const input = document.getElementById(`provider-setting-${setting}`);
+        if (input) {
+            provider.options[setting] = input.value;
+        }
+    });
     
     console.log('Saving provider with options:', provider.options);
     
@@ -691,6 +701,41 @@ function saveProviderData() {
     
     // Close modal
     closeProviderEditModal();
+}
+
+/**
+ * Updates the provider-specific settings fields based on the selected provider type
+ * @param {string} providerType - The selected provider type
+ * @param {object} currentValues - Current values for the fields, if any
+ */
+function updateProviderSpecificSettings(providerType, currentValues = {}) {
+    if (!providerSpecificSettingsContainer) return;
+    
+    // Clear existing fields
+    providerSpecificSettingsContainer.innerHTML = '';
+    
+    // Get settings for this provider type
+    const settings = providerTypeSettings[providerType] || [];
+    
+    // Create a field for each setting
+    settings.forEach(setting => {
+        const formGroup = document.createElement('div');
+        formGroup.className = 'settings-form-group';
+        
+        const label = document.createElement('label');
+        label.setAttribute('for', `provider-setting-${setting}`);
+        label.textContent = setting.charAt(0).toUpperCase() + setting.slice(1); // Capitalize first letter
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `provider-setting-${setting}`;
+        input.placeholder = `Enter ${setting}`;
+        input.value = currentValues[setting] || '';
+        
+        formGroup.appendChild(label);
+        formGroup.appendChild(input);
+        providerSpecificSettingsContainer.appendChild(formGroup);
+    });
 }
 
 /**

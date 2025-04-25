@@ -99,24 +99,12 @@
             <div class="settings-form-group">
                 <label for="providerType">Provider Type</label>
                 <select id="providerType">
-                    <option value="openai">openai</option>
-                    <option value="gemini">gemini</option>
-                    <option value="anthropic">anthropic</option>
-                    <option value="ollama">ollama</option>
-                    <option value="bedrock">bedrock</option>
-                    <option value="vertex.ai">vertex.ai</option>
+                    <!-- Provider types will be populated dynamically by JS -->
                 </select>
             </div>
 
-            <div class="settings-form-group">
-                <label for="providerApiKey">API Key</label>
-                <input type="text" id="providerApiKey" placeholder="Enter API key" />
-            </div>
-            
-            <div class="settings-form-group">
-                <label for="providerApiUrl">API URL (Optional)</label>
-                <input type="text" id="providerApiUrl" placeholder="Custom endpoint URL (if needed)" />
-            </div>
+            <!-- Dynamic provider-specific settings will be added here -->
+            <div id="provider-specific-settings"></div>
         </div>
         
         <div class="modal-footer">

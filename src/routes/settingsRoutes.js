@@ -118,10 +118,11 @@ router.get('/', (_req, res) => {
 // GET /api/settings/schema - return the schema definition and provider types
 router.get('/schema', (_req, res) => {
   try {
-    // Get available provider types from providers/index.js
+    // Get available provider types and their settings from providers/index.js
     const providerTypes = Object.keys(providers).map(key => ({
       name: key,
-      type: key
+      type: key,
+      settings: providers[key].settings || []
     }));
     
     res.json({
