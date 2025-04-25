@@ -699,7 +699,8 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
         });
 
         // 6. Combine messages for LLM call
-        const messagesForLLM = systemAndContextMessages.concat(persistentHistory).concat(userMessageForLLM);
+        //const messagesForLLM = systemAndContextMessages.concat(persistentHistory).concat(userMessageForLLM);
+        const messagesForLLM = systemAndContextMessages.concat(persistentHistory);
 
         // 7. Prepare tools registry
         const { createToolRegistry, getAllToolNames } = await import('../../../tools/index.js');
