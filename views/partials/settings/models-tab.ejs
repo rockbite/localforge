@@ -6,7 +6,10 @@
             <div class="provider-types-list">
                 <span class="provider-type-badge">openai</span>
                 <span class="provider-type-badge">gemini</span>
-                <!-- Can add more provider types here -->
+                <span class="provider-type-badge">anthropic</span>
+                <span class="provider-type-badge">ollama</span>
+                <span class="provider-type-badge">bedrock</span>
+                <span class="provider-type-badge">vertex.ai</span>
             </div>
             <div class="settings-note">
                 <div class="note-icon"><span class="material-icons">info</span></div>
@@ -131,7 +134,7 @@
 </div>
 
 <!-- Provider Edit Modal (hidden initially, would be shown when editing a provider) -->
-<div id="provider-edit-modal" class="modal" style="display: none;">
+<div id="provider-edit-modal" class="modal">
     <div class="modal-content provider-edit-modal-content">
         <h3>
             <span class="material-icons">settings</span>
@@ -149,12 +152,21 @@
                 <select id="providerType">
                     <option value="openai">openai</option>
                     <option value="gemini">gemini</option>
+                    <option value="anthropic">anthropic</option>
+                    <option value="ollama">ollama</option>
+                    <option value="bedrock">bedrock</option>
+                    <option value="vertex.ai">vertex.ai</option>
                 </select>
             </div>
             
             <div class="settings-form-group">
                 <label for="providerApiKey">API Key</label>
-                <input type="password" id="providerApiKey" placeholder="Enter API key" />
+                <div class="key-input-wrapper">
+                    <input type="password" id="providerApiKey" placeholder="Enter API key" />
+                    <button type="button" class="toggle-password" title="Toggle password visibility">
+                        <span class="material-icons">visibility_off</span>
+                    </button>
+                </div>
             </div>
             
             <div class="settings-form-group">

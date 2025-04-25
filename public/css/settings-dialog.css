@@ -167,10 +167,39 @@
 .provider-edit-modal-content {
     max-width: 500px;
     width: 90%;
+    background-color: var(--secondary-bg) !important;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    animation: provider-modal-fade-in 0.3s ease-out;
+}
+
+@keyframes provider-modal-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .provider-edit-form {
     padding: 16px 0;
+}
+
+.provider-edit-modal-content h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    margin: 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 18px;
+}
+
+.provider-edit-modal-content .material-icons {
+    color: #40A2E3;
 }
 
 /* Web tab */
@@ -564,6 +593,13 @@
 
 .toggle-password .material-icons {
     font-size: 20px; /* Icon size */
+}
+
+/* Modal active state */
+.modal.active {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Settings Modal Footer */

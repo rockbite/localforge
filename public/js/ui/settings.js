@@ -12,6 +12,18 @@ const settingsCancelButton = document.getElementById('settings-cancel');
 const settingsTabs = document.querySelectorAll('.settings-tab');
 const settingsTabContents = document.querySelectorAll('.settings-tab-content');
 
+// Provider edit modal elements
+const providerEditModal = document.getElementById('provider-edit-modal');
+const providerEditTitle = document.getElementById('provider-edit-title');
+const providerNameInput = document.getElementById('providerName');
+const providerTypeSelect = document.getElementById('providerType');
+const providerApiKeyInput = document.getElementById('providerApiKey');
+const providerApiUrlInput = document.getElementById('providerApiUrl');
+const providerEditCancelButton = document.getElementById('provider-edit-cancel');
+const providerEditSaveButton = document.getElementById('provider-edit-save');
+const addProviderButton = document.querySelector('.add-provider-btn');
+const editProviderButtons = document.querySelectorAll('.edit-provider');
+
 // Input field elements
 const openaiApiKeyInput = document.getElementById('openaiApiKey');
 const mainModelProviderSelect = document.getElementById('mainModelProvider');
@@ -69,7 +81,75 @@ export function initSettingsDialog() {
         settingsModal.classList.remove('active');
     });
 
+    // Provider edit modal functionality
+    initProviderEditModal();
+
     console.log("Settings dialog initialized.");
+}
+
+/**
+ * Initializes the provider edit modal functionality
+ */
+function initProviderEditModal() {
+    // Initialize password toggle functionality
+    const togglePasswordButton = document.querySelector('.toggle-password');
+    if (togglePasswordButton) {
+        togglePasswordButton.addEventListener('click', function() {
+            const passwordInput = this.parentElement.querySelector('input');
+            const iconElement = this.querySelector('.material-icons');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                iconElement.textContent = 'visibility';
+            } else {
+                passwordInput.type = 'password';
+                iconElement.textContent = 'visibility_off';
+            }
+        });
+    }
+
+    // Add provider button functionality
+    if (addProviderButton) {
+        addProviderButton.addEventListener('click', function() {
+            showProviderEditModal();
+        });
+    }
+
+    // Edit provider buttons functionality
+    if (editProviderButtons) {
+        editProviderButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const providerItem = this.closest('.provider-item');
+                const providerName = providerItem.querySelector('.provider-name').textContent;
+                const providerType = providerItem.querySelector('.provider-type-label').textContent;
+                
+                // Mock data for demonstration purposes only
+                const mockProviderData = {
+                    name: providerName,
+                    type: providerType,
+                    apiKey: '********',
+                    apiUrl: 'https://api.example.com/v1'
+                };
+                
+                showProviderEditModal(mockProviderData);
+            });
+        });
+    }
+
+    // Provider edit modal buttons
+    if (providerEditCancelButton) {
+        providerEditCancelButton.addEventListener('click', function() {
+            closeProviderEditModal();
+        });
+    }
+
+    if (providerEditSaveButton) {
+        providerEditSaveButton.addEventListener('click', function() {
+            // In a real implementation, this would save the provider data
+            // For demo purposes, we'll just close the modal
+            closeProviderEditModal();
+        });
+    }
 }
 
 /**
@@ -209,4 +289,52 @@ function setLoadingState(isLoading) {
         // Ensure save button state is correct after loading finishes
         if (!isLoading && settingsSaveButton) settingsSaveButton.disabled = false;
     }
+}
+
+/**
+ * Shows the provider edit modal, optionally with pre-filled data
+ * @param {Object} providerData - Optional provider data to pre-fill the form
+ */
+function showProviderEditModal(providerData = null) {
+    if (!providerEditModal) return;
+    
+    // Update modal title based on mode
+    if (providerEditTitle) {
+        providerEditTitle.textContent = providerData ? 'Edit Provider' : 'Add Provider';
+    }
+    
+    // Clear or pre-fill form fields
+    if (providerNameInput) {
+        providerNameInput.value = providerData ? providerData.name : '';
+    }
+    
+    if (providerTypeSelect) {
+        providerTypeSelect.value = providerData ? providerData.type : 'openai';
+    }
+    
+    if (providerApiKeyInput) {
+        providerApiKeyInput.value = providerData ? providerData.apiKey : '';
+        providerApiKeyInput.type = 'password'; // Always reset to password type
+        
+        // Reset visibility icon if exists
+        const visibilityIcon = providerEditModal.querySelector('.toggle-password .material-icons');
+        if (visibilityIcon) {
+            visibilityIcon.textContent = 'visibility_off';
+        }
+    }
+    
+    if (providerApiUrlInput) {
+        providerApiUrlInput.value = providerData ? providerData.apiUrl : '';
+    }
+    
+    // Show the modal with active class for animation
+    providerEditModal.classList.add('active');
+}
+
+/**
+ * Closes the provider edit modal
+ */
+function closeProviderEditModal() {
+    if (!providerEditModal) return;
+    providerEditModal.classList.remove('active');
 }
