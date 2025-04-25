@@ -114,9 +114,15 @@ export default {
      * /v1/chat/completions
      * Azure OpenAI, DeepSeek, Groq Cloud, Anyscale Endpoints, Fireworks, Together, Mistral API, Perplexity, OpenRouter, etc.
      */
-    async chat(options) {
-        let client = new OpenAI({ apiKey: store.getSetting('openaiApiKey') });
+    async chat(options, providerOptions) {
+        let init = { apiKey:  providerOptions.apiKey }
+        if(providerOptions.apiUrl) {
+            init.baseUrl = providerOptions.apiUrl;
+        }
 
+        let client = new OpenAI(init);
+
+        // this needs this weird api change for whoever knows why
         if (options.model === 'o4-mini') {
             options.max_completion_tokens = options.max_tokens;
             delete options.max_tokens;

@@ -535,7 +535,7 @@ async function saveSettings() { // Internal helper, called by save button listen
         const settings = collectSettingsFromForm();
         await api.saveSettingsToServer(settings);
         settingsModal.classList.remove('active');
-        addAgentMessage("✅ Settings saved successfully.");
+        addAgentMessage("Settings saved successfully.");
     } catch (error) {
         console.error('Error saving settings:', error);
         alert(`Error saving settings: ${error.message}`);

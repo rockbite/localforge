@@ -79,7 +79,7 @@
 
 #working-dir .material-icons,
 #model-info .material-icons {
-    margin-right: 8px;
+    margin-right: 0px;
     font-size: 18px;
     color: #ff715b; /* Use start gradient color for icons */
     flex-shrink: 0;

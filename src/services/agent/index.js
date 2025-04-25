@@ -67,7 +67,6 @@ async function getEnvironmentInfo(workDir) {
     let isGitRepo = false;
     let platform = process.platform;
     const today = new Date().toLocaleDateString();
-    const model = "gpt-4-turbo"; // Mocked - in production this would be dynamically determined
     
     try {
         // Only check git status if directory is provided
@@ -86,7 +85,6 @@ Working directory: ${workDir ? cwd : 'Not set'}
 Is directory a git repo: ${isGitRepo ? 'Yes' : 'No'}
 Platform: ${platform}
 Today's date: ${today}
-Model: ${model}
 </env>`;
 }
 
@@ -263,6 +261,7 @@ async function detectTopic(message) {
         });
         
         try {
+            response.content = response.content?.trim() ?? '';
             response.content = response.content.startsWith("```json") && response.content.endsWith("```") ? response.content.slice(7, -3) : response.content;
             const result = JSON.parse(response.content);
             return result;
@@ -499,6 +498,7 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
                 console.log(`Tool execution completed for ${call.function.name}`);
                 
                 // Add the tool result to the messages list
+                // TODO: this is sus..
                 loopMessages.push({
                     role: 'tool',
                     tool_call_id: call.id,

@@ -1,5 +1,6 @@
 // llm.js
 import providers from './providers/index.js';
+import store from "../db/store.js";
 
 let MAIN_MODEL = 0;
 let AUX_MODEL = 1;
@@ -7,28 +8,28 @@ let EXPERT_MODEL = 2;
 
 
 export async function callLLMByType(modelType, options) {
-    let providerName = getProviderNameByType(modelType);
     options.model = getModelNameByType(modelType);
-
-    return callLLMProvider(providerName, options);
+    return callLLMProvider(numToStringModelConfigNameMap(modelType), options);
 }
 
-export function getModelNameByType(modelType) {
-    //TODO: take this from settings
-    let model = "gpt-4.1.-mini";
-    if(modelType === AUX_MODEL) {
-        model = 'gpt-4.1-mini'
-    } else if(modelType === MAIN_MODEL) {
-        model = 'gpt-4.1';
-    } else if(modelType === EXPERT_MODEL) {
-        model = 'o3'
-    }
-    return model;
+function numToStringModelConfigNameMap(number) {
+    if(number === EXPERT_MODEL) return `expert`;
+    if(number === MAIN_MODEL) return `main`;
+    return `aux`;
 }
 
 export function getProviderNameByType(modelType) {
-    //TODO: take this from settings
-    return 'openai';
+    const config = store.getModelConfigFor(numToStringModelConfigNameMap(modelType));
+    return config.provider.name;
+}
+
+export function getModelNameByType(modelType) {
+    const config = store.getModelConfigFor(numToStringModelConfigNameMap(modelType));
+    return config.model;
+}
+
+function getProviderTypeByProviderName(providerName) {
+
 }
 
 
@@ -38,7 +39,11 @@ export function getProviderNameByType(modelType) {
  * @param {object} opts  e.g. { model: 'gpt-4o-mini', temperature: 0.7 }
  */
 export async function callLLMProvider(providerName, options) {
-    const provider = providers[providerName];
+    const modelConfig = store.getModelConfigFor(providerName);
+    let providerType = modelConfig.provider.type;
+    let providerOptions = modelConfig.provider.options;
+
+    const provider = providers[providerType];
 
     // check our custom options
     if (options.signal?.aborted) {
@@ -60,7 +65,7 @@ export async function callLLMProvider(providerName, options) {
     }
 
     try {
-        const res = await provider.chat(options);
+        const res = await provider.chat(options, providerOptions);
 
         const msg = res.choices[0].message;
         const out = {
