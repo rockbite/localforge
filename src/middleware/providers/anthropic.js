@@ -173,7 +173,7 @@ function processResponse(res) {
 /* ───────────── Provider ───────────── */
 export default {
     name: 'anthropic',
-
+    settings: ['apiKey'],
     /**
      * /v1/messages
      */

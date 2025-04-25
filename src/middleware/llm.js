@@ -94,7 +94,7 @@ export async function callLLMProvider(providerName, options) {
 
     } catch (err) {
         console.error(`[llm] ${provider.name} failed:`, err.message);
-        return { role: 'assistant', content: `OpenAI error: ${err.message}` };
+        return { role: 'assistant', content: `LLM error: ${err.message}` };
     }
 }
 

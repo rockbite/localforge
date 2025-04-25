@@ -18,7 +18,7 @@ const toGeminiType = t => {
     }
 };
 
-const sanitizeSchema = s => {
+const sanitizeGeminiSchema = s => {
     if (!s || typeof s !== 'object') return s;
 
     const clean = {
@@ -28,17 +28,17 @@ const sanitizeSchema = s => {
 
     if (s.properties) {
         clean.properties = Object.fromEntries(
-            Object.entries(s.properties).map(([k, v]) => [k, sanitizeSchema(v)]),
+            Object.entries(s.properties).map(([k, v]) => [k, sanitizeGeminiSchema(v)]),
         );
     }
-    if (s.items) clean.items = sanitizeSchema(s.items);   // array item schema
+    if (s.items) clean.items = sanitizeGeminiSchema(s.items);   // array item schema
 
     // note: deliberately dropping `required`, `additionalProperties`, etc.
     return clean;
 };
 
 /* ────────────────────────── Helpers ────────────────────────── */
-function processOptions(options) {
+function processGeminiOptions(options) {
 
     let config = {
         thinkingConfig: {
@@ -62,7 +62,7 @@ function processOptions(options) {
             .map(({ function: fn }) => ({
                 name:        fn.name,
                 description: fn.description || '',
-                parameters:  sanitizeSchema(fn.parameters),
+                parameters:  sanitizeGeminiSchema(fn.parameters),
             }));
 
         config.tools = functionDeclarations.length
@@ -164,7 +164,7 @@ function openaiToGeminiMessages(messages) {
 
 // Convert a Gemini response (either the SDK wrapper or raw JSON)
 // into the OpenAI chat-completion JSON shape.
-function processResponse(res) {
+function processGeminiResponse(res) {
     const raw     = res.response ?? res;           // SDK wraps payload in .response
     const created = Math.floor(Date.now() / 1000); // OpenAI uses seconds
 
@@ -245,6 +245,7 @@ function processResponse(res) {
 /* ────────────────────────── Provider ────────────────────────── */
 export default {
     name: 'gemini',
+    settings: ['apiKey'],
 
     async chat(options, providerOptions) {
         let model = options.model;
@@ -253,7 +254,7 @@ export default {
             apiKey: providerOptions.apiKey,
         });
 
-        const { contents, config } = processOptions(options);
+        const { contents, config } = processGeminiOptions(options);
 
         const res = await client.models.generateContent({
             model,
@@ -261,6 +262,10 @@ export default {
             contents
         });
 
-        return processResponse(res);
+        return processGeminiResponse(res);
     },
 };
+
+export {
+    toGeminiType, sanitizeGeminiSchema, processGeminiOptions, processGeminiResponse, openaiToGeminiMessages
+}

@@ -109,6 +109,7 @@ function processResponse(response) {
 
 export default {
     name: 'openai',
+    settings: ['apiKey', 'apiUrl'],
 
     /**
      * /v1/chat/completions

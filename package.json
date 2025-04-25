@@ -28,6 +28,7 @@
   "description": "Localforge - Local AI dev assistant",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@google-cloud/vertexai": "^1.10.0",
     "@google/genai": "^0.8.0",
     "@mozilla/readability": "^0.6.0",
     "@shoelace-style/shoelace": "^2.12.0",
