@@ -22,14 +22,15 @@ npm install
 npm run start
 ```
 
-## Download
+## Or better yet - Use NPM install
 
-* **macOS** – [`Localforge.dmg`](https://github.com/rockbite/localforge/releases/latest/download/Localforge.dmg)
+```bash
+npm i -g @rockbite/localforge</code>
+```
 
 ## Setup
 
 1. **Launch Localforge**  
-   • **DMG** – *Applications ▸ Localforge*  
    • **CLI** – `localforge`
 
 2. **Open Settings** (top-right) and add your credentials:
