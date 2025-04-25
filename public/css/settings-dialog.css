@@ -1,4 +1,182 @@
 /* Settings Dialog Specific Styles */
+
+/* Provider type badges */
+.provider-types-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.provider-type-badge {
+    background-color: rgba(30, 30, 30, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--text-color);
+    display: inline-block;
+}
+
+/* Provider section header */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* Provider list with fixed height scroll */
+.providers-list-wrapper {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: rgba(25, 25, 25, 0.3);
+    margin-bottom: 10px;
+}
+
+.providers-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.provider-item {
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(60, 60, 60, 0.3);
+}
+
+.provider-item:last-child {
+    border-bottom: none;
+}
+
+.provider-header {
+    display: flex;
+    align-items: center;
+}
+
+.provider-name {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text-color);
+    flex: 1;
+}
+
+.provider-info {
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
+}
+
+.provider-type-label {
+    font-size: 11px;
+    color: var(--secondary-text);
+    background-color: rgba(40, 40, 40, 0.5);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.provider-actions {
+    display: flex;
+    gap: 2px;
+}
+
+.mini-button {
+    background: none;
+    border: none;
+    color: var(--secondary-text);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-button:hover {
+    color: var(--text-color);
+    background-color: rgba(60, 60, 60, 0.5);
+}
+
+.mini-button .material-icons {
+    font-size: 15px;
+}
+
+.add-provider-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: fit-content;
+    margin-left: auto;
+}
+
+.add-provider-btn .material-icons {
+    font-size: 14px;
+}
+
+.add-provider-btn .material-icons {
+    font-size: 16px;
+}
+
+/* LLM Configurations Grid */
+.llm-configs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.llm-config-card {
+    background-color: rgba(30, 30, 30, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.llm-config-header {
+    background-color: rgba(40, 40, 40, 0.7);
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.llm-config-body {
+    padding: 10px;
+}
+
+.llm-config-body .settings-form-group.compact {
+    margin-bottom: 6px;
+}
+
+.llm-config-body .settings-form-group.compact:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive adjustment for small screens */
+@media (max-width: 700px) {
+    .llm-configs-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Provider edit modal */
+.provider-edit-modal-content {
+    max-width: 500px;
+    width: 90%;
+}
+
+.provider-edit-form {
+    padding: 16px 0;
+}
+
+/* Web tab */
+#web-tab .settings-section {
+    margin-top: 12px;
+}
 .settings-modal-content {
     width: 95%;
     max-width: 700px; /* Wider modal for settings */
@@ -88,14 +266,11 @@
 /* .content-scroll-area { ... } */
 
 .settings-section {
-    margin-bottom: 24px; /* More space between sections */
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 6px; /* More space between sections */
+    padding-bottom: 8px;
 }
 
 .settings-section.compact {
-    padding-bottom: 16px; /* Slightly more padding to create better spacing */
-    margin-bottom: 16px; /* Increase section spacing */
     padding-left: 0; /* No extra padding */
 }
 
@@ -183,7 +358,7 @@
     background-color: rgba(227, 122, 3, 0.07); /* Very transparent orange */
     border-radius: 6px;
     padding: 8px 12px;
-    margin-bottom: 16px;
+    margin-bottom: 5px;
     border-left: 3px solid rgba(227, 122, 3, 0.4); /* Orange border */
 }
 

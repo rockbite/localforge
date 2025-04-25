@@ -1,68 +1,171 @@
 <div class="settings-tab-content" id="models-tab" style="visibility:visible; position:relative; z-index:1">
     <div class="content-scroll-area">
+        <!-- Provider Types Section -->
         <div class="settings-section compact">
-            <div class="model-row-label section-title">OpenAI API Key</div>
-            <div class="key-input-wrapper">
-                <input type="text" id="openaiApiKey" placeholder="sk-..." />
+            <div class="model-row-label section-title">Available Provider Types</div>
+            <div class="provider-types-list">
+                <span class="provider-type-badge">openai</span>
+                <span class="provider-type-badge">gemini</span>
+                <!-- Can add more provider types here -->
+            </div>
+            <div class="settings-note">
+                <div class="note-icon"><span class="material-icons">info</span></div>
+                <div class="note-text">Recommended setup: o3 or gemini 2.5 for expert, gpt-4.1 for main, and gpt-4.1-mini for aux)</div>
             </div>
         </div>
         
-        <div class="settings-note">
-            <div class="note-icon"><span class="material-icons">info</span></div>
-            <div class="note-text">Model and provider selection customization coming soon</div>
-        </div>
-        
+        <!-- Providers Configuration Section -->
         <div class="settings-section compact">
-            <div class="model-row compact">
-                <div class="model-row-label">Main Model</div>
-                <div class="model-controls">
-                    <div class="settings-form-group inline">
-                        <select id="mainModelProvider" title="Provider" disabled>
-                            <option value="openai">OpenAI</option>
-                        </select>
+            <div class="section-header">
+                <div class="model-row-label section-title">Your Provider List</div>
+                <button class="btn secondary add-provider-btn">
+                    <span class="material-icons">add</span> Add
+                </button>
+            </div>
+            
+            <div class="providers-list-wrapper">
+                <div class="providers-list">
+                    <!-- Example provider -->
+                    <div class="provider-item">
+                        <div class="provider-header">
+                            <span class="provider-name">OpenAI Default</span>
+                            <div class="provider-info">
+                                <span class="provider-type-label">openai</span>
+                            </div>
+                            <div class="provider-actions">
+                                <button class="mini-button edit-provider" title="Edit"><span class="material-icons">edit</span></button>
+                                <button class="mini-button delete-provider" title="Delete"><span class="material-icons">delete</span></button>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="settings-form-group inline">
-                        <input type="text" id="mainModelName" placeholder="Model name (e.g. gpt-4.1)" value="gpt-4.1" title="Model Name" readonly />
+                    <!-- Example provider 2 -->
+                    <div class="provider-item">
+                        <div class="provider-header">
+                            <span class="provider-name">Gemini Pro</span>
+                            <div class="provider-info">
+                                <span class="provider-type-label">gemini</span>
+                            </div>
+                            <div class="provider-actions">
+                                <button class="mini-button edit-provider" title="Edit"><span class="material-icons">edit</span></button>
+                                <button class="mini-button delete-provider" title="Delete"><span class="material-icons">delete</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Add more example providers if needed -->
+                    <div class="provider-item">
+                        <div class="provider-header">
+                            <span class="provider-name">Ollama Local</span>
+                            <div class="provider-info">
+                                <span class="provider-type-label">openai</span>
+                            </div>
+                            <div class="provider-actions">
+                                <button class="mini-button edit-provider" title="Edit"><span class="material-icons">edit</span></button>
+                                <button class="mini-button delete-provider" title="Delete"><span class="material-icons">delete</span></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+        
+        <!-- LLM Configurations Section -->
+        <div class="settings-section compact">
+            <div class="model-row-label section-title">LLM Configurations</div>
             
-            <div class="model-row compact">
-                <div class="model-row-label">Expert Model</div>
-                <div class="model-controls">
-                    <div class="settings-form-group inline">
-                        <select id="expertModelProvider" title="Provider" disabled>
-                            <option value="openai">OpenAI</option>
-                        </select>
+            <div class="llm-configs-grid">
+                <!-- Aux Model -->
+                <div class="llm-config-card">
+                    <div class="llm-config-header">Aux Model</div>
+                    <div class="llm-config-body">
+                        <div class="settings-form-group compact">
+                            <select id="auxModelProvider" title="Provider">
+                                <option value="">Select Provider</option>
+                                <option value="openai-default">OpenAI Default</option>
+                                <option value="gemini-pro">Gemini Pro</option>
+                            </select>
+                        </div>
+                        <div class="settings-form-group compact">
+                            <input type="text" id="auxModelName" placeholder="Model name (e.g. gpt-3.5)" />
+                        </div>
                     </div>
-                    
-                    <div class="settings-form-group inline">
-                        <input type="text" id="expertModelName" placeholder="Model name (e.g. o3)" value="o3" title="Model Name" readonly />
+                </div>
+                
+                <!-- Main Model -->
+                <div class="llm-config-card">
+                    <div class="llm-config-header">Main Model</div>
+                    <div class="llm-config-body">
+                        <div class="settings-form-group compact">
+                            <select id="mainModelProvider" title="Provider">
+                                <option value="">Select Provider</option>
+                                <option value="openai-default">OpenAI Default</option>
+                                <option value="gemini-pro">Gemini Pro</option>
+                            </select>
+                        </div>
+                        <div class="settings-form-group compact">
+                            <input type="text" id="mainModelName" placeholder="Model name (e.g. gpt-4)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Expert Model -->
+                <div class="llm-config-card">
+                    <div class="llm-config-header">Expert Model</div>
+                    <div class="llm-config-body">
+                        <div class="settings-form-group compact">
+                            <select id="expertModelProvider" title="Provider">
+                                <option value="">Select Provider</option>
+                                <option value="openai-default">OpenAI Default</option>
+                                <option value="gemini-pro">Gemini Pro</option>
+                            </select>
+                        </div>
+                        <div class="settings-form-group compact">
+                            <input type="text" id="expertModelName" placeholder="Model name (e.g. claude-3)" />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="settings-section compact">
-            <div class="model-row-label section-title">Web Integration</div>
-            <div class="settings-form-group checkbox-group compact">
-                <label for="usePuppeteer">
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="usePuppeteer">
-                        <span class="custom-checkbox"></span>
-                    </div>
-                    <span>Use Puppeteer for web browsing</span>
-                </label>
-            </div>
-            
-            <div class="settings-form-group compact">
-                <input type="text" id="googleCseId" placeholder="Google CSE ID" />
+    </div>
+</div>
 
+<!-- Provider Edit Modal (hidden initially, would be shown when editing a provider) -->
+<div id="provider-edit-modal" class="modal" style="display: none;">
+    <div class="modal-content provider-edit-modal-content">
+        <h3>
+            <span class="material-icons">settings</span>
+            <span id="provider-edit-title">Edit Provider</span>
+        </h3>
+        
+        <div class="provider-edit-form">
+            <div class="settings-form-group">
+                <label for="providerName">Provider Name</label>
+                <input type="text" id="providerName" placeholder="e.g. My OpenAI Provider" />
             </div>
-            <div class="settings-form-group compact">
-                <input type="text" id="googleApiKey" placeholder="Google API Key" />
+            
+            <div class="settings-form-group">
+                <label for="providerType">Provider Type</label>
+                <select id="providerType">
+                    <option value="openai">openai</option>
+                    <option value="gemini">gemini</option>
+                </select>
             </div>
+            
+            <div class="settings-form-group">
+                <label for="providerApiKey">API Key</label>
+                <input type="password" id="providerApiKey" placeholder="Enter API key" />
+            </div>
+            
+            <div class="settings-form-group">
+                <label for="providerApiUrl">API URL (Optional)</label>
+                <input type="text" id="providerApiUrl" placeholder="Custom endpoint URL (if needed)" />
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" id="provider-edit-cancel" class="btn secondary">Cancel</button>
+            <button type="button" id="provider-edit-save" class="btn primary">Save Provider</button>
         </div>
     </div>
 </div>
