@@ -51,21 +51,28 @@ export async function callLLMProvider(providerName, options) {
         throw new Error('ABORT_ERR');
     }
 
-    // cleanup and sanitize here
-    if(options.signal) delete options.signal;
-    if(options.sessionId) delete options.sessionId;
-    if(options.responseCallback) delete options.responseCallback; // TODO: this whole signal and responseCallback is shade and need to be changed, probably wont work now
+    // Store params we'll need after the API call
+    const sessionId = options.sessionId;
+    const responseCallback = options.responseCallback;
+
+    // Create a cleaned copy of options for the provider
+    const cleanOptions = {...options};
+    
+    // Remove properties not expected by LLM providers
+    delete cleanOptions.signal;
+    delete cleanOptions.sessionId;
+    delete cleanOptions.responseCallback;
 
 
     //TODO: this is shade and should be looked at
-    options.messages = options.messages.map(message => preprocessMessageForLLM(message));
+    cleanOptions.messages = options.messages.map(message => preprocessMessageForLLM(message));
 
     if (!provider) {
         throw new Error(`No provider registered for name "${providerName}"`);
     }
 
     try {
-        const res = await provider.chat(options, providerOptions);
+        const res = await provider.chat(cleanOptions, providerOptions);
 
         const msg = res.choices[0].message;
         const out = {
@@ -75,19 +82,26 @@ export async function callLLMProvider(providerName, options) {
         };
 
         // Track token usage if sessionId is provided
-        if (options.sessionId) {
+        if (sessionId) {
             // TODO: this is old code that i wouldn't just trust, needs checking
-            const { estimateTokens } = await import('../agent/index.js');
-            const { projectSessionManager } = await import('../sessions/index.js');
+            const { estimateTokens } = await import('../services/agent/index.js');
+            const { projectSessionManager } = await import('../services/sessions/index.js');
 
             // Get token counts either from API response or estimate them
             const promptTokens = res?.usage?.prompt_tokens
-                ?? estimateTokens(JSON.stringify(options.messages));
+                ?? estimateTokens(JSON.stringify(cleanOptions.messages));
             const completionTokens = res?.usage?.completion_tokens
                 ?? estimateTokens(JSON.stringify(res.content || ''));
 
             // Add usage to session accounting through the manager
-            await projectSessionManager.addUsage(options.sessionId, options.model, promptTokens, completionTokens);
+            await projectSessionManager.addUsage(sessionId, cleanOptions.model, promptTokens, completionTokens);
+        }
+        
+        // Handle streaming updates if responseCallback is provided
+        if (responseCallback && out.content) {
+            responseCallback({
+                content: out.content
+            });
         }
 
         return out;
