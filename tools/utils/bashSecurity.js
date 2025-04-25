@@ -1,4 +1,3 @@
-import { callLLM } from '../../src/services/llm/index.js';
 import {callLLMByType} from "../../src/index.js";
 
 // Aux LLM prompt for bash command prefix detection
