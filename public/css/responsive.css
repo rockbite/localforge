@@ -46,7 +46,7 @@
     }
     /* Adjust footer height */
     :root {
-        --footer-height: 140px;
+        --footer-height: 300px;
     }
     footer {
         padding: 12px 16px;
@@ -145,7 +145,7 @@
 
     /* Adjust footer height */
     :root {
-        --footer-height: 100px;
+        --footer-height: 300px;
     }
     footer {
         padding: 12px 16px;
@@ -167,7 +167,7 @@
 /* Small mobile phones */
 @media (max-width: 480px) {
     :root {
-        --footer-height: 80px; /* Further reduce footer height */
+        --footer-height: 300px; /* Further reduce footer height */
     }
     footer {
         padding: 10px 12px; /* Reduce padding */

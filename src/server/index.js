@@ -46,18 +46,12 @@ import store from '../db/store.js';
     app.use('/api/settings', settingsRoutes.default);
 
     // Register settings change callbacks for various components that need to refresh
-    const { refreshOpenAIClient } = await import('../middleware/openai.js');
     const { refreshLLMSettings } = await import('../config/llm.js');
     
     // Register callbacks to refresh dependent components when settings change
     settingsRoutes.registerSettingsChangeCallback((changes) => {
         console.log('Settings changed:', Object.keys(changes).join(', '));
-        
-        // Refresh OpenAI client if API key changed
-        if (changes.openaiApiKey !== undefined) {
-            refreshOpenAIClient();
-        }
-        
+
         // Refresh LLM settings if model settings changed
         if (changes.mainModelName !== undefined || 
             changes.mainModelProvider !== undefined) {

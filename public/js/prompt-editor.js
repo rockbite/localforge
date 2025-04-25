@@ -437,13 +437,13 @@ class BlockEditor {
             h = Math.min(h, 200);
             ta.style.height = `${h}px`;
 
-            const connH = h + 27;
+            const connH = h + 7;
             topSeg.style.height = `${connH}px`;
-            addBtn.style.marginTop = `${connH - 2}px`;
+            addBtn.style.marginTop = `${connH}px`;
             textBtn.style.marginTop = '0';
-            bottomSeg.style.top = `${connH + 64}px`;
+            bottomSeg.style.top = `${connH + 61}px`;
             bottomSeg.style.display = i < els.length - 1 ? 'block' : 'none';
-            if (i < els.length - 1) bottomSeg.style.height = '6px';
+            if (i < els.length - 1) bottomSeg.style.height = '4px';
         });
     }
 

@@ -20,7 +20,7 @@
     --border-color: #333;
     --border-radius: 12px;
     --header-height: 64px;
-    --footer-height: 160px;
+    --footer-height: 300px;
     --tool-panel-width: 420px; /* Initial width, updated in responsive.css */
 
     /* Status colors */

@@ -1,8 +1,7 @@
-import OpenAI from 'openai';
-import { SETTINGS_SCHEMA } from "../../routes/settingsRoutes.js";
-import store from "../../db/store.js";
-import openai from "../../middleware/openai.js";
-import { MAIN_MODEL, AUX_MODEL, LLM_PROVIDER, refreshLLMSettings, sanitizeModelName } from "../../config/llm.js";
+//llm/index.js
+
+import { LLM_PROVIDER, sanitizeModelName } from "../../config/llm.js";
+import {llmChatCompletionsCall} from "../../middleware/openai.js";
 
 /**
  * Processes a message to make it compatible with the LLM API
@@ -57,6 +56,20 @@ function preprocessMessageForLLM(message) {
     return processedMessage;
 }
 
+
+export async function callLLMFinal(options) {
+
+    const { signal: optSignal, ...opts } = options;
+
+    if (options.signal) delete options.signal;
+    // Guarantee non-streaming
+    delete opts.stream;
+
+    // Finally make the call
+    return llmChatCompletionsCall(opts);
+}
+
+
 /**
  * Calls the selected LLM provider API with specified parameters
  * @param {Object} params - Parameters for the API call
@@ -87,9 +100,6 @@ async function callLLM({
     try {
         // Determine which provider to use (from parameter, environment variable, or default)
         const providerKey = provider || LLM_PROVIDER;
-        
-        // Get the middleware for the provider
-        const middleware = openai;
 
         // Preprocess messages for LLM consumption
         const processedMessages = messages.map(message => preprocessMessageForLLM(message));
@@ -134,7 +144,7 @@ async function callLLM({
         }
         
         // Call the middleware, passing signal and callback
-        const completion = await middleware.callLLM(apiOptions, responseCallback, signal);
+        const completion = await callLLMFinal(apiOptions, responseCallback, signal);
         
         // Check signal *after* call returns (important for non-streaming ignore)
         if (signal?.aborted) {
