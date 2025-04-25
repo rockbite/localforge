@@ -25,7 +25,7 @@ npm run start
 ## Or better yet - Use NPM install
 
 ```bash
-npm i -g @rockbite/localforge</code>
+npm i -g @rockbite/localforge
 ```
 
 ## Setup
