@@ -1,3 +1,5 @@
+// src/middleware/providers/openai.js
+
 import OpenAI from "openai";
 import store from "../../db/store.js";
 
@@ -20,11 +22,6 @@ export default {
 
         const res = await client.chat.completions.create(options);
 
-        const msg = res.choices[0].message;
-        return {
-            text: msg.content,
-            promptTokens: res.usage.prompt_tokens,
-            completionTokens: res.usage.completion_tokens,
-        };
+        return res;
     },
 };

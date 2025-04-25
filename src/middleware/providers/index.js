@@ -1,14 +1,27 @@
 // providers/index.js
-import fs from 'node:fs';
-import path from 'node:path';
+import { readdirSync } from 'node:fs';
+import { join, extname, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url); // -> /…/providers/index.js
+const __dirname  = dirname(__filename);            // -> /…/providers
 
 const providers = {};
 
-// Dynamically import everything in the folder
-for (const file of fs.readdirSync(import.meta.dirname)) {
-    if (!file.endsWith('.js') || file === 'index.js') continue;
-    const mod = await import(path.join(import.meta.dirname, file));
-    providers[mod.default.name] = mod.default;
+for (const file of readdirSync(__dirname)) {
+    if (file === 'index.js' || extname(file) !== '.js') continue;
+
+    // Convert back to a file:// URL so dynamic import always works
+    const url = pathToFileURL(join(__dirname, file)).href;
+    const { default: provider } = await import(url);   // supports CJS + ESM
+
+    if (!provider?.name) {
+        console.warn(`provider ${file} is missing "name" property`);
+        continue;
+    }
+    providers[provider.name] = provider;
 }
+
+
 
 export default providers;

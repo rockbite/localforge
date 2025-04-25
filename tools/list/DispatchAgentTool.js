@@ -1,8 +1,7 @@
-import { callLLM } from '../../src/services/llm/index.js';
-import { AUX_MODEL } from '../../src/config/llm.js';
 import { createToolRegistry } from '../index.js';
 import { getEnvironmentInfo, getDirectoryStructure, runAgentLoop } from '../../src/services/agent/index.js';
-import crypto from 'crypto'; // Import crypto for generating a unique ID
+import crypto from 'crypto';
+import {MAIN_MODEL} from "../../src/index.js"; // Import crypto for generating a unique ID
 
 // System prompt for sub-agent
 const SUB_AGENT_SYSTEM_PROMPT = `You are a specialized sub-agent focused on searching and retrieving information from the provided context (like files and web content). You have a limited set of tools focused on reading and searching: View, GlobTool, GrepTool, LS, ReadNotebook, WebFetchTool. You CANNOT modify files or execute general commands. Your goal is to fulfill the request given in the user prompt, using only your available tools, and then return a single, comprehensive response summarizing your findings or the answer to the request. Be precise and directly answer the request based on the information you gather.`;
@@ -78,9 +77,8 @@ async function dispatchAgent(args, workingDirectory, parentSessionId = 'unknown_
       subAgentSessionId,  // sessionId (Argument 1)
       initialMessages,    // currentMessages (Argument 2)
       subAgentTools,      // agentTools (Argument 3)
-      AUX_MODEL,          // llmModel (Argument 4)
-      workingDirectory,   // workingDirectory (Argument 5)
-      null                // streamCallback (Argument 6)
+      workingDirectory,   // workingDirectory (Argument 4)
+      null                // streamCallback (Argument 5)
     );
 
     // 6. Return the sub-agent's response

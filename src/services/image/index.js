@@ -2,8 +2,7 @@ import path from 'path';
 import { promises as fs } from 'fs';
 import ejs from 'ejs';
 import { fileURLToPath } from 'url';
-import { callLLM } from '../llm/index.js';
-import { MAIN_MODEL, AUX_MODEL } from '../../config/llm.js';
+import {callLLMByType, MAIN_MODEL} from "../../middleware/llm.js";
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -50,12 +49,10 @@ async function generateImageDescription(imageDataUrl, modelName = MAIN_MODEL) {
         }
     ];
 
-    const resp = await callLLM({
-        modelName,
+    const resp = await callLLMByType(MAIN_MODEL, {
         messages,
         temperature: 0.5,
-        max_tokens: 512,
-        stream: false
+        max_tokens: 512
     });
 
     return (resp && resp.content) ? resp.content.trim() : '[No description]';

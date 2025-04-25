@@ -1,5 +1,5 @@
 import { callLLM } from '../../src/services/llm/index.js';
-import { AUX_MODEL } from '../../src/config/llm.js';
+import {callLLMByType} from "../../src/index.js";
 
 // Aux LLM prompt for bash command prefix detection
 const BASH_PREFIX_PROMPT = `Your task is to process Bash commands that an AI coding agent wants to run.
@@ -91,13 +91,11 @@ async function safeBashCheck(command) {
         content: command
       }
     ];
-    
-    const response = await callLLM({
-      modelName: AUX_MODEL,
+
+    const response = await callLLMByType(AUX_MODEL, {
       messages,
       temperature: 0,
-      max_tokens: 128,
-      stream: false
+      max_tokens: 128
     });
     
     return response.content.trim();
@@ -125,14 +123,13 @@ async function extractBashFilePaths(command, output) {
         content: `Command: ${command}\n\nOutput: ${output}`
       }
     ];
-    
-    const response = await callLLM({
-      modelName: AUX_MODEL,
+
+    const response = await callLLMByType(AUX_MODEL, {
       messages,
       temperature: 0,
-      max_tokens: 1024,
-      stream: false
+      max_tokens: 1024
     });
+
     
     const content = response.content;
     const match = /<filepaths>([\s\S]*)<\/filepaths>/m.exec(content);

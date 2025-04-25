@@ -4,9 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import ejs from 'ejs';
-import { GoogleGenAI } from '@google/genai';
-import OpenAI from 'openai';
-import {callLLM, callLLMFinal} from "../../src/index.js";
+import {callLLMByType, EXPERT_MODEL} from "../../src/middleware/llm.js";
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -137,22 +135,18 @@ export default {
 };
 
 async function callModel(prompt) {
-    const apiKey = store.getSetting('openaiApiKey');
 
-    const openai = new OpenAI({
-        apiKey
-    });
-
-    let options = {
-        model: 'o3',
+    const response = await callLLMByType(EXPERT_MODEL, {
         messages: [
             {
                 role: 'user',
                 content: prompt,
             },
         ],
-        max_completion_tokens: 8192,
-    };
+        max_completion_tokens: 8192
+    });
 
-    return callLLMFinal(options).then((completion) => completion.choices?.[0]?.message?.content || '');
+    let text = response.then((completion) => completion.choices?.[0]?.message?.content || '');
+
+    return text;
 }

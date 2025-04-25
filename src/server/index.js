@@ -6,8 +6,6 @@ import http from 'http';
 import { Server } from 'socket.io';
 import fs from 'fs';
 import * as agentLogic from '../services/agent/index.js';
-import { callLLM } from '../services/llm/index.js';
-import { MAIN_MODEL, AUX_MODEL } from '../config/llm.js';
 import { 
     projectSessionManager, 
     sessionTaskEvents, 
@@ -35,6 +33,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, '../../public')));
 
 import store from '../db/store.js';
+import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} from "../middleware/llm.js";
 
 // ------------------------------------------------------------------
 // REST API routes
@@ -44,19 +43,10 @@ import store from '../db/store.js';
 (async () => {
     const settingsRoutes = await import('../routes/settingsRoutes.js');
     app.use('/api/settings', settingsRoutes.default);
-
-    // Register settings change callbacks for various components that need to refresh
-    const { refreshLLMSettings } = await import('../config/llm.js');
     
     // Register callbacks to refresh dependent components when settings change
     settingsRoutes.registerSettingsChangeCallback((changes) => {
         console.log('Settings changed:', Object.keys(changes).join(', '));
-
-        // Refresh LLM settings if model settings changed
-        if (changes.mainModelName !== undefined || 
-            changes.mainModelProvider !== undefined) {
-            refreshLLMSettings();
-        }
     });
 
     const { routerProjects, routerSessions } = await import('../routes/projectsRoutes.js');
@@ -175,13 +165,11 @@ app.post('/agent/detect-topic', async (req, res) => {
                 content: message
             }
         ];
-        
-        const response = await callLLM({
-            modelName: AUX_MODEL,
+
+        const response = await callLLMByType(AUX_MODEL, {
             messages,
             temperature: 0,
-            max_tokens: 128,
-            stream: false
+            max_tokens: 128
         });
         
         try {
@@ -215,13 +203,11 @@ app.post('/agent/generate-gerund', async (req, res) => {
                 content: word
             }
         ];
-        
-        const response = await callLLM({
-            modelName: AUX_MODEL,
+
+        const response = await callLLMByType(AUX_MODEL, {
             messages,
             temperature: 1.0,
-            max_tokens: 32,
-            stream: false
+            max_tokens: 32
         });
         
         return res.json({ gerund: response.content.trim() });
@@ -241,7 +227,13 @@ io.on('connection', (socket) => {
     };
     
     // Send current model configuration to client
-    socket.emit('model_info', { expertModel: "o3", mainModel: MAIN_MODEL, auxModel: AUX_MODEL });
+    // TODO: get model names by type using llm.js settings
+    socket.emit('model_info',
+        {
+            expertModel: getModelNameByType(EXPERT_MODEL),
+            mainModel: getModelNameByType(MAIN_MODEL),
+            auxModel: getModelNameByType(AUX_MODEL)
+        });
     
     // Handle session joining
     socket.on('join_session', async ({ sessionId, projectId }) => {
@@ -423,13 +415,11 @@ io.on('connection', (socket) => {
                         content: firstWord
                     }
                 ];
-                
-                const gerundResponse = await callLLM({
-                    modelName: AUX_MODEL,
+
+                const gerundResponse = await callLLMByType(AUX_MODEL, {
                     messages,
                     temperature: 1.0,
-                    max_tokens: 32,
-                    stream: false
+                    max_tokens: 32
                 });
                 
                 socket.emit('agent_update', {

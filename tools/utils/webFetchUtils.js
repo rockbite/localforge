@@ -2,13 +2,11 @@ import axios from 'axios';
 import TurndownService from 'turndown';
 const turndown = new TurndownService();
 import puppeteer from 'puppeteer';
-import { callLLM } from '../../src/services/llm/index.js';
-import { AUX_MODEL, MAIN_MODEL } from '../../src/config/llm.js';
 import { getRealisticHeaders, getRandomUserAgent } from './realisticHeaders/index.js';
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
 import store from '../../src/db/store.js';
-import { SETTINGS_SCHEMA } from '../../src/routes/settingsRoutes.js';
+import {callLLMByType, MAIN_MODEL} from "../../src/index.js";
 
 // Simple in-memory cache with TTL
 const cache = new Map();
@@ -256,12 +254,10 @@ async function processWithLLM(content, prompt, url) {
       }
     ];
 
-    const llmResponse = await callLLM({
-      modelName: MAIN_MODEL,
+    const llmResponse = await callLLMByType(MAIN_MODEL, {
       messages,
       temperature: 0.3,
-      max_tokens: 2048,
-      stream: false
+      max_tokens: 2048
     });
 
     return {

@@ -1,7 +1,5 @@
 //agent/index.js
 
-import { callLLM } from '../llm/index.js';
-import { MAIN_MODEL, AUX_MODEL } from '../../config/llm.js';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -19,6 +17,7 @@ import { projectSessionManager, sessionAccountingEvents } from '../sessions/inde
 
 // Import tool registry for metadata access
 import { TOOL_REGISTRY } from '../../../tools/index.js';
+import {AUX_MODEL, callLLMByType, MAIN_MODEL} from "../../middleware/llm.js";
 
 // Token count constants
 const MAX_TOKENS = 1000000; // 1 million tokens maximum
@@ -256,13 +255,11 @@ async function detectTopic(message) {
                 content: message
             }
         ];
-        
-        const response = await callLLM({
-            modelName: AUX_MODEL,
+
+        const response = await callLLMByType(AUX_MODEL, {
             messages,
             temperature: 0,
-            max_tokens: 128,
-            stream: false
+            max_tokens: 128
         });
         
         try {
@@ -294,13 +291,11 @@ async function generateGerund(word) {
                 content: word
             }
         ];
-        
-        const response = await callLLM({
-            modelName: AUX_MODEL,
+
+        const response = await callLLMByType(AUX_MODEL, {
             messages,
             temperature: 1.0,
-            max_tokens: 32,
-            stream: false
+            max_tokens: 32
         });
         
         return response.content.trim();
@@ -321,8 +316,8 @@ async function generateGerund(word) {
  * @param {AbortSignal} signal - Optional abort signal for interrupting execution
  * @returns {Object} - Final LLM message
  */
-async function runAgentLoop(sessionId, currentMessages, agentTools, llmModel, workingDirectory, streamCallback = null, signal = null) {
-    console.log(`Starting agent loop with ${currentMessages.length} messages and model ${llmModel}`);
+async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirectory, streamCallback = null, signal = null) {
+    console.log(`Starting agent loop with ${currentMessages.length} messages`);
     let loopMessages = [...currentMessages]; // Work on a copy
 
     // Check for interruption before starting the loop
@@ -341,11 +336,9 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, llmModel, wo
         // Call LLM with the current messages and available tools
         // Check if this is a sub-agent session (starts with "sub_")
         const isSubAgentSession = sessionId.startsWith('sub_');
-        
-        const llmResponse = await callLLM({
-            modelName: llmModel,
+
+        const llmResponse = await callLLMByType(MAIN_MODEL, {
             messages: loopMessages,
-            stream: !!streamCallback,
             tools: agentTools.getSchemas(),
             sessionId: isSubAgentSession ? null : sessionId, // Only pass sessionId for main agents
             signal, // Pass the signal down
@@ -355,7 +348,7 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, llmModel, wo
                     console.log(`[${sessionId}] Interruption detected during LLM stream update.`);
                     throw new Error('ABORT_ERR'); // Stop processing stream updates
                 }
-                
+
                 // Forward streaming updates from LLM to the client
                 streamCallback({
                     type: 'llm_update',
@@ -376,7 +369,9 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, llmModel, wo
         // Analyze the response - check if it has content, tool calls, or both
         const hasContent = llmResponse.content && llmResponse.content.trim().length > 0;
         const hasToolCalls = llmResponse.tool_calls && llmResponse.tool_calls.length > 0;
-        
+
+        console.log(JSON.stringify(streamCallback));
+
         // If response contains tool calls, execute them
         if (hasToolCalls) {
             console.log(`LLM requested ${llmResponse.tool_calls.length} tool calls`);
@@ -588,6 +583,8 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
     const abortController = new AbortController();
     const signal = abortController.signal;
 
+    console.log(streamCallback);
+
     // Listener to abort if interruption is requested via the manager
     const checkInterruption = () => {
         if (projectSessionManager.isInterruptionRequested(sessionId)) {
@@ -713,8 +710,7 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
         const finalAssistantMessage = await runAgentLoop(
             sessionId, 
             messagesForLLM, 
-            agentTools, 
-            MAIN_MODEL, 
+            agentTools,
             workingDirectory, 
             streamCallback,
             signal
