@@ -53,8 +53,16 @@ export function initChatForm() {
 
     // Add key handlers to capture Cmd+Enter in the prompt editor
     document.addEventListener('keydown', function(event) {
+        // Only handle Cmd+Enter, not just Enter
         if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
             event.preventDefault();
+            
+            // Make sure we're not in block rename mode
+            const blockNameInput = document.querySelector('.block-name-input:focus');
+            if (blockNameInput) {
+                return; // Exit if we're editing a block name
+            }
+            
             if (appState.currentAgentState.status === 'idle') {
                 messageForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
             }

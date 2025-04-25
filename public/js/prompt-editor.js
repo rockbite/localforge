@@ -145,7 +145,17 @@ class BlockEditor {
         textarea.className = 'block-textarea';
         textarea.placeholder = 'Prompt text...';
         textarea.rows = 1;
-        textarea.addEventListener('input', () => this.updateAllBlockLayouts());
+        // Add event listener to update block content in real-time
+        textarea.addEventListener('input', () => {
+            // Update block data when text changes
+            const blockId = blockDiv.dataset.blockId;
+            const blockData = this.blocks.find(block => block.id === blockId);
+            if (blockData) {
+                blockData.content = textarea.value;
+            }
+            // Adjust layout
+            this.updateAllBlockLayouts();
+        });
         blockContent.appendChild(textarea);
         makeSmartTextarea(textarea, {}, this);
 
@@ -261,8 +271,12 @@ class BlockEditor {
             // Handle key presses
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent form submission
+                    e.stopPropagation(); // Prevent event bubbling
                     this.finishRenaming(id, true); // save changes
                 } else if (e.key === 'Escape') {
+                    e.preventDefault(); // Prevent default behavior
+                    e.stopPropagation(); // Prevent event bubbling
                     escapePressed = true;
                     this.finishRenaming(id, false); // discard changes
                 }
@@ -377,6 +391,7 @@ class BlockEditor {
             this.blocks.forEach(block => {
                 if (block.id === id) {
                     block.id = input.value.trim();
+                    return;
                 }
 
             });
@@ -653,6 +668,7 @@ function promptEditorBoot(container, options = {}) {
             if (targetClass === 'prompt') {
                 syncTextareaToEditor(textarea, editor);
             } else {
+                // When switching to text editor, update textarea with current block content
                 textarea.value = ptToRawText(editor.getPTJson());
             }
         });
@@ -677,6 +693,7 @@ function syncTextareaToEditor(textarea, editor) {
         });
     }
 
+    // Always load from PT Json to ensure proper syncing
     editor.loadFromPTJson();
     editor.updateAllBlockLayouts();
 }
