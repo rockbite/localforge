@@ -13,9 +13,10 @@
 /* Chat header styles */
 #chat-header {
     display: flex;
+    max-height: 44px;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 24px;
+    padding: 4px 24px;
     border-bottom: 1px solid var(--border-primary);
     background-color: var(--bg-primary);
 }
@@ -23,7 +24,7 @@
 #chat-header .chat-info {
     display: flex;
     align-items: center;
-    font-size: 15px;
+    font-size: 13px;
     color: var(--text-primary);
     font-weight: var(--font-weight-medium);
 }
