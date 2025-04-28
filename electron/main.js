@@ -1,13 +1,23 @@
 #!/usr/bin/env node
 
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog, shell, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { startServer } from './server.js';
+import https from 'https';
+import fetch from 'node-fetch';
+import semver from 'semver';
+import { readFileSync } from 'fs';
+import {exec} from "child_process";
+import {runUpdate} from "./updater.js";
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load package.json to get app version
+const packagePath = path.resolve(__dirname, '../package.json');
+const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 let electronSquirrelStartup = false;
@@ -25,8 +35,65 @@ if (electronSquirrelStartup) {
 
 let win;
 let serverHasStarted = false; // Flag to track server start attempt
+let latestVersion; // Removing unused variable declarations helps clean up code
 
 const iconPath = path.join(__dirname, 'assets', 'icon.png'); // Adjust path if needed, normally need to use *.icns
+
+// Function to handle downloading and relaunch (placeholder - actual update logic would depend on your distribution method)
+function downloadAndRelaunch(version) {
+  // In a real implementation, you'd download the new version and update the app
+  // For now, we'll just show a dialog prompting the user to update manually
+  const updateUrl = `https://www.npmjs.com/package/${pkg.name}/v/${version}`;
+  
+  dialog.showMessageBox(win, {
+    type: 'info',
+    title: 'Update Available',
+    message: `A new version (${version}) is available!`,
+    detail: `You are currently running version ${pkg.version}. Would you like to download the update?`,
+    buttons: ['Later', 'Download Update'],
+    defaultId: 1
+  }).then(({ response }) => {
+    if (response === 1) {
+      runUpdate();
+    }
+  });
+}
+
+// Check for npm package updates
+function checkForNpmUpdate() {
+  console.log(`Checking for updates. Current version: ${pkg.version}`);
+  
+  https.get(`https://registry.npmjs.org/${pkg.name}/latest`, res => {
+    let body = '';
+    res.on('data', chunk => (body += chunk));
+    res.on('end', () => {
+      try {
+        latestVersion = JSON.parse(body).version;
+        console.log(`Latest version available: ${latestVersion}`);
+        
+        if (semver.gt(latestVersion, pkg.version)) {
+          console.log(`Update available: ${latestVersion}`);
+          updateAvailable = true;
+          
+          // Notify renderer process about update
+          if (win && win.webContents) {
+            win.webContents.send('update-available', {
+              current: pkg.version,
+              latest: latestVersion
+            });
+          }
+        } else {
+          console.log('Application is up to date');
+          updateAvailable = false;
+        }
+      } catch (error) {
+        console.error('Error parsing npm registry response:', error);
+      }
+    });
+  }).on('error', (error) => {
+    console.error('Error checking for updates:', error.message);
+  });
+}
 
 function createWindow() {
   // Create the browser window.
@@ -36,10 +103,14 @@ function createWindow() {
     icon: path.join(__dirname, 'assets', 'icon.png'), // Adjust path if needed
     backgroundColor: '#222222',
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     },
   });
+  
+  // Log preload path for debugging
+  console.log('Preload script path:', path.join(__dirname, 'preload.js'));
 
   // --- MODIFIED DEVTOOLS LOGIC ---
   const isGlobalInstall = process.env.GLOBAL_NPM_INSTALL === 'true';
@@ -56,6 +127,11 @@ function createWindow() {
   win.once('ready-to-show', () => {
     console.log('Window ready to show, making visible.');
     win.show();
+  });
+  
+  win.webContents.on('did-finish-load', () => {
+    console.log('Window finished loading');
+    // Update checks are now handled by the server
   });
 
   const isDev = !app.isPackaged;
@@ -136,6 +212,22 @@ app.whenReady().then(async () => {
   }
   
   createWindow(); // Create the window, which will then try to connect
+  
+  // Check for updates will happen after window fully loads (see win.webContents.on('did-finish-load'))
+  
+  // Set up IPC handler for update dialog
+  ipcMain.on('show-update-dialog', () => {
+    // Send IPC to get update status from server via fetch request
+    fetch('http://localhost:3001/api/updates').then(res => res.json())
+      .then(updateInfo => {
+        if (updateInfo.updateAvailable) {
+          downloadAndRelaunch(updateInfo.latestVersion);
+        }
+      })
+      .catch(err => {
+        console.error('Error checking for updates in dialog handler:', err);
+      });
+  });
 });
 
 // Quit when all windows are closed, except on macOS.

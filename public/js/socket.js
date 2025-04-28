@@ -104,6 +104,15 @@ export function initializeSocket() {
     // Setup application-specific listeners
     setupSocketEventHandlers(socket);
 
+    // Handle update_available events
+    socket.on('update_available', (data) => {
+        console.log('Update available from socket:', data);
+        
+        // Dispatch a custom event to update-checker.js
+        const updateEvent = new CustomEvent('update_available', { detail: data });
+        window.dispatchEvent(updateEvent);
+    });
+
     console.log("Socket initialized.");
 }
 
@@ -533,6 +542,36 @@ export function setupSocketEventHandlers(socket) {
         if (expertSpan && data.expertModel) expertSpan.textContent = data.expertModel;
         if (mainSpan && data.mainModel) mainSpan.textContent = data.mainModel;
         if (auxSpan && data.auxModel) auxSpan.textContent = data.auxModel;
+    });
+    
+    // Handle update notifications from the server
+    socket.on('update_available', (data) => {
+        console.log('Update available notification received:', data);
+        // Create a notification UI element
+        const notification = document.createElement('div');
+        notification.className = 'update-notification';
+        notification.innerHTML = `
+            <span class="material-icons">system_update</span>
+            <div class="update-content">
+                <div class="update-title">Update Available</div>
+                <div class="update-info">Version ${data.latest} is available (current: ${data.current})</div>
+            </div>
+            <button class="update-button">Update Now</button>
+        `;
+        
+        // Add click handler to update button
+        const updateButton = notification.querySelector('.update-button');
+        updateButton.addEventListener('click', () => {
+            if (window.electronAPI) {
+                window.electronAPI.showUpdateDialog();
+                notification.remove(); // Remove notification after clicking
+            } else {
+                console.warn('electronAPI not available, cannot show update dialog');
+            }
+        });
+        
+        // Add to document
+        document.body.appendChild(notification);
     });
 
     // Handle Task Diff updates (from legacy main-legacy.js)

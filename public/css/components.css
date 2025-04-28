@@ -237,3 +237,66 @@ a .material-icons {
     font-size: 90%;
     color: #ff715b;
 }
+
+/* Update Notification */
+.update-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    max-width: 320px;
+    animation: slide-in 0.3s ease-out;
+}
+
+.update-notification .material-icons {
+    color: var(--accent-color);
+    font-size: 24px;
+}
+
+.update-content {
+    flex: 1;
+}
+
+.update-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.update-info {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.update-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background-color 0.2s;
+}
+
+.update-button:hover {
+    background-color: var(--accent-hover);
+}
+
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

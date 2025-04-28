@@ -13,6 +13,7 @@ import {
     sessionToolLogEvents,
     sessionAgentStateEvents
 } from '../services/sessions/index.js';
+import * as updateService from '../services/updates/index.js';
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +44,9 @@ import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} 
 (async () => {
     const settingsRoutes = await import('../routes/settingsRoutes.js');
     app.use('/api/settings', settingsRoutes.default);
+    
+    // Initialize update service
+    updateService.initUpdateService();
     
     // Register callbacks to refresh dependent components when settings change
     settingsRoutes.registerSettingsChangeCallback((changes) => {
@@ -146,6 +150,37 @@ app.post('/agent/chat', async (req, res) => {
 
 // Auxiliary endpoints for special functions
 
+// Updates endpoint
+app.get('/api/updates', (req, res) => {
+    try {
+        const updateInfo = updateService.getUpdateInfo();
+        res.json(updateInfo);
+    } catch (error) {
+        console.error('Error checking for updates:', error);
+        res.status(500).json({ error: 'Failed to check for updates' });
+    }
+});
+
+// Manual update check endpoint
+app.post('/api/updates/check', async (req, res) => {
+    try {
+        const updateInfo = await updateService.checkForUpdates();
+        
+        // If an update is available, broadcast to all connected sockets
+        if (updateInfo.updateAvailable) {
+            io.emit('update_available', {
+                current: updateInfo.currentVersion,
+                latest: updateInfo.latestVersion
+            });
+        }
+        
+        res.json(updateInfo);
+    } catch (error) {
+        console.error('Error checking for updates:', error);
+        res.status(500).json({ error: 'Failed to check for updates' });
+    }
+});
+
 // Topic detection endpoint for UI
 app.post('/agent/detect-topic', async (req, res) => {
     try {
@@ -234,6 +269,15 @@ io.on('connection', (socket) => {
             mainModel: getModelNameByType(MAIN_MODEL),
             auxModel: getModelNameByType(AUX_MODEL)
         });
+    
+    // Send update information to client on connection
+    const updateData = updateService.getUpdateInfo();
+    if (updateData.updateAvailable) {
+        socket.emit('update_available', {
+            current: updateData.currentVersion,
+            latest: updateData.latestVersion
+        });
+    }
     
     // Handle session joining
     socket.on('join_session', async ({ sessionId, projectId }) => {
@@ -552,6 +596,14 @@ io.on('connection', (socket) => {
             }
         }
     });
+    
+    // Handle update notifications relay from clients
+    socket.on('relay_update_available', (data) => {
+        console.log('Received update notification relay:', data);
+        
+        // Broadcast to all connected sockets
+        io.emit('update_available', data);
+    });
 });
 
 // Main entry point - now a single page that handles everything
@@ -619,6 +671,18 @@ sessionAgentStateEvents.on('update', ({ sessionId, agentState }) => {
     if (sockets) {
         sockets.forEach(socket => {
             socket.emit('agent_state_update', { sessionId, agentState });
+        });
+    }
+});
+
+// Check for updates and broadcast when a socket connects
+io.on('connection', (socket) => {
+    // Send update information to the client on connect
+    const updateInfo = updateService.getUpdateInfo();
+    if (updateInfo.updateAvailable) {
+        socket.emit('update_available', {
+            current: updateInfo.currentVersion,
+            latest: updateInfo.latestVersion
         });
     }
 });

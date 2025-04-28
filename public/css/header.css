@@ -51,6 +51,29 @@ header h1 .material-icons {
     text-fill-color: transparent; /* Standard property */
 }
 
+#update-indicator {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: var(--warning-color);
+    background-color: var(--secondary-bg);
+    padding: 6px 16px;
+    border-radius: 18px;
+    border: 1px solid #444;
+    margin-right: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#update-indicator:hover {
+    background-color: #252525;
+}
+
+#update-indicator #update-icon {
+    font-size: 16px;
+    margin-right: 6px;
+}
+
 #status-indicator {
     display: flex;
     align-items: center;

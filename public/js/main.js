@@ -15,6 +15,41 @@ import { setStatus } from './ui/status.js'; // Direct import for initial status
 // Assume external libraries (marked, Prism) are loaded globally
 
 /**
+ * Initializes the update notification system by connecting Electron IPC with Socket.IO
+ */
+function initUpdateNotifications() {
+    // Check if we're running in Electron
+    if (window.electronAPI) {
+        console.log('Initializing update notification system');
+        
+        // Listen for update notifications from Electron main process
+        window.electronAPI.onUpdateAvailable((data) => {
+            console.log('Update available from Electron main process:', data);
+            
+            // Forward to Socket.IO server to broadcast to all clients
+            if (appState.socket && appState.socket.connected) {
+                appState.socket.emit('relay_update_available', data);
+            } else {
+                // If socket not connected, just show the notification directly
+                const event = new CustomEvent('update_available', { detail: data });
+                document.dispatchEvent(event);
+            }
+        });
+        
+        // Also listen for update_available events from the socket or custom event
+        document.addEventListener('update_available', (event) => {
+            const data = event.detail;
+            if (data && data.current && data.latest) {
+                console.log('Creating update notification from custom event');
+                // UI notification is handled by socket.js
+            }
+        });
+    } else {
+        console.log('Not running in Electron, update notification system not initialized');
+    }
+}
+
+/**
  * Initializes the entire application.
  */
 async function initializeApp() {
@@ -86,6 +121,9 @@ async function initializeApp() {
 
         // Set initial status (might be quickly overwritten by socket connect/join)
         setStatus('connecting', 'Initializing...');
+        
+        // Initialize update notification system
+        initUpdateNotifications();
 
         console.log("Application initialized successfully.");
 
