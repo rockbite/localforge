@@ -7,14 +7,16 @@
         </h2>
         
         <div class="settings-tabs">
-            <button class="settings-tab active" data-tab="models">Models</button>
-            <button class="settings-tab" data-tab="security">Security</button>
-            <button class="settings-tab" data-tab="web">Web Integration</button>
+            <button class="settings-tab-button active" data-tab="models">Models</button>
+            <button class="settings-tab-button" data-tab="security">Security</button>
+            <button class="settings-tab-button" data-tab="web">Web Integration</button>
+            <button class="settings-tab-button" data-tab="ui">Appearance</button>
         </div>
         
         <%- include('settings/models-tab') %>
         <%- include('settings/security-tab') %>
         <%- include('settings/web-tab') %>
+        <%- include('settings/ui-tab') %>
         
         <div class="modal-footer">
             <button type="button" id="settings-cancel" class="btn secondary">Cancel</button>

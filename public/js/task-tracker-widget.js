@@ -662,21 +662,24 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
     // ------------------ styles ------------------
     static styles = i`
     :host {
-      --primary-bg: #121212;
-      --secondary-bg: #1a1a1a;
-      --text-color: #d9dfe7;
-      --secondary-text: #888;
+      /* Use the app's CSS variables with fallbacks */
+      --primary-bg: var(--bg-primary, #121212);
+      --secondary-bg: var(--bg-secondary, #1a1a1a);
+      --tertiary-bg: var(--bg-tertiary, #252525);
+      --text-color: var(--text-primary, #d9dfe7);
+      --secondary-text: var(--text-secondary, #888);
 
-      --gradient-start: #ff715b;
-      --gradient-mid1: #ffd166;
-      --gradient-mid2: #7b61ff;
-      --gradient-end: #40a2e3;
+      /* Use app accent colors with fallbacks */
+      --gradient-start: var(--accent-quaternary, #ff715b);
+      --gradient-mid1: var(--accent-tertiary, #ffd166);
+      --gradient-mid2: var(--accent-secondary, #7b61ff);
+      --gradient-end: var(--accent-primary, #40a2e3);
 
-      --border-color: #333;
-      --border-radius: 12px;
+      --border-color: var(--border-primary, #333);
+      --border-radius: 8px;
 
-      --success-color: #7dd1c1;
-      --error-color: #f8a5a6;
+      --success-color: var(--status-success, #7dd1c1);
+      --error-color: var(--status-error, #f8a5a6);
 
       display: block;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
@@ -684,11 +687,12 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       color: var(--text-color);
     }
 
-    /* Outer section with animated gradient border */
+    /* Outer section with a simple border */
     .ai-tasks-section {
       position: relative;
       border-radius: var(--border-radius);
       overflow: hidden;
+      border: 1px solid var(--border-color);
 
       /*
        * Allow the host element to control the overall size of the widget.
@@ -704,46 +708,16 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       flex-direction: column;
     }
 
-    .ai-tasks-section::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 2px; /* border thickness */
-      background: linear-gradient(
-        90deg,
-        var(--gradient-start),
-        var(--gradient-mid1),
-        var(--gradient-mid2),
-        var(--gradient-end)
-      );
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor;
-              mask-composite: exclude;
-      animation: gradientAnimation 6s ease infinite;
-      pointer-events: none;
-    }
-
-    @keyframes gradientAnimation {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
+    /* Task section animation keyframe definition removed */
 
     /* Header */
     .ai-section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 2px 20px;
-      background-color: rgba(0, 0, 0, 0.2);
-      border-radius: calc(var(--border-radius) - 1px) calc(var(--border-radius) - 1px) 0 0;
+      padding: 8px 16px;
+      background-color: var(--tertiary-bg);
+      border-radius: 0;
       border-bottom: 1px solid var(--border-color);
       font-size: 15px;
     }
@@ -753,10 +727,8 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       align-items: center;
       gap: 10px;
       font-weight: 500;
-      background: linear-gradient(90deg, var(--gradient-mid1), var(--gradient-start));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--text-primary);
+      font-size: 14px;
     }
 
     .ai-task-counter {
@@ -773,7 +745,7 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background-color: var(--gradient-mid2);
+      background-color: var(--accent-primary);
     }
 
     /* Content */
@@ -802,10 +774,10 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      padding: 12px 14px;
-      border-radius: 8px;
+      padding: 6px 14px;
+      border-radius: 6px;
       border: 1px solid var(--border-color);
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: var(--tertiary-bg);
       opacity: 0;
       transform: translateY(10px);
       transition: background-color 0.3s ease, opacity 0.4s ease, transform 0.4s ease;
@@ -820,9 +792,9 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       top: 0;
       width: 3px;
       height: 100%;
-      background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-mid1));
-      border-top-left-radius: 8px;
-      border-bottom-left-radius: 8px;
+      background-color: var(--accent-primary);
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
     }
 
     .ai-task-item.show {
@@ -831,7 +803,7 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
     }
 
     .ai-task-item:hover {
-      background-color: rgba(255, 255, 255, 0.05);
+      background-color: var(--bg-hover, rgba(255, 255, 255, 0.05));
     }
 
     .ai-task-checkbox {
@@ -1142,10 +1114,10 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
         return x`
       <section class="ai-tasks-section">
         <header class="ai-section-header">
-          <h3 class="ai-section-title">
+          <div class="ai-section-title">
             ${this._icon("pending", true)}
             Tasks
-          </h3>
+          </div>
           <span class="ai-task-counter">${completed}/${this.tasks.length} completed</span>
         </header>
         <div class="ai-tasks-content">

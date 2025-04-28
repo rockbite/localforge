@@ -127,6 +127,15 @@ export function initProjectUI() {
         addProjectBtn.addEventListener('click', handleAddProject);
     }
     
+    // Expose functions to the global bridge for backwards compatibility
+    if (window.bridge) {
+        window.bridge.showProjectContextMenu = showProjectContextMenu;
+        window.bridge.showSessionContextMenu = showSessionContextMenu;
+        window.bridge.switchToProject = switchToProject;
+        window.bridge.switchToSession = switchToSession;
+        window.bridge.toggleProjectExpansion = toggleProjectExpansion;
+    }
+    
     console.log("Project UI initialized.");
     // Initial render is called from main.js after data fetch
 }

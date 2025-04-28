@@ -1,0 +1,49 @@
+/* Task Panel specific styles (within right-panel) */
+
+/* Ensure the custom element takes up space */
+#tasks-panel task-tracker-widget {
+    display: block;
+    height: 100%;
+}
+
+/* Ensure the section within the widget fills its container */
+#tasks-panel task-tracker-widget section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Allow the content area within the widget to scroll if needed */
+#tasks-panel task-tracker-widget .ai-tasks-content {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 270px; /* Add max height to enable scrolling */
+}
+
+/* Task panel header */
+#tasks-panel .ai-section-title {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--accent-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+#tasks-panel .ai-section-title .material-icons {
+    font-size: 16px;
+    color: var(--accent-primary);
+}
+
+/* Container for the actual tasks list */
+#tasks-container {
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    min-height: 200px;
+    border: 1px solid var(--border-primary);
+    flex: 1;
+    overflow-y: auto;
+}

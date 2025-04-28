@@ -1,0 +1,303 @@
+/* Projects panel specific styling */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-primary);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.panel-header span {
+    font-size: var(--font-size-md);
+}
+
+.add-project-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.add-project-btn:hover {
+    background-color: var(--bg-hover);
+    color: var(--accent-tertiary);
+}
+
+.add-project-btn .material-icons {
+    font-size: 20px;
+}
+
+.projects-list {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.project-item, .session-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    border-left: 3px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 2px 0;
+    position: relative;
+}
+
+.project-item {
+    padding-left: 12px;
+    font-weight: var(--font-weight-medium);
+}
+
+.session-item {
+    padding-left: 32px;
+    font-size: var(--font-size-xs);
+    background-color: var(--bg-hover);
+}
+
+.project-item:hover, .session-item:hover {
+    background-color: var(--bg-secondary);
+}
+
+.project-item.active {
+    background-color: var(--bg-active);
+    border-left: 3px solid var(--border-active);
+}
+
+.project-item.expanded {
+    background-color: var(--bg-active);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.project-item.temp-project {
+    background-color: rgba(255, 209, 102, 0.1);
+    border-left: 3px solid var(--accent-tertiary);
+    animation: fade-in 0.3s ease-in-out;
+}
+
+.project-item.temp-project.creating {
+    opacity: 0.7;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.session-item.active {
+    background-color: var(--bg-active);
+    border-left: 3px solid var(--accent-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.project-item:hover .project-name,
+.session-item:hover .session-name {
+    color: var(--text-primary);
+}
+
+.project-name, .session-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+    flex: 1;
+    outline: none;
+    border-radius: 3px;
+    padding: 4px 6px;
+    margin: -2px -4px;
+    letter-spacing: 0.01em;
+}
+
+.project-name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.project-item.expanded .project-name {
+    color: var(--text-primary);
+}
+
+.session-name {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-normal);
+    color: var(--text-secondary);
+}
+
+.project-name[contenteditable="true"],
+.session-name[contenteditable="true"] {
+    background-color: transparent;
+    border: none;
+    min-width: 50px;
+    position: relative;
+    cursor: text;
+}
+
+.project-name[contenteditable="true"]::selection,
+.session-name[contenteditable="true"]::selection {
+    background-color: var(--bg-active);
+}
+
+.project-name[contenteditable="true"]:focus,
+.session-name[contenteditable="true"]:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.session-item.active .session-name {
+    color: var(--accent-primary);
+}
+
+.sessions-container {
+    display: none;
+    border-bottom: 1px solid var(--border-primary);
+    margin-bottom: 4px;
+}
+
+.sessions-container.expanded {
+    display: block;
+    animation: fade-in-sessions 0.2s ease-out;
+}
+
+@keyframes fade-in-sessions {
+    from { opacity: 0.7; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.toggle-icon {
+    margin-right: 6px;
+    color: var(--text-secondary);
+    font-size: 18px;
+    transition: transform var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.project-item.expanded .toggle-icon {
+    color: var(--text-primary);
+}
+
+.project-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    overflow: hidden;
+    padding-left: 2px;
+}
+
+.panel-subheader {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    border-top: 1px solid var(--border-primary);
+    margin-top: 10px;
+}
+
+.project-item.archived {
+    opacity: 0.7;
+}
+
+.project-item.archived .project-name {
+    font-style: italic;
+}
+
+.project-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    padding: 2px;
+    border-radius: 3px;
+    position: relative;
+    z-index: 10;
+    width: 24px;
+    height: 24px;
+    margin-left: 8px;
+    flex-shrink: 0;
+    transition: opacity var(--transition-fast), visibility var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.project-menu-btn .material-icons {
+    font-size: 16px;
+}
+
+.project-item:hover .project-menu-btn,
+.session-item:hover .project-menu-btn {
+    opacity: 1;
+    visibility: visible;
+}
+
+.project-menu-btn:hover {
+    background-color: var(--bg-hover);
+    color: var(--accent-primary);
+}
+
+/* Context menu styles */
+.context-menu {
+    position: fixed;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--border-radius);
+    width: 150px;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    display: none;
+    z-index: var(--z-index-dropdown);
+    padding: 4px 0;
+}
+
+.menu-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-xs);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    background-color: transparent;
+}
+
+.menu-item:hover {
+    background-color: var(--bg-hover);
+}
+
+.menu-item .material-icons {
+    font-size: 16px;
+    margin-right: 8px;
+    color: var(--text-secondary);
+}
+
+.menu-item:hover .material-icons {
+    color: var(--text-primary);
+}
+
+.menu-item.delete {
+    color: var(--status-error);
+}
+
+.menu-item.delete .material-icons {
+    color: var(--status-error);
+}
+
+.menu-item.delete:hover {
+    background-color: rgba(248, 165, 166, 0.1);
+}

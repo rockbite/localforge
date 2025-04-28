@@ -1,0 +1,37 @@
+/* Badges for Status or Labels */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    background-color: var(--border-primary);
+    color: var(--text-secondary);
+    line-height: 1.4;
+    text-align: center;
+}
+
+.badge-primary {
+    background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
+    color: white;
+}
+
+.badge-secondary {
+    background: linear-gradient(90deg, var(--accent-quaternary), var(--accent-tertiary));
+    color: white;
+}
+
+.badge-success {
+    background-color: var(--status-success);
+    color: #121212;
+}
+
+.badge-warning {
+    background-color: var(--status-warning);
+    color: #121212;
+}
+
+.badge-error {
+    background-color: var(--status-error);
+    color: #121212;
+}

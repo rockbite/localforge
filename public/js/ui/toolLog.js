@@ -109,11 +109,11 @@ export function renderOrUpdateToolWidget(toolCallId, allLogs, currentAgentState)
         statusIconHtml = ''; // No spinner when complete
         if (isError) {
             toolIconName = toolIconMap['error'];
-            iconColorStyle = `style="color: var(--error-color);"`;
+            iconColorStyle = `style="color: var(--status-error);"`;
             statusText = toolEndLog.descriptiveText || 'Tool failed';
         } else {
             toolIconName = toolIconMap['success'];
-            iconColorStyle = `style="color: var(--success-color);"`;
+            iconColorStyle = `style="color: var(--status-success);"`;
             statusText = toolEndLog.descriptiveText || 'Tool completed';
         }
         stopToolExecutionTimer(toolCallId); // Ensure timer is stopped

@@ -1,0 +1,67 @@
+/* Dark theme variables */
+:root {
+    /* Base backgrounds */
+    --bg-primary: #121212;
+    --bg-secondary: #1A1A1A;
+    --bg-tertiary: #252525;
+    --bg-input: #1A1A1A;
+    --bg-code: #1E1E1E;
+    --bg-hover: rgba(255, 255, 255, 0.05);
+    --bg-active: rgba(64, 162, 227, 0.15);
+    --bg-code-overlay: rgba(0, 0, 0, 0.2);
+
+    /* Text colors */
+    --text-primary: #d9dfe7;
+    --text-secondary: #888;
+    --text-disabled: #555;
+    --text-placeholder: #8b98a9;
+    --text-code-inline: #FF715B;
+
+    /* Border colors */
+    --border-primary: #333;
+    --border-input: #444;
+    --border-focus: #40A2E3;
+    --border-active: #40A2E3;
+    --divider-color: #333;
+
+    /* Component backgrounds */
+    --button-primary-bg: linear-gradient(90deg, #7B61FF, #40A2E3);
+    --button-secondary-bg: #363741;
+    --button-secondary-bg-hover: #44454e;
+    --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+    --dropdown-bg: #2c2c2c;
+    
+    /* Accent colors */
+    --accent-primary: #40A2E3;
+    --accent-secondary: #7B61FF;
+    --accent-tertiary: #FFD166;
+    --accent-quaternary: #FF715B;
+    --accent-gradient: linear-gradient(90deg, #FF715B, #FFD166);
+    
+    /* Status colors */
+    --status-success: #7dd1c1;
+    --status-warning: #ffcc80;
+    --status-error: #f8a5a6;
+    
+    /* Link colors */
+    --link-color: #40A2E3;
+    --link-hover: #7B61FF;
+    --link-active: #FF715B;
+    
+    /* Code syntax highlighting */
+    --code-text: #f8f8f2;
+    --code-comment: #8292a2;
+    --code-punctuation: #f8f8f2;
+    --code-property: #f92672;
+    --code-boolean: #ae81ff;
+    --code-string: #a6e22e;
+    --code-operator: #f8f8f2;
+    --code-function: #e6db74;
+    --code-keyword: #66d9ef;
+    --code-regex: #fd971f;
+    
+    /* Shadow and effects */
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --focus-shadow: rgba(64, 162, 227, 0.3);
+    --hover-shadow: rgba(0, 0, 0, 0.5);
+}

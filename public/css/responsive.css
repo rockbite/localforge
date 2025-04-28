@@ -1,258 +1,52 @@
-/* Mobile and Responsive Styles */
+/* Responsive styles */
 
-/* Adjust tool panel width for medium screens */
-@media (max-width: 1200px) {
+/* Small devices (phones) */
+@media (max-width: 576px) {
     :root {
-        --tool-panel-width: 340px;
+        --tool-panel-width: 100%;
     }
-    #right-panel {
-        width: var(--tool-panel-width);
-        min-width: var(--tool-panel-width);
-    }
-}
-
-/* Adjust tool panel width for smaller laptops/tablets */
-@media (max-width: 1024px) {
-    :root {
-        --tool-panel-width: 320px;
-    }
-    #right-panel {
-        width: var(--tool-panel-width);
-        min-width: var(--tool-panel-width);
-    }
-}
-
-/* Further adjustments for smaller screens */
-@media (max-width: 900px) {
-    header {
-        padding: 0 16px; /* Reduce header padding */
-    }
-    .greeting h1 {
-        font-size: 20px; /* Smaller greeting */
-    }
-    .greeting h2 {
-        font-size: 14px;
-    }
-    #status-indicator {
-        font-size: 12px; /* Smaller status */
-        padding: 4px 12px;
-    }
-    #settings-button {
-        width: 32px; /* Smaller settings button */
-        height: 32px;
-    }
-    #settings-button .material-icons {
-        font-size: 18px;
-    }
-    /* Adjust footer height */
-    :root {
-        --footer-height: 300px;
-    }
-    footer {
-        padding: 12px 16px;
-    }
-}
-
-/* Major layout shift for Tablet Portrait / Large Phones */
-@media (max-width: 768px) {
-    /* Stack panels vertically */
-    #split-container {
-        flex-direction: column;
-        height: 100%; /* Ensure it takes full height */
-    }
-
-    /* Projects panel takes full width */
-    #projects-panel {
+    
+    .container {
         width: 100%;
-        max-width: 100%;
-        min-width: 100%;
-        flex: 0 0 auto; /* Don't flex, height determined by content/min-height */
-        min-height: 200px; /* Minimum height */
-        max-height: 30vh; /* Limit height */
-        border-right: none; /* Remove side border */
-        border-bottom: 1px solid var(--border-color); /* Add bottom border */
-        overflow-y: auto; /* Ensure scrolling if content exceeds max-height */
     }
-
-    /* Drag bar becomes horizontal */
-    #drag-bar {
-        height: 4px;
-        width: 100%;
-        cursor: ns-resize; /* North-south resize cursor */
-    }
-
-    /* Main panel takes remaining space */
-    #main-panel {
-        width: 100%;
-        flex: 1 !important; /* Take remaining vertical space */
-        min-height: 0; /* Allow shrinking */
-        order: 1; /* Ensure main panel is visually after projects */
-    }
-
-    /* Right panel stack at the bottom or potentially hide/toggle */
-    #right-panel {
-        width: 100% !important; /* Full width */
-        flex: 0 0 auto !important; /* Height determined by content/min-height */
-        min-height: 250px; /* Minimum height */
-        max-height: 40vh; /* Limit height */
-        border-left: none; /* Remove side border */
-        border-top: 1px solid var(--border-color); /* Add top border */
-        overflow: hidden; /* Contain tool/task panels */
-        order: 2; /* Place right panel last */
-        /* Adjust tool/task panel layout inside */
+    
+    .main-content {
         flex-direction: column;
     }
-
-    #right-panel #tool-panel {
-        flex: 1; /* Allow tool panel to grow */
-        min-height: 0; /* Allow shrinking */
-        border-bottom: 1px solid var(--border-color); /* Separator if tasks visible */
-        padding: 12px;
+    
+    .left-panel {
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-primary);
     }
-
-    #right-panel #tasks-panel {
-        min-height: 150px; /* Reduce min height for tasks */
-        max-height: 150px;
-        margin-top: 0;
-        padding: 12px;
+    
+    .right-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border-primary);
     }
-
-    /* Adjust chat messages */
+    
     .message {
-        max-width: 90%; /* Slightly wider messages */
-    }
-
-    /* Adjust modal padding */
-    .modal-content {
-        padding: 24px;
-        width: 95%; /* Wider modal on smaller screens */
-        max-height: 95vh; /* Ensure it fits */
-    }
-
-    /* Adjust code block copy button */
-    .copy-button {
-        width: 32px;
-        height: 32px;
-        top: 6px;
-        right: 6px;
-    }
-    .copy-button .material-icons {
-        font-size: 16px;
-    }
-    pre[class*="language-"]::after {
-        right: 40px; /* Adjust language marker position */
-    }
-
-    /* Adjust footer height */
-    :root {
-        --footer-height: 300px;
-    }
-    footer {
-        padding: 12px 16px;
-    }
-    #message-input {
-        max-height: calc(var(--footer-height) - 24px - 2px);
-    }
-    #send-button {
-        margin-bottom: 0; /* Align better */
-    }
-
-    /* Settings Modal Adjustments */
-    .settings-modal-content {
         max-width: 95%;
-        height: 90vh;
     }
 }
 
-/* Small mobile phones */
-@media (max-width: 480px) {
+/* Medium devices (tablets) */
+@media (min-width: 577px) and (max-width: 992px) {
     :root {
-        --footer-height: 300px; /* Further reduce footer height */
+        --tool-panel-width: 300px;
     }
-    footer {
-        padding: 10px 12px; /* Reduce padding */
-        height: var(--footer-height);
-    }
-    #message-form {
-        gap: 8px; /* Reduce gap */
-        align-items: center; /* Center align might work better */
-    }
-    .textarea-container {
-        padding: 10px; /* Reduce padding */
-    }
-    #message-input {
-        font-size: 14px; /* Smaller font */
-        line-height: 20px;
-        min-height: 20px;
-        max-height: calc(var(--footer-height) - 20px - 2px);
-    }
-    #send-button {
-        width: 40px; /* Smaller send button */
-        height: 40px;
-        border-radius: 20px;
-    }
-    #send-button .material-icons {
-        font-size: 18px;
-    }
-
-    /* Adjust chat messages */
-    #messages {
-        padding: 16px; /* Less padding */
-    }
+    
     .message {
-        padding: 12px 14px; /* Less padding */
-        max-width: 95%; /* Allow messages to be wider */
-        margin-bottom: 20px;
+        max-width: 90%;
     }
-    .message-avatar {
-        width: 32px; /* Smaller avatars */
-        height: 32px;
-        margin-right: 10px;
-    }
-    .message-avatar .material-icons {
-        font-size: 16px;
-    }
-    .message-content {
-        font-size: 14px; /* Smaller message text */
-    }
+}
 
-    /* Adjust header */
-    header {
-        padding: 0 12px; /* Less padding */
-        height: 56px; /* Reduce header height */
+/* Large devices (desktops) */
+@media (min-width: 993px) {
+    :root {
+        --tool-panel-width: 420px;
     }
-    :root { --header-height: 56px; }
-    .greeting h1 { font-size: 18px; }
-    .greeting h2 { display: none; } /* Hide subtitle */
-    header h1 .material-icons { margin-right: 6px; }
-    #status-indicator { display: none; } /* Hide status text, rely on dot */
-
-    /* Adjust modals */
-    .modal-content { padding: 16px; }
-    .modal-content h2 { font-size: 18px; margin-bottom: 16px;}
-    .modal-content p { font-size: 14px; margin-bottom: 20px;}
-    .modal-buttons { gap: 8px; }
-    .modal-buttons .confirm-button,
-    .modal-buttons .cancel-button {
-        padding: 10px 16px;
-        font-size: 13px;
-        min-width: 80px;
-    }
-
-    /* Adjust code blocks */
-    pre { padding: 12px; font-size: 13px; }
-    pre::before { width: 2px; }
-    pre.line-numbers { padding-left: 3em; }
-    .line-numbers .line-numbers-rows { top: 12px; }
-
-    /* Settings Modal Adjustments */
-    .settings-modal-content h2 { padding: 16px 16px 10px 16px; font-size: 18px; }
-    .settings-tabs { padding: 0 16px; top: 57px; } /* Adjust sticky top */
-    .settings-tab { padding: 8px 12px; font-size: 13px; }
-    .settings-tab-content { padding: 16px; }
-    .settings-section h3 { font-size: 15px; margin-bottom: 12px;}
-    .settings-form-group label { font-size: 12px; }
-    .settings-modal-content input, .settings-modal-content select { height: 36px; font-size: 13px; padding: 6px 10px; }
-    .modal-footer { padding: 12px 16px; }
-    .btn { padding: 7px 14px; font-size: 13px;}
 }

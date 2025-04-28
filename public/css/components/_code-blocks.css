@@ -1,0 +1,262 @@
+/* Code rendering with Prism.js */
+pre {
+    background-color: var(--bg-code);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    overflow-x: auto;
+    margin: var(--spacing-md) 0;
+    position: relative;
+    border: 1px solid var(--border-primary);
+    max-height: 500px;
+    max-width: 100%;
+    font-family: var(--code-font);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+/* Left accent border */
+pre::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background-color: var(--accent-primary);
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+}
+
+/* Base Prism styles */
+pre[class*="language-"] {
+    margin: var(--spacing-md) 0;
+    background-color: var(--bg-code);
+    color: var(--code-text);
+    text-shadow: 0 1px var(--shadow-color);
+    padding-left: 20px;
+}
+
+code {
+    font-family: var(--code-font);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+/* Code block specific styles */
+code[class*="language-"] {
+    font-family: var(--code-font);
+    font-size: var(--font-size-sm);
+    direction: ltr;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    tab-size: 4;
+    hyphens: none;
+    color: inherit;
+}
+
+/* Prism Token Colors */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: var(--code-comment);
+}
+
+.token.punctuation {
+    color: var(--code-punctuation);
+}
+
+.token.namespace {
+    opacity: 0.7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: var(--code-property);
+}
+
+.token.boolean,
+.token.number {
+    color: var(--code-boolean);
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: var(--code-string);
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+    color: var(--code-operator);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+    color: var(--code-function);
+}
+
+.token.keyword {
+    color: var(--code-keyword);
+}
+
+.token.regex,
+.token.important {
+    color: var(--code-regex);
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+/* Language marker - ONLY for chat messages */
+#messages pre[class*="language-"]::after {
+    content: attr(data-lang);
+    position: absolute;
+    top: 0;
+    right: 44px;
+    font-family: var(--font-family);
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 3px 8px;
+    text-transform: uppercase;
+    z-index: 1;
+}
+
+/* Prism line numbers plugin styling */
+#messages pre.line-numbers {
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 16px;
+    left: 0;
+    font-size: 100%;
+    width: 3em;
+    letter-spacing: -1px;
+    border-right: 1px solid var(--border-primary);
+    user-select: none;
+    padding-right: 10px;
+    margin-right: 10px;
+}
+
+.line-numbers-rows > span {
+    pointer-events: none;
+    display: block;
+    counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+    content: counter(linenumber);
+    color: var(--text-secondary);
+    display: block;
+    padding-right: 0.8em;
+    text-align: right;
+}
+
+/* Copy button styling */
+#messages .copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    z-index: 2;
+}
+
+.copy-button .material-icons {
+    font-size: 16px;
+    transition: transform var(--transition-fast);
+}
+
+#messages pre:hover .copy-button {
+    opacity: 1;
+}
+
+.copy-button:hover {
+    background-color: var(--border-primary);
+    color: var(--accent-tertiary);
+    transform: scale(1.05);
+}
+
+.copy-button:active {
+    transform: scale(0.95);
+}
+
+.copy-button.copied {
+    background-color: var(--status-success);
+    color: white;
+    border-color: var(--status-success);
+}
+
+/* Tooltip for copy button */
+.copy-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: var(--font-family);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity var(--transition-fast), visibility var(--transition-fast);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Tooltip arrow */
+.copy-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--bg-tertiary) transparent transparent transparent;
+}

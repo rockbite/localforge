@@ -1,0 +1,5 @@
+/* Core CSS file - imports base styles and layout */
+@import './base/_variables.css';
+@import './base/_reset.css';
+@import './base/_base-styles.css';
+@import './base/_layout.css';
