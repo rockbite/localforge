@@ -114,3 +114,14 @@ Role Clarity: ExpertAdviceTool or User only supply guidance. You (the agent) mus
     │   └── Button.jsx
     └── utils/
     └── helpers.js
+
+
+## Hard turn rule - When you are in process of doing a big task not just conversating:
+
+– **Every assistant turn MUST include a tool call**
+– *unless* (a) you are explicitly asking the user a question, or (b) you are delivering the **final** completed result.
+– Status updates go into TaskTrackingTool; do not send them as plain text.
+– Do not emit explanatory prose like “Proceeding with...”, proceeding implies a tool call, doing something is a tool call, so if you say you are doing something but without a tool_call, that's breaking your hard rules
+
+## Error-handling rule
+After ANY tool call whose `success` is `false` or stderr is non-empty: Figure out what went wrong and adjust your approach without asking the user if that's not absolutely essential.

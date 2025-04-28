@@ -1,44 +1,6 @@
-1. SELF‑HOSTED CHATGPT CLONE FOR TEAMS
+1. SNAKE ARENA
 PROMPT:
-You are an autonomous engineering agent. Create a self‑hosted ChatGPT‑style web app for private teams. Deliverables: Next.js frontend, Node/Express backend proxying OpenAI completions, PostgreSQL for auth & usage logging, Stripe billing for seat‑based plans, real‑time WebSocket streaming. Provide Docker & k8s manifests, CI tests, seed data, and docs.
+Create a browser Snake game using Node.js + TypeScript with a Vite scaffold and clean multi‑file structure: two AI‑controlled snakes battle on a 50×50 pastel grid, seek random food, avoid walls and each other, respawn small after death, and reset the board while keeping cumulative scores. Scoring: +1 per second alive, +10 per food eaten, +50 when the rival dies and this snake survives, −10 on death. Implement smart path‑finding AI, silently consult experts as needed, and reply only after the entire, fully‑tested game is finished. Before starting fully discuss this task with an Expert so it can help you craft a detailed high level task-list and the architecture, after, start implementing. Let expert know that your goal is to keep things simple, and you are tight on time.
+Expected Result: Completed one shot under 2$ (best result $1.6)
 
-2. PROCEDURAL 2.5D IDLE‑RPG ENGINE
-PROMPT:
-Build a browser‑based idle‑RPG engine with procedural maps and JSON‑driven assets. Core modules: ECS game logic, WebGL renderer, save‑load encryption, hot‑reload dev tools, mod plugin system. Ship demo assets, unit tests, and README.
-
-3. EDGE‑FIRST VIDEO UPLOADER
-PROMPT:
-Implement a chunked video uploader that hits Cloudflare R2, triggers Workers to transcode to HLS, and serves a React player dashboard. Include resumable uploads, signed URLs, queue processing, and Terraform infra.
-
-4. AI CODE REVIEW BOT FOR GITHUB
-PROMPT:
-Write a GitHub App that comments on pull requests with LLM‑generated review notes, security lint, and suggested patches. Store embeddings in a vector DB, schedule nightly learning jobs, and supply Helm chart.
-
-5. IOT GREENHOUSE CONTROLLER
-PROMPT:
-Create an IoT greenhouse system: C++/Arduino sensor firmware, Go data collector on Raspberry Pi, FastAPI backend, Svelte PWA dashboard, Telegram alert bot, Grafana dashboards, and OTA update script.
-
-6. MULTIPLAYER DUNGEON GENERATOR SaaS
-PROMPT:
-Deliver a hosted procedural dungeon generator exposing REST + gRPC, Unity & JS SDKs, metered billing tiers, and OpenAPI spec. Use Elixir/Phoenix service, sample game integrations, and rate‑limit middleware. Implement simple example-demo for user to try out the service.
-
-7. PERSONAL KNOWLEDGE OS
-PROMPT:
-Build a local‑first markdown vault (Electron desktop + React Native mobile) with CRDT sync, graph view, full‑text semantic search, plugin marketplace, and encryption. Provide core library, sync server, and E2E tests.
-
-8. FULLY‑AUTOMATED E‑COMMERCE DROP‑SHIPPER
-PROMPT:
-Create a pipeline that scrapes supplier catalogs, predicts optimal pricing with ML, pushes products to Shopify, and tunes ad spend automatically. Include headless CMS, financial reconciliation scripts, and scheduler.
-
-9. REAL‑TIME COLLABORATIVE WHITEBOARD
-PROMPT:
-Engineer a live whiteboard app: Rust Actix server, Svelte client, CRDT canvas, WebRTC voice, AI shape recognizer, export to SVG/PDF. Provide load tests and benchmark suite.
-
-10. OPEN‑SOURCE OKR TRACKER
-PROMPT:
-Develop an OKR tracking platform with NestJS GraphQL API, Vue3 UI, Slack slash‑commands, goal tree visualization, cron‑based progress roll‑ups, role‑based perms, and docker‑compose for local dev.
-
-
-11. SNAKE ARENA
-PROMPT:
-Create a browser Snake game using Node.js + TypeScript with a Vite scaffold and clean multi‑file structure: two AI‑controlled snakes battle on a 50×50 pastel grid, seek random food, avoid walls and each other, respawn small after death, and reset the board while keeping cumulative scores. Scoring: +1 per second alive, +10 per food eaten, +50 when the rival dies and this snake survives, −10 on death. Implement smart path‑finding AI, silently consult experts as needed, and reply only after the entire, fully‑tested game is finished. Before starting fully discuss this task with an Expert so it can help you craft a detailed high level task-list and the architecture.
+# need to add more benchmarks
