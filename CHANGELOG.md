@@ -2,6 +2,10 @@
 All notable changes to **Localforge** will be documented in this file.  
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.12] – 2025-04-25
+* Chat messages context now show system prompt
+* Fixed bug with simultaneous tool call + content response
+
 ---
 
 ## [1.0.11] – 2025-04-25
