@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import ejs from 'ejs';
 import {callLLMByType, EXPERT_MODEL} from "../../src/middleware/llm.js";
+import {getPromptOverride} from "../../src/utils.js";
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +38,7 @@ export default {
         }
     },
     execute: async (args) => {
-        const { files = [], prompt: userPrompt, sessionId } = args || {};
+        const { files = [], prompt: userPrompt, sessionId, sessionData } = args || {};
 
         if (!userPrompt || typeof userPrompt !== 'string') {
             throw new Error('ExpertAdviceTool.execute: "prompt" argument is required');
@@ -58,7 +59,7 @@ export default {
             // Resolve to absolute path to be safe
             const absolutePath = path.isAbsolute(suppliedPath)
                 ? suppliedPath
-                : path.resolve(process.cwd(), suppliedPath);
+                : path.resolve(sessionData.workingDirectory, suppliedPath);
 
             let fileContent = '';
             try {
@@ -87,15 +88,13 @@ export default {
             }
         }
 
+
+
         // --------------------------------------------------------------------
         // Assemble final prompt via EJS template
         const templatePath = path.join(__dirname, '..', '..', 'prompts', 'expert-advice.ejs');
-        let templateString;
-        try {
-            templateString = fs.readFileSync(templatePath, 'utf8');
-        } catch (err) {
-            throw new Error(`ExpertAdviceTool.execute: failed to read template – ${err.message}`);
-        }
+        let templateString = fs.readFileSync(templatePath, 'utf8');
+        templateString = await getPromptOverride(sessionData, "expert-advice", templateString);
 
         const finalPrompt = ejs.render(templateString, {
             fileContext: fileContextBlocks.trim(),
@@ -106,7 +105,7 @@ export default {
         // Call the chosen LLM and return its response
         let answer;
         try {
-            answer = await callModel(finalPrompt);
+            answer = await callModel(finalPrompt, sessionData);
             
             // Track token usage if sessionId is provided
             if (sessionId) {
@@ -134,7 +133,7 @@ export default {
     }
 };
 
-async function callModel(prompt) {
+async function callModel(prompt, sessionData) {
 
     const response = await callLLMByType(EXPERT_MODEL, {
         messages: [
@@ -144,7 +143,7 @@ async function callModel(prompt) {
             },
         ],
         max_completion_tokens: 8192
-    });
+    }, sessionData);
 
     return response.content;
 }

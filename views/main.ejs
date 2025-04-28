@@ -48,6 +48,17 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-jsx.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-tsx.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    
+    <!-- CodeMirror for prompt editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/comment/comment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/display/placeholder.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
@@ -76,6 +87,8 @@
     <script src="/js/loader.js"></script>
     <script src="/js/bridge.js"></script>
     <script src="/js/ui/settings.js" type="module"></script>
+    <script src="/js/ui/agents.js" type="module"></script>
+    <script src="/js/ui/agent-modal.js" type="module"></script>
     
     <!-- Load modules after settings.js has initialized -->
     <script src="/js/utils.js" type="module"></script>
@@ -111,6 +124,7 @@
     <%- include('partials/settings-modal') %>
     <%- include('partials/setup-modal') %>
     <%- include('partials/project-context-menu') %>
+    <%- include('partials/agent-modal') %>
     
     <!-- Global Modal Dialogs - Must be outside all panels to avoid z-index issues -->
     <!-- Confirmation dialog -->

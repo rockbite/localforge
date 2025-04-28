@@ -31,14 +31,8 @@ export default {
   },
   execute: async (args) => viewTool(args),
   getDescriptiveText: (args) => {
-    let text = `Reading file ${args.file_path}`;
-    if (args.offset && args.limit) {
-      text += ` (lines ${args.offset}-${args.offset + args.limit})`;
-    } else if (args.offset) {
-      text += ` (from line ${args.offset})`;
-    } else if (args.limit) {
-      text += ` (first ${args.limit} lines)`;
-    }
+    const fileName = args.file_path.split('/').pop();
+    const text = `Viewing ${fileName}`;
     return text;
   },
   ui: {

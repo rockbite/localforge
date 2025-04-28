@@ -1,0 +1,42 @@
+<!-- Agents Settings Tab -->
+<div class="settings-tab-content" id="agents-tab" style="visibility:hidden; position:absolute; z-index:-1">
+    <div class="content-scroll-area">
+        <div class="settings-section compact">
+            <div class="model-row-label section-title">Agent Management</div>
+            <div class="settings-note">
+                <div class="note-icon"><span class="material-icons">info</span></div>
+                <div class="note-text">Custom agents can use different models, prompts and tools!</div>
+            </div>
+            
+            <!-- Agents List -->
+            <div class="agents-section">
+                <div class="agents-header">
+                    <h3>Your Agents</h3>
+                    <button class="btn secondary add-agent-btn"><span class="material-icons">add</span> Add Agent</button>
+                </div>
+                <div class="agents-list">
+                    <!-- Agents will be added here dynamically -->
+                </div>
+                
+                <!-- Empty state when there are no agents -->
+                <div class="empty-agents-state">
+                    <div class="empty-state-icon"><span class="material-icons">psychology</span></div>
+                    <div class="empty-state-text">No agents added yet</div>
+                    <button class="btn secondary add-agent-btn"><span class="material-icons">add</span> Add your first agent</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Agent delete confirmation modal -->
+<div id="agent-delete-modal" class="modal">
+    <div class="modal-content confirmation-modal-content">
+        <h3>Delete Agent</h3>
+        <p>Are you sure you want to delete <span id="agent-delete-name"></span>?</p>
+        <div class="modal-footer">
+            <button type="button" id="agent-delete-cancel" class="btn secondary">Cancel</button>
+            <button type="button" id="agent-delete-confirm" class="btn danger">Delete</button>
+        </div>
+    </div>
+</div>

@@ -8,8 +8,6 @@
  * session.  No global state is kept in this module.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-
 // Allowed status values – kept minimal but can easily be extended later.
 const STATUSES = {
   PENDING: 'pending',        // not started yet / waiting
@@ -38,8 +36,10 @@ function addTask(tasksArray, { title, description = '' }) {
   if (!title || typeof title !== 'string') {
     throw new Error('Task title is required');
   }
+  const shortId = Math.random().toString(36).slice(2, 7);
+
   const task = {
-    id: uuidv4(),
+    id: shortId,
     title,
     description,
     status: STATUSES.PENDING,

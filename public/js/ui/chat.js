@@ -215,17 +215,9 @@ function handleFormSubmit(event) {
 
         sendMessage(contentToSend);
         
-        // Clear the prompt editor
-        if (promptEditor) {
-            // Clear the text tab
-            const textarea = document.querySelector('.prompt-editor-container .raw-textarea');
-            if (textarea) {
-                textarea.value = '';
-            }
-            
-            // Clear the prompt editor blocks
-            const json = { blocks: [{ id: Math.random().toString(16).slice(2, 8), content: '', muted: false }] };
-            promptEditor.loadFromPTJson(json);
+        // Clear the prompt editor using the dedicated method
+        if (promptEditor && promptEditor.clearContent) {
+            promptEditor.clearContent();
         }
         
         // Reset attachment state

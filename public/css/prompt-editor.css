@@ -77,55 +77,9 @@ prompt-editor.css
     font-size: 14px;
 }
 
-.prompt-editor-container .raw-textarea {
+.prompt-editor-container .text-editor-container {
     width: 100%;
     height: 100%;
-    background-color: var(--bg-code);
-    border: none;
-    border-radius: 0; /* Removing border radius */
-    padding: 10px 15px;
-    color: var(--text-primary);
-    font-size: 13px;
-    font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
-    line-height: 1.5;
-    resize: none;
-    box-sizing: border-box;
-}
-
-.prompt-editor-container .raw-textarea:focus {
-    outline: none;
-}
-
-.prompt-editor-container .editor-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    margin: 10px auto 0;
-}
-
-.prompt-editor-container .message-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 15px;
-    border-bottom: 1px solid var(--border-primary);
-}
-
-.prompt-editor-container .message-title {
-    display: flex;
-    align-items: center;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.prompt-editor-container .message-title svg {
-    margin-right: 10px;
-    color: var(--text-secondary);
-}
-
-.prompt-editor-container .action-icons {
-    display: flex;
-    gap: 10px;
 }
 
 .prompt-editor-container .block {
@@ -168,71 +122,6 @@ prompt-editor.css
     width: 100%;
 }
 
-.prompt-editor-container .block-textarea {
-    width: 100%;
-    background-color: var(--bg-tertiary);
-    border: none;
-    border-radius: 4px;
-    color: var(--text-primary);
-    font-size: 13px;
-    font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
-    resize: none;
-}
-
-.prompt-editor-container .block-textarea:focus {
-    outline: none;
-}
-
-.prompt-editor-container .block-textarea:focus::placeholder {
-    opacity: 0;
-}
-
-.prompt-editor-container .block-footer {
-    display: flex;
-    margin-top: 5px;
-}
-
-.prompt-editor-container .option-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: 4px;
-    height: 30px;
-    min-width: 30px;
-    margin-right: 5px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.prompt-editor-container .option-button.selected {
-    background-color: var(--bg-active);
-}
-
-.prompt-editor-container .highlighted {
-    border: 1px solid var(--border-active);
-}
-
-.prompt-editor-container .add-block {
-    display: flex;
-    align-items: center;
-    color: var(--text-secondary);
-    padding: 10px;
-    font-style: italic;
-    cursor: pointer;
-}
-
-.prompt-editor-container .add-block svg {
-    margin-right: 10px;
-}
-
-.prompt-editor-container .prompt-text {
-    color: var(--text-secondary);
-    font-style: italic;
-}
-
 .prompt-editor-container .block-menu {
     display: flex;
     gap: 10px;
@@ -273,21 +162,9 @@ prompt-editor.css
     pointer-events: none;
 }
 
-.prompt-editor-container .block.muted .block-textarea {
-    cursor: not-allowed;
-}
-
 /* Exception to allow mute/unmute button to work */
 .prompt-editor-container .block.muted .mute-icon {
     pointer-events: auto;
-}
-
-.prompt-editor-container .footer {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    border-top: 1px solid var(--border-primary);
-    margin-top: 20px;
 }
 
 /* Connector segments and controls */
@@ -340,34 +217,81 @@ prompt-editor.css
     opacity: 1;
 }
 
-.prompt-editor-container .add-btns {
-    display: none;
-    position: absolute;
-    left: 36px;
-    top: 0;
-    background-color: var(--bg-secondary);
-    border-radius: 4px;
-    padding: 10px;
-    border: 1px solid var(--border-primary);
-    z-index: 10;
-    min-width: 140px;
-}
-
-.prompt-editor-container .add-btn {
-    padding: 5px;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.prompt-editor-container .add-btn:hover {
-    background-color: var(--bg-hover);
-}
-
-.prompt-editor-container .item-type {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
 .prompt-editor-container .drag-placeholder {
     opacity: 0;       /* fully hidden */
+}
+
+/* CodeMirror custom styles for prompt editor */
+.prompt-editor-container .CodeMirror {
+    height: 100%;
+    font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+    background-color: var(--bg-code);
+    color: var(--text-primary);
+    border-radius: 0;
+    line-height: 1.5;
+    font-size: 13px;
+}
+
+/* Remove the orange line on the active line */
+.prompt-editor-container .CodeMirror-activeline-background {
+    background-color: transparent !important;
+}
+
+/* Remove border on the left side marking active line */
+.prompt-editor-container .CodeMirror-activeline-gutter {
+    background-color: var(--bg-tertiary) !important;
+}
+
+/* Override any syntax highlighting that might cause orange borders */
+.prompt-editor-container .CodeMirror div.CodeMirror-cursor {
+    border-left: 1px solid var(--text-primary) !important;
+}
+
+.prompt-editor-container .CodeMirror-gutters {
+    background-color: var(--bg-tertiary);
+    border-right: 1px solid var(--border-primary);
+}
+
+.prompt-editor-container .CodeMirror-linenumber {
+    color: var(--text-secondary);
+}
+
+.prompt-editor-container .CodeMirror-placeholder {
+    color: var(--text-placeholder);
+    opacity: 0.7;
+}
+
+/* Syntax highlighting */
+.prompt-editor-container .cm-comment {
+    color: var(--code-comment);
+}
+
+.prompt-editor-container .cm-string {
+    color: var(--code-string);
+}
+
+.prompt-editor-container .cm-property {
+    color: var(--code-property);
+}
+
+.prompt-editor-container .cm-keyword {
+    color: var(--code-keyword);
+}
+
+.prompt-editor-container .cm-variable {
+    color: var(--code-text);
+}
+
+.prompt-editor-container .cm-def, 
+.prompt-editor-container .cm-variable-2 {
+    color: var(--code-function);
+}
+
+.prompt-editor-container .cm-number {
+    color: var(--code-boolean);
+}
+
+/* Make sure the CodeMirror in the blocks doesn't get too big */
+.prompt-editor-container .block .CodeMirror {
+    max-height: 200px;
 }

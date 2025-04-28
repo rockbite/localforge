@@ -202,6 +202,13 @@ export function setupSocketEventHandlers(socket) {
             // --- 6. Update Working Directory ---
             appState.workingDirectory = data.workingDirectory || null;
             setWorkingDirectoryDisplay(appState.workingDirectory);
+            
+            // --- 6.1. Update Agent ID ---
+            appState.agentId = data.agentId || null;
+            const agentSelector = document.getElementById('agent-selector');
+            if (agentSelector) {
+                agentSelector.value = appState.agentId || '';
+            }
 
             // --- 7. Store and Render Historical Tool Logs ---
             if (data.toolLogs && Array.isArray(data.toolLogs)) {
@@ -721,5 +728,15 @@ export function emitSetupWorkspace(socket, directory) {
         console.error("Cannot emit setup_workspace: socket not connected.");
         addAgentMessage("⚠️ Cannot set workspace: Not connected to server.");
         setStatus('error', 'Connection Error');
+    }
+}
+
+/** Emits 'set_agent' */
+export function emitSetAgent(socket, agentId) {
+    if (socket?.connected) {
+        console.log(`Emitting set_agent: ${agentId || 'None'}`);
+        socket.emit('set_agent', { agentId });
+    } else {
+        console.error("Cannot emit set_agent: socket not connected.");
     }
 }

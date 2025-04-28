@@ -131,7 +131,7 @@ routerSessions.get('/:id', async (req, res) => {
     const data = await store.getSessionData(req.params.id);
 
 
-    const systemMessage = await getSystemAndContext(data.workingDirectory);
+    const systemMessage = await getSystemAndContext(data.workingDirectory, data);
     
     res.json({ id: req.params.id, ...meta, data, systemMessage });
   } catch {
@@ -202,19 +202,23 @@ routerSessions.post('/:id/clear', async (req, res) => {
     console.log(`Attempting to clear session: ${sessionId}`);
 
     let existingWorkingDirectory = null;
+    let existingAgentId = null;
 
-    // 1. Try to get the *current* working directory (handle potential legacy fields)
+    // 1. Try to get the *current* working directory and agentId (handle potential legacy fields)
     try {
       const existingRawData = await store.getSessionData(sessionId);
       // Use the same logic as normalization to find the correct working directory
       existingWorkingDirectory = existingRawData?.[FIELD_NAMES.WORKING_DIRECTORY]
                               || existingRawData?.[FIELD_NAMES.LEGACY_DIRECTORY]
                               || null;
-       console.log(`Found existing working directory for session ${sessionId}: ${existingWorkingDirectory}`);
+      existingAgentId = existingRawData?.[FIELD_NAMES.AGENT_ID] || null;
+      
+      console.log(`Found existing working directory for session ${sessionId}: ${existingWorkingDirectory}`);
+      console.log(`Found existing agent ID for session ${sessionId}: ${existingAgentId}`);
     } catch (err) {
-      // If session data doesn't exist (e.g., corrupted/partially deleted), log but proceed with null WD.
+      // If session data doesn't exist (e.g., corrupted/partially deleted), log but proceed with null values.
        if (err.status === 404 || err.code === 'LEVEL_NOT_FOUND') {
-           console.warn(`Session data not found for ${sessionId} during clear. Proceeding without preserving working directory.`);
+           console.warn(`Session data not found for ${sessionId} during clear. Proceeding without preserving working directory or agent ID.`);
        } else {
            // Rethrow unexpected errors
            throw err;
@@ -225,13 +229,14 @@ routerSessions.post('/:id/clear', async (req, res) => {
     const clearedData = {
       ...DEFAULT_SESSION_DATA, // Start with defaults
       [FIELD_NAMES.WORKING_DIRECTORY]: existingWorkingDirectory, // Preserve the found WD
+      [FIELD_NAMES.AGENT_ID]: existingAgentId, // Preserve the found agent ID
       // updatedAt will be added by setSessionData/saveSession
     };
 
     // 3. Use setSessionData to replace the existing data completely
     // Add updatedAt timestamp here or rely on setSessionData to do it
     const savedData = await store.setSessionData(sessionId, { ...clearedData, [FIELD_NAMES.UPDATED_AT]: Date.now() });
-    console.log(`Session ${sessionId} cleared. Preserved WD: ${savedData[FIELD_NAMES.WORKING_DIRECTORY]}`);
+    console.log(`Session ${sessionId} cleared. Preserved WD: ${savedData[FIELD_NAMES.WORKING_DIRECTORY]}, Agent ID: ${savedData[FIELD_NAMES.AGENT_ID]}`);
 
     // 4. Reset the in-memory session in ProjectSessionManager IMMEDIATELY
     // Pass the definitively cleared and saved data.

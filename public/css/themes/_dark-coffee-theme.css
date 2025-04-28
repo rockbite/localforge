@@ -1,0 +1,67 @@
+/* Dark Coffee theme variables */
+:root {
+    /* Base backgrounds */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #232323;
+    --bg-tertiary: #2c2c2c;
+    --bg-input: #232323;
+    --bg-code: #1e1e1e;
+    --bg-hover: rgba(255, 163, 135, 0.05);
+    --bg-active: rgba(255, 163, 135, 0.1);
+    --bg-code-overlay: rgba(255, 163, 135, 0.02);
+
+    /* Text colors */
+    --text-primary: #f0f0f0;
+    --text-secondary: #c0c0c0;
+    --text-disabled: #808080;
+    --text-placeholder: #9a9a9a;
+    --text-code-inline: #ff9e80;
+
+    /* Border colors */
+    --border-primary: #333333;
+    --border-input: #3a3a3a;
+    --border-focus: #ff9e80;
+    --border-active: #ff7f50;
+    --divider-color: #383838;
+
+    /* Component backgrounds */
+    --button-primary-bg: linear-gradient(90deg, #ff7f50, #ff9e80);
+    --button-secondary-bg: #2c2c2c;
+    --button-secondary-bg-hover: #3a3a3a;
+    --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+    --dropdown-bg: #232323;
+    
+    /* Accent colors */
+    --accent-primary: #ff7f50;
+    --accent-secondary: #ff9e80;
+    --accent-tertiary: #c76d45;
+    --accent-quaternary: #a05a3c;
+    --accent-gradient: linear-gradient(90deg, #ff7f50, #ff9e80);
+    
+    /* Status colors */
+    --status-success: #7dd1c1;
+    --status-warning: #ffd166;
+    --status-error: #f08080;
+    
+    /* Link colors */
+    --link-color: #ff9e80;
+    --link-hover: #ffc3ad;
+    --link-active: #ff7f50;
+    
+    /* Code syntax highlighting */
+    --code-text: #f0f0f0;
+    --code-comment: #8a8a8a;
+    --code-punctuation: #c0c0c0;
+    --code-property: #ff9e80;
+    --code-boolean: #d3a692;
+    --code-string: #a8c19f;
+    --code-operator: #c0c0c0;
+    --code-function: #ffb299;
+    --code-keyword: #ff9e80;
+    --code-regex: #ffa885;
+    
+    /* Shadow and effects */
+    --shadow-color: rgba(0, 0, 0, 0.35);
+    --focus-shadow: rgba(255, 163, 135, 0.25);
+    --hover-shadow: rgba(0, 0, 0, 0.3);
+}

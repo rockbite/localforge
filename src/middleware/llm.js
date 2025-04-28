@@ -1,15 +1,19 @@
 // llm.js
 import providers from './providers/index.js';
 import store from "../db/store.js";
+import agentStore from "../db/agentStore.js";
 
 let MAIN_MODEL = 0;
 let AUX_MODEL = 1;
 let EXPERT_MODEL = 2;
 
 
-export async function callLLMByType(modelType, options) {
+export async function callLLMByType(modelType, options, sessionData = null) {
+
     options.model = getModelNameByType(modelType);
-    return callLLMProvider(numToStringModelConfigNameMap(modelType), options);
+    let providerType = numToStringModelConfigNameMap(modelType);
+
+    return callLLMProvider(providerType, options, sessionData);
 }
 
 function numToStringModelConfigNameMap(number) {
@@ -38,12 +42,32 @@ function getProviderTypeByProviderName(providerName) {
  * @param {string} prompt
  * @param {object} opts  e.g. { model: 'gpt-4o-mini', temperature: 0.7 }
  */
-export async function callLLMProvider(providerName, options) {
+export async function callLLMProvider(providerName, options, sessionData = null) {
     const modelConfig = store.getModelConfigFor(providerName);
     let providerType = modelConfig.provider.type;
     let providerOptions = modelConfig.provider.options;
+    let provider = providers[providerType];
 
-    const provider = providers[providerType];
+
+    if(sessionData) {
+        let agentId = sessionData.agentId;
+        let agent = await agentStore.getAgent(agentId);
+        if(agent && agent.agent) {
+            agent = agent.agent;
+            if(agent.llms[providerName]) {
+                // we are overriding the default provider and model
+                let providerListId = agent.llms[providerName].provider;
+                let providerData = store.findProviderById(providerListId);
+                if(providerData) {
+                    let providerType = providerData.type;
+                    provider = providers[providerType];
+                    options.model = agent.llms[providerName].model;
+                    providerOptions = providerData.options;
+                }
+            }
+        }
+    }
+
 
     // check our custom options
     if (options.signal?.aborted) {

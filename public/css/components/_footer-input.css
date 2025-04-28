@@ -69,6 +69,10 @@ footer {
     width: 100%;
 }
 
+.editor-container {
+    width: 100%;
+}
+
 /* Style for the prompt editor container */
 .prompt-editor-container {
     position: relative;

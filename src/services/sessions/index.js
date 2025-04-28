@@ -69,6 +69,9 @@ class ProjectSessionManager {
         normalized[FIELD_NAMES.WORKING_DIRECTORY] = rawData[FIELD_NAMES.WORKING_DIRECTORY]
                                                 || rawData[FIELD_NAMES.LEGACY_DIRECTORY]
                                                 || null; // Explicitly null if neither exists
+                                                
+        // 1.1 Preserve Agent ID if it exists
+        normalized[FIELD_NAMES.AGENT_ID] = rawData[FIELD_NAMES.AGENT_ID] || null;
 
         // 2. Preserve History (Handle legacy 'conversation')
         const history = rawData[FIELD_NAMES.HISTORY] || rawData[FIELD_NAMES.LEGACY_CONVERSATION];
@@ -511,6 +514,27 @@ class ProjectSessionManager {
     async getWorkingDirectory(sessionId) {
         const sessionData = await this.getSession(sessionId);
         return sessionData[FIELD_NAMES.WORKING_DIRECTORY];
+    }
+    
+    /**
+     * Set the agent ID for a session
+     * @param {string} sessionId
+     * @param {string|null} agentId
+     */
+    async setAgentId(sessionId, agentId) {
+        const sessionData = await this.getSession(sessionId);
+        sessionData[FIELD_NAMES.AGENT_ID] = agentId;
+        await this.saveSession(sessionId);
+    }
+
+    /**
+     * Get the agent ID for a session
+     * @param {string} sessionId
+     * @returns {Promise<string|null>} Agent ID or null
+     */
+    async getAgentId(sessionId) {
+        const sessionData = await this.getSession(sessionId);
+        return sessionData[FIELD_NAMES.AGENT_ID];
     }
 
     /**

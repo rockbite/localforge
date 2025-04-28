@@ -45,7 +45,23 @@
 /* Buttons in chat header */
 .chat-buttons {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    align-items: center;
+    height: 28px; /* Ensure consistent height */
+}
+
+/* Agent selector dropdown */
+.agent-selector {
+    height: 28px;
+    border-radius: 4px;
+    padding: 0 8px;
+    margin-right: 10px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
 }
 
 /* Chat message area styles */

@@ -680,3 +680,172 @@
 .code-font-large .prism-code {
     font-size: 16px !important;
 }
+
+/* Agents Tab Styles */
+.agents-section {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.agents-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.agents-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.add-agent-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.add-agent-btn .material-icons {
+    font-size: 16px;
+}
+
+.agents-list {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    overflow: hidden;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.agent-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-primary);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 40px; /* Fixed height to prevent jumping */
+}
+
+.agent-item:last-child {
+    border-bottom: none;
+}
+
+.agent-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-primary);
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 30%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    height: 30px;
+    line-height: 20px;
+    width: 150px;
+    cursor: pointer;
+    display: inline-block; /* Required for accurate text width measurement */
+}
+
+.settings-agent-name-input {
+    font-weight: 500 !important;;
+    font-size: 14px !important;;
+    color: var(--text-primary) !important;;
+    background-color: transparent !important;
+    border: 1px solid red !important;
+    border-radius: 0 !important;;
+    margin: -10px !important;
+    height: 30px !important;;
+    width: 150px !important;
+    line-height: 20px !important;;
+    outline: none !important;
+    box-shadow: none !important;
+    box-sizing: border-box;
+}
+
+.settings-agent-name-input:focus {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.agent-description {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-left: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+.agent-actions {
+    margin-left: auto;
+    flex-shrink: 0;
+    display: flex;
+    gap: 8px;
+}
+
+.empty-agents-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 0;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: var(--text-tertiary);
+}
+
+.empty-state-icon .material-icons {
+    font-size: 40px;
+}
+
+.empty-state-text {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+/* Confirmation modal for agent deletion */
+.confirmation-modal-content {
+    max-width: 400px;
+    width: 90%;
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--border-primary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    animation: modal-fade-in 0.3s ease-out;
+    padding: 20px;
+}
+
+.confirmation-modal-content h3 {
+    margin-top: 0;
+    color: var(--text-primary);
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.confirmation-modal-content p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.btn.danger {
+    background-color: #e53935;
+    color: white;
+}
+
+.btn.danger:hover {
+    background-color: #d32f2f;
+}

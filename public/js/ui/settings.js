@@ -45,6 +45,7 @@ class SettingsUI {
         // Provider edit modal functionality
         this.initProviderEditModal();
     }
+    
 
     openDialog() {
         this.dialog.classList.add('active');

@@ -1,0 +1,542 @@
+/* Agent Modal Styles */
+.agent-modal-content {
+    width: 98%;
+    max-width: none;
+    height: 95vh;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+}
+
+.agent-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-primary);
+    background-color: var(--bg-tertiary);
+}
+
+.agent-modal-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.mini-close-btn {
+    width: 32px;
+    height: 32px;
+    min-width: unset;
+    border-radius: 4px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-close-btn .material-icons {
+    font-size: 18px;
+}
+
+.agent-modal-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Add small negative margin to offset the header space */
+    margin-top: -1px;
+}
+
+/* Top section styles */
+.agent-modal-top-section {
+    display: grid;
+    grid-template-columns: 250px minmax(400px, 640px) 1fr;
+    gap: 16px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+/* Agent Info Section */
+.agent-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.agent-info-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.agent-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    background-color: var(--bg-tertiary);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.agent-icon .material-icons {
+    font-size: 24px;
+    color: var(--accent-primary);
+}
+
+.agent-name-container {
+    flex: 1;
+}
+
+.agent-name-input {
+    width: 100%;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 8px 12px;
+    border: 1px solid var(--border-input);
+    border-radius: 6px;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+}
+
+.agent-description-container {
+    width: 100%;
+}
+
+.agent-description-input {
+    width: 100%;
+    height: 100px;
+    resize: none;
+    font-size: 14px;
+    padding: 10px 15px;
+    border: 1px solid var(--border-input);
+    border-radius: 6px;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+}
+
+/* Agent LLMs Section */
+.agent-llms-section {
+    flex: 1;
+}
+
+.agent-llms-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    height: 100%;
+}
+
+.agent-llm-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.agent-llm-header {
+    background-color: var(--bg-tertiary);
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.agent-llm-body {
+    padding: 8px 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.agent-llm-form-group {
+    margin-bottom: 6px;
+}
+
+.agent-llm-form-group:last-child {
+    margin-bottom: 0;
+}
+
+.agent-llm-form-group label {
+    display: none; /* Hide the "Provider" label */
+}
+
+.agent-llm-form-group select,
+.agent-llm-form-group input {
+    width: 100%;
+    font-size: 12px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-input);
+    border-radius: 4px;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    height: 30px;
+}
+
+/* Agent Tools Section */
+.agent-tools-section h3 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.agent-tools-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    height: 157px;
+    max-width: 500px;
+    align-content: flex-start;
+    overflow-y: auto;
+    padding: 8px;
+    background-color: var(--bg-tertiary);
+    border-radius: 6px;
+    border: 1px solid var(--border-primary);
+}
+
+.tool-item {
+    display: flex;
+    height: 27px;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    border: 1px solid var(--border-primary);
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.tool-checkbox {
+    margin: 0;
+    transform: scale(0.85);
+}
+
+.tool-info {
+    margin-left: 3px;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    font-size: 12px;
+}
+
+.tool-info:hover {
+    color: var(--text-secondary);
+}
+
+/* Tabs Section */
+.agent-modal-tabs-section {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border-primary);
+    min-height: 50px;
+    background-color: var(--bg-tertiary);
+}
+
+.agent-tabs-list {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    max-width: calc(100% - 40px);
+}
+
+.agent-tab {
+    padding: 6px 12px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    position: relative;
+    margin-right: 4px;
+}
+
+.agent-tab.active {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+}
+
+.agent-tab-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 120px;
+    display: inline-block;
+}
+
+.tab-name-input {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: inherit;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    max-width: 120px;
+    min-width: 120px;
+    padding: 0;
+    margin: 0;
+    width: 120px;
+}
+
+.agent-tab.active .tab-name-input {
+    color: var(--text-primary);
+}
+
+.agent-tab-delete.material-icons {
+    opacity: 0.6;
+    cursor: pointer;
+    font-size: 17px !important;
+}
+
+.agent-tab-delete:hover {
+    opacity: 1;
+    color: var(--status-error);
+}
+
+.add-tab-button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    margin-left: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.add-tab-button:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Prompt Editor Section */
+.agent-modal-content-section {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--bg-primary);
+}
+
+/* No prompts message */
+.no-prompts-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-primary);
+    z-index: 5;
+}
+
+.no-prompts-content {
+    text-align: center;
+    color: var(--text-tertiary);
+    padding: 30px;
+}
+
+.no-prompts-content .material-icons {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+}
+
+.no-prompts-content p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.no-prompts-content .hint-text {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.agent-prompt-editor {
+    height: 100%;
+    width: 100%;
+    font-family: var(--code-font);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Override styles for the prompt editor in agent modal */
+.agent-prompt-editor .tab-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.agent-prompt-editor .tab-content-container {
+    flex: 1;
+    overflow: hidden;
+}
+
+.agent-prompt-editor .tab-content {
+    height: 100%;
+}
+
+.agent-prompt-editor .text-editor-container {
+    height: 100%;
+}
+
+.agent-prompt-editor .editor-container {
+    height: 100%;
+    overflow: auto;
+}
+
+.prompt-view-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    font-size: 13px;
+    color: var(--text-primary);
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.prompt-view-button:hover {
+    background-color: var(--bg-hover);
+}
+
+.prompt-view-button .material-icons {
+    font-size: 16px;
+}
+
+/* Override for the prompt editor to fit */
+/* Use the prompt editor instead of direct CodeMirror */
+#agent-prompt-editor .CodeMirror {
+    font-family: var(--code-font);
+    /* Theme-aware CodeMirror styling */
+    background-color: var(--bg-code) !important;
+    color: var(--code-text) !important;
+    border: 1px solid var(--border-primary);
+}
+
+/* Fix content alignment with line numbers */
+#agent-prompt-editor .CodeMirror .CodeMirror-lines {
+    padding: 4px 0; /* Vertical padding */
+}
+
+/* Fix placeholder position and style */
+#agent-prompt-editor .CodeMirror .CodeMirror-placeholder {
+    padding-left: 30px !important;
+    color: var(--text-placeholder) !important;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+#agent-prompt-editor .CodeMirror-gutters {
+    background-color: var(--bg-tertiary) !important;
+    border-right: 1px solid var(--border-primary) !important;
+}
+
+#agent-prompt-editor .CodeMirror-linenumber {
+    color: var(--text-secondary) !important;
+}
+
+#agent-prompt-editor .CodeMirror-cursor {
+    border-left: 1px solid var(--text-primary) !important;
+}
+
+/* CodeMirror syntax highlighting overrides for themes */
+#agent-prompt-editor .cm-comment {
+    color: var(--code-comment) !important;
+}
+
+#agent-prompt-editor .cm-string {
+    color: var(--code-string) !important;
+}
+
+#agent-prompt-editor .cm-property {
+    color: var(--code-property) !important;
+}
+
+#agent-prompt-editor .cm-keyword {
+    color: var(--code-keyword) !important;
+}
+
+#agent-prompt-editor .cm-operator {
+    color: var(--code-operator) !important;
+}
+
+#agent-prompt-editor .cm-variable {
+    color: var(--code-text) !important;
+}
+
+#agent-prompt-editor .cm-def, 
+#agent-prompt-editor .cm-variable-2 {
+    color: var(--code-function) !important;
+}
+
+#agent-prompt-editor .cm-number {
+    color: var(--code-boolean) !important;
+}
+
+/* Fix for active line highlighting in CodeMirror */
+#agent-prompt-editor .CodeMirror-activeline-background {
+    background-color: var(--bg-active) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1500px) {
+    .agent-modal-top-section {
+        grid-template-columns: 250px minmax(400px, 640px) 1fr;
+    }
+}
+
+@media (max-width: 1200px) {
+    .agent-modal-top-section {
+        grid-template-columns: 250px 1fr;
+    }
+    
+    .agent-tools-section {
+        grid-column: 2;
+        grid-row: 2;
+    }
+    
+    .agent-llms-container {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .agent-modal-top-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .agent-tools-section {
+        grid-column: 1;
+        grid-row: 3;
+    }
+}
