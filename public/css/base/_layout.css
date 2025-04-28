@@ -1,0 +1,126 @@
+/* Core layout rules that don't change with themes */
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - var(--header-height));
+    overflow: hidden;
+    width: 100%;
+}
+
+.left-panel {
+    flex: 0 0 auto;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-primary);
+}
+
+.center-panel {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.right-panel {
+    flex: 0 0 var(--tool-panel-width);
+    overflow-y: auto;
+    border-left: 1px solid var(--border-primary);
+}
+
+.footer {
+    border-top: 1px solid var(--border-primary);
+    background-color: var(--bg-secondary);
+}
+
+/* Generic flex utilities */
+.flex {
+    display: flex;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.gap-1 {
+    gap: var(--spacing-xs);
+}
+
+.gap-2 {
+    gap: var(--spacing-sm);
+}
+
+.gap-3 {
+    gap: var(--spacing-md);
+}
+
+/* Positioning utilities */
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.sticky {
+    position: sticky;
+}
+
+.fixed {
+    position: fixed;
+}
+
+/* Scroll behaviors */
+.overflow-auto {
+    overflow: auto;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+/* If necessary, add scrollbar styles for webkit browsers */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--border-primary);
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}

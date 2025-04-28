@@ -102,7 +102,7 @@ async function initializeApp() {
         projectUI.initProjectUI();        // Setup project list interactions/menus
         chatUI.initChatForm();          // Setup message input form
         toolLogUI.initToolLog();          // Prepare tool log area
-        settingsUI.initSettingsDialog();    // Setup settings modal button/logic
+        // Settings UI is now initialized automatically in the module
         workspaceUI.initWorkspaceSetup();   // Setup WD display click/modal form
         
         // Initialize chat context view

@@ -1,0 +1,214 @@
+/* Footer drag handle */
+#footer-drag-handle {
+    height: 8px;
+    width: 100%;
+    cursor: ns-resize;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border-primary);
+    position: relative;
+    z-index: 10;
+}
+
+.handle-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 40px;
+}
+
+.handle-icon .material-icons {
+    font-size: 18px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    transition: opacity var(--transition-fast);
+}
+
+#footer-drag-handle:hover .material-icons {
+    opacity: 1;
+}
+
+/* Footer styles */
+footer {
+    background-color: var(--bg-primary);
+    min-height: 220px;
+    max-height: 90vh;
+    height: var(--footer-height, 360px); /* Use CSS variable for dynamic height */
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+#message-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 auto;
+    align-items: stretch;
+    height: 100%;
+    flex: 1;
+}
+
+/* Prompt container for the new editor */
+.prompt-container {
+    position: relative;
+    border-radius: 0;
+    background: var(--bg-secondary);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+}
+
+/* Style for the prompt editor container */
+.prompt-editor-container {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-secondary);
+    flex: 1;
+    min-height: 0;
+    height: calc(100% - 40px);
+    overflow: hidden;
+}
+
+/* Toolbar below the editor */
+.prompt-toolbar {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-primary);
+}
+
+.prompt-toolbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.prompt-toolbar-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Attached filename display */
+.attached-filename {
+    font-size: 12px;
+    color: var(--status-success);
+    margin-left: 4px;
+}
+
+#message-input {
+    resize: none;
+    background: transparent;
+    appearance: none;
+    caret-color: var(--accent-quaternary);
+    border: none;
+    outline: none;
+    overflow-y: auto;
+    color: var(--text-primary);
+    box-sizing: border-box;
+    padding: 0;
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-normal);
+    line-height: 24px;
+    flex: 1;
+    width: 100%;
+    height: calc(100% - 24px);
+    display: block;
+    min-height: 24px;
+}
+
+#message-input::placeholder {
+    color: var(--text-placeholder);
+}
+
+/* Attachment icon - now in the toolbar */
+.attachments-icon {
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    position: relative;
+}
+
+.attachments-icon:hover {
+    color: var(--accent-quaternary);
+    transform: scale(1.1);
+}
+
+.attachments-icon.attached {
+    color: var(--status-success);
+}
+
+@keyframes pulse-success {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Command Enter label - now in the toolbar */
+.prompt-label {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 12px;
+}
+
+.prompt-toolbar-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Send button in toolbar - VS Code style */
+.toolbar-send-button {
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.toolbar-send-button:hover {
+    background-color: color-mix(in srgb, var(--accent-primary) 90%, white);
+}
+
+.toolbar-send-button:active {
+    background-color: color-mix(in srgb, var(--accent-primary) 80%, black);
+}
+
+.toolbar-send-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    background: var(--border-primary);
+}
+
+/* Disabled state for prompt container */
+.prompt-container.disabled {
+    opacity: 0.7;
+    pointer-events: none; 
+}

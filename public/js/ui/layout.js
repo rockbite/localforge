@@ -136,6 +136,16 @@ function initFooterDragHandle() {
         requestAnimationFrame(() => {
             // Update the footer height
             footer.style.height = `${newFooterHeight}px`;
+            
+            // Explicitly adjust chat container to maintain balance
+            if (chatContainer) {
+                // Allow the chat container to shrink as footer grows
+                const mainPanelHeight = mainPanel.offsetHeight;
+                const headerHeight = document.getElementById('chat-header')?.offsetHeight || 0;
+                const footerHandleHeight = footerDragHandle?.offsetHeight || 0;
+                const availableHeight = mainPanelHeight - headerHeight - footerHandleHeight - newFooterHeight;
+                chatContainer.style.height = `${Math.max(100, availableHeight)}px`;
+            }
 
             // Update CSS variable to store the value
             document.documentElement.style.setProperty('--footer-height', `${newFooterHeight}px`);

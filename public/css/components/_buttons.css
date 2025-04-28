@@ -1,0 +1,84 @@
+/* Button Styles */
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--button-secondary-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.secondary-button:hover {
+    background-color: var(--button-secondary-bg-hover);
+}
+
+.secondary-button:active {
+    transform: translateY(1px);
+}
+
+.secondary-button .material-icons {
+    font-size: 18px;
+}
+
+.danger-button {
+    background-color: #9e3636;
+    color: white;
+    border: 1px solid #8a2626;
+}
+
+.danger-button:hover {
+    background-color: #b74040;
+}
+
+.danger-button:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-disabled);
+    border-color: var(--border-primary);
+    opacity: 0.8;
+    cursor: wait;
+}
+
+/* Button-style links */
+.link-button {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+}
+
+.link-button:hover {
+    background-color: var(--bg-tertiary);
+    text-decoration: none;
+    transform: translateY(-1px);
+    color: var(--text-primary);
+}
+
+.link-button:active {
+    transform: translateY(0px);
+}
+
+/* Update button */
+.update-button {
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background-color var(--transition-fast);
+}
+
+.update-button:hover {
+    background-color: var(--accent-secondary);
+}

@@ -1,636 +1,613 @@
-// src/ui/settings.js
-// Purpose: Handles the settings modal display and interactions.
+// Settings dialog functionality
+class SettingsUI {
+    constructor() {
+        this.dialog = document.getElementById('settings-modal');
+        this.tabButtons = document.querySelectorAll('.settings-tab-button');
+        this.tabContents = document.querySelectorAll('.settings-tab-content');
+        this.cancelButton = document.getElementById('settings-cancel');
+        this.saveButton = document.getElementById('settings-save');
 
-import * as api from '../api.js';
-import { addAgentMessage } from './chat.js'; // For user feedback
-
-// DOM Elements specific to settings
-const settingsButton = document.getElementById('settings-button');
-const settingsModal = document.getElementById('settings-modal');
-const settingsSaveButton = document.getElementById('settings-save');
-const settingsCancelButton = document.getElementById('settings-cancel');
-const settingsTabs = document.querySelectorAll('.settings-tab');
-const settingsTabContents = document.querySelectorAll('.settings-tab-content');
-
-// Provider edit modal elements
-const providerEditModal = document.getElementById('provider-edit-modal');
-const providerEditTitle = document.getElementById('provider-edit-title');
-const providerNameInput = document.getElementById('providerName');
-const providerTypeSelect = document.getElementById('providerType');
-const providerSpecificSettingsContainer = document.getElementById('provider-specific-settings');
-const providerEditCancelButton = document.getElementById('provider-edit-cancel');
-const providerEditSaveButton = document.getElementById('provider-edit-save');
-const addProviderButton = document.querySelector('.add-provider-btn');
-const providersListElement = document.querySelector('.providers-list');
-
-// LLM config elements
-const auxModelProviderSelect = document.getElementById('auxModelProvider');
-const auxModelNameInput = document.getElementById('auxModelName');
-const mainModelProviderSelect = document.getElementById('mainModelProvider');
-const mainModelNameInput = document.getElementById('mainModelName');
-const expertModelProviderSelect = document.getElementById('expertModelProvider');
-const expertModelNameInput = document.getElementById('expertModelName');
-
-// Other settings elements
-const usePuppeteerCheckbox = document.getElementById('usePuppeteer');
-const googleCseIdInput = document.getElementById('googleCseId');
-const googleApiKeyInput = document.getElementById('googleApiKey');
-const enableCommandExecutionCheckbox = document.getElementById('enableCommandExecution');
-const restrictFilesystemCheckbox = document.getElementById('restrictFilesystem');
-const enableWebAccessCheckbox = document.getElementById('enableWebAccess');
-
-// Store settings data
-let settingsData = {};
-let providerTypes = [];
-// Map of provider type to settings array
-let providerTypeSettings = {};
-// Global models data that persists between UI operations
-let globalModelsData = null;
-
-/**
- * Initializes the settings dialog functionality (button, tabs, save/cancel).
- */
-export function initSettingsDialog() {
-    if (!settingsButton || !settingsModal || !settingsSaveButton || !settingsCancelButton) {
-        console.warn("Settings modal elements not found, skipping initialization.");
-        return;
+        // Theme and appearance elements
+        this.themeSelect = document.getElementById('theme-select');
+        
+        // Theme is now applied by theme-loader.js on page load
+        // No need to apply default theme here
+        
+        this.setupEventListeners();
+        this.loadSettings();
     }
 
-    // --- Tab Switching Logic ---
-    settingsTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const targetTabId = this.getAttribute('data-tab');
-            settingsTabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            settingsTabContents.forEach(content => {
-                const contentTabId = content.id.replace('-tab', '');
-                if (contentTabId === targetTabId) {
-                    content.style.visibility = 'visible';
-                    content.style.position = 'relative';
-                    content.style.zIndex = '1';
-                } else {
-                    content.style.visibility = 'hidden';
-                    content.style.position = 'absolute';
-                    content.style.zIndex = '-1';
-                }
+    setupEventListeners() {
+        // Tab navigation
+        this.tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                this.openTab(button.dataset.tab);
             });
         });
-    });
-    // Ensure the first tab is active initially
-    if (settingsTabs.length > 0 && !document.querySelector('.settings-tab.active')) {
-        settingsTabs[0].click();
-    }
 
-    // --- Button Listeners ---
-    // Attach showSettingsModal which handles loading data internally
-    settingsButton.addEventListener('click', showSettingsModal);
-
-    settingsSaveButton.addEventListener('click', saveSettings); // Keep separate save logic
-
-    settingsCancelButton.addEventListener('click', () => {
-        settingsModal.classList.remove('active');
-    });
-
-    // Provider edit modal functionality
-    initProviderEditModal();
-
-    console.log("Settings dialog initialized.");
-}
-
-/**
- * Initializes the provider edit modal functionality
- */
-function initProviderEditModal() {
-    // No password toggle needed anymore - API key is a regular text field
-
-    // Add provider button functionality
-    if (addProviderButton) {
-        addProviderButton.addEventListener('click', function() {
-            showProviderEditModal();
+        // Close dialog
+        this.cancelButton.addEventListener('click', () => {
+            this.closeDialog();
         });
-    }
 
-    // Provider edit modal cancel button
-    if (providerEditCancelButton) {
-        providerEditCancelButton.addEventListener('click', function() {
-            closeProviderEditModal();
+        // Save settings
+        this.saveButton.addEventListener('click', () => {
+            this.saveSettings();
         });
-    }
-}
 
-/**
- * Loads settings schema and data, and displays the settings modal.
- * This is the function typically called to open the settings.
- */
-export async function showSettingsModal() {
-    if (!settingsModal) {
-        console.error("Settings modal element not found.");
-        return;
-    }
-    
-    // Set initial styles to prevent flash
-    const modalContent = settingsModal.querySelector('.modal-content');
-    if (modalContent) {
-        modalContent.style.opacity = '0';
-    }
-    
-    // Show modal (without animation initially)
-    settingsModal.style.display = 'flex';
-    
-    // Load data first before showing animation
-    setLoadingState(true);
-
-    try {
-        // Get schema data (includes provider types and their settings)
-        const schemaData = await api.loadSettingsSchema();
-        if (schemaData.providerTypes) {
-            providerTypes = schemaData.providerTypes;
-            // Build map of provider type to settings
-            providerTypeSettings = {};
-            providerTypes.forEach(provider => {
-                providerTypeSettings[provider.type] = provider.settings || [];
+        // Theme selector
+        if (this.themeSelect) {
+            this.themeSelect.addEventListener('change', () => {
+                this.applyTheme(this.themeSelect.value);
             });
-            updateProviderTypeOptions();
         }
         
-        // Load settings data
-        const settingsData = await api.loadSettingsFromServer();
-        populateSettingsForm(settingsData);
-        
-        // Now add the active class for animation
-        setTimeout(() => {
-            // Reset opacity first
-            if (modalContent) {
-                modalContent.style.opacity = '';
-            }
-            settingsModal.style.display = '';
-            settingsModal.classList.add('active');
-        }, 10);
-    } catch (error) {
-        console.error("Failed to load settings:", error);
-        alert(`Error loading settings: ${error.message}`);
-        populateSettingsForm({}); // Clear form on error
-        
-        // Still show modal even on error
-        setTimeout(() => {
-            if (modalContent) {
-                modalContent.style.opacity = '';
-            }
-            settingsModal.style.display = '';
-            settingsModal.classList.add('active');
-        }, 10);
-    } finally {
-        setLoadingState(false);
+        // Provider edit modal functionality
+        this.initProviderEditModal();
     }
-}
 
-/**
- * Updates the provider type options in the provider edit modal and provider types list
- */
-function updateProviderTypeOptions() {
-    // Update provider type select dropdown in the edit modal
-    if (providerTypeSelect) {
-        // Store current value
-        const currentValue = providerTypeSelect.value;
-        
-        // Clear options
-        providerTypeSelect.innerHTML = '';
-        
-        // Add provider type options from API response only
-        providerTypes.forEach(type => {
-            const option = document.createElement('option');
-            option.value = type.type;
-            option.textContent = type.name;
-            providerTypeSelect.appendChild(option);
+    openDialog() {
+        this.dialog.classList.add('active');
+        this.openTab('models'); // Default tab
+        this.loadSettings();
+    }
+
+    closeDialog() {
+        this.dialog.classList.remove('active');
+    }
+
+    openTab(tabId) {
+        // Hide all tabs and deactivate all buttons
+        this.tabContents.forEach(content => {
+            content.style.visibility = 'hidden';
+            content.style.position = 'absolute';
+            content.style.zIndex = '-1';
         });
         
-        // Restore selected value if it exists in new options
-        if (currentValue && [...providerTypeSelect.options].some(option => option.value === currentValue)) {
-            providerTypeSelect.value = currentValue;
-        } else if (providerTypeSelect.options.length > 0) {
-            providerTypeSelect.value = providerTypeSelect.options[0].value;
+        this.tabButtons.forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        // Activate the selected tab and button
+        const tabContent = document.getElementById(`${tabId}-tab`);
+        if (tabContent) {
+            tabContent.style.visibility = 'visible';
+            tabContent.style.position = 'relative';
+            tabContent.style.zIndex = '1';
         }
+        document.querySelector(`.settings-tab-button[data-tab="${tabId}"]`).classList.add('active');
     }
-    
-    // Update provider types badges in the UI
-    updateProviderTypesBadges();
-}
 
-
-/**
- * Updates the UI with the available provider types
- * This is called both at initialization and when new data is loaded
- */
-function updateProviderTypesBadges() {
-    const providerTypesList = document.querySelector('.provider-types-list');
-    if (!providerTypesList) return;
-    
-    // Clear the list
-    providerTypesList.innerHTML = '';
-    
-    // Use only provider types from API
-    const typesToShow = providerTypes.map(t => t.type);
-    
-    // Add each type as a badge
-    typesToShow.forEach(type => {
-        const badge = document.createElement('span');
-        badge.className = 'provider-type-badge';
-        badge.textContent = type;
-        providerTypesList.appendChild(badge);
-    });
-}
-
-/**
- * Creates default models data when none exists
- * Per requirements, this is the only place where we initialize with a default structure
- * @returns {object} The default models configuration
- */
-function createDefaultModelsData() {
-    return {
-        providers: [
-            {
-                name: 'OpenAI',
-                type: 'openai',
-                options: {
-                    apiKey: '',
-                    url: ''
+    loadSettings() {
+        // Load current settings from API
+        fetch('/api/settings').then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to load settings: ${response.statusText}`);
+            }
+            return response.json();
+        }).then(settings => {
+            // Populate form with settings
+            this.populateModelSettings(settings);
+            this.populateWebSettings(settings);
+            this.populateSecuritySettings(settings);
+            this.populateThemeSettings(settings);
+            
+            // Parse models data
+            if (settings.models && typeof settings.models === 'string') {
+                try {
+                    const modelsData = JSON.parse(settings.models);
+                    this.populateProvidersData(modelsData);
+                } catch (error) {
+                    console.error('Error parsing models data:', error);
                 }
             }
-        ],
-        llmConfig: {
-            aux: {
-                provider: 'OpenAI',
-                model: 'gpt-4.1-mini'
-            },
-            main: {
-                provider: 'OpenAI',
-                model: 'gpt-4.1'
-            },
-            expert: {
-                provider: 'OpenAI',
-                model: 'o3'
+        }).catch(error => {
+            console.error('Error loading settings:', error);
+        });
+    }
+    
+    populateProvidersData(modelsData) {
+        // Store global data
+        this.globalModelsData = modelsData;
+
+        // Populate providers list
+        if (modelsData.providers && Array.isArray(modelsData.providers)) {
+            const providersListElement = document.querySelector('.providers-list');
+            if (providersListElement) {
+                providersListElement.innerHTML = '';
+                
+                modelsData.providers.forEach(provider => {
+                    const providerItem = document.createElement('div');
+                    providerItem.className = 'provider-item';
+                    providerItem.dataset.name = provider.name;
+                    providerItem.dataset.type = provider.type;
+                    
+                    providerItem.innerHTML = `
+                        <div class="provider-header">
+                            <span class="provider-name">${provider.name}</span>
+                            <div class="provider-info">
+                                <span class="provider-type-label">${provider.type}</span>
+                            </div>
+                            <div class="provider-actions">
+                                <button class="mini-button edit-provider" title="Edit"><span class="material-icons">edit</span></button>
+                                <button class="mini-button delete-provider" title="Delete"><span class="material-icons">delete</span></button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    providersListElement.appendChild(providerItem);
+                });
+                
+                // Add event listeners for edit and delete buttons
+                providersListElement.querySelectorAll('.edit-provider').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const providerItem = button.closest('.provider-item');
+                        const providerName = providerItem.dataset.name;
+                        const providerType = providerItem.dataset.type;
+                        
+                        const provider = modelsData.providers.find(p => p.name === providerName);
+                        if (provider) {
+                            this.showProviderEditModal({
+                                name: provider.name,
+                                type: provider.type,
+                                apiKey: provider.options?.apiKey || '',
+                                apiUrl: provider.options?.url || '',
+                                options: provider.options || {}
+                            });
+                        }
+                    });
+                });
+                
+                providersListElement.querySelectorAll('.delete-provider').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const providerItem = button.closest('.provider-item');
+                        const providerName = providerItem.dataset.name;
+                        
+                        // Remove from global data
+                        if (this.globalModelsData && this.globalModelsData.providers) {
+                            this.globalModelsData.providers = this.globalModelsData.providers.filter(p => p.name !== providerName);
+                            
+                            // Update the UI
+                            this.populateProvidersData(this.globalModelsData);
+                        } else {
+                            providerItem.remove();
+                        }
+                    });
+                });
+                
+                // Add event handler for the add provider button
+                const addProviderButton = document.querySelector('.add-provider-btn');
+                if (addProviderButton) {
+                    addProviderButton.removeEventListener('click', this.showProviderEditModal);
+                    addProviderButton.addEventListener('click', () => {
+                        this.showProviderEditModal();
+                    });
+                }
             }
         }
-    };
-}
+        
+        // Populate model selectors
+        if (modelsData.llmConfig) {
+            const llmConfig = modelsData.llmConfig;
+            
+            // Populate provider selects
+            const providerSelects = [
+                document.getElementById('auxModelProvider'),
+                document.getElementById('mainModelProvider'),
+                document.getElementById('expertModelProvider')
+            ];
+            
+            providerSelects.forEach(select => {
+                if (!select) return;
+                
+                // Clear options
+                select.innerHTML = '';
+                
+                // Add provider options
+                if (modelsData.providers && Array.isArray(modelsData.providers)) {
+                    modelsData.providers.forEach(provider => {
+                        const option = document.createElement('option');
+                        option.value = provider.name;
+                        option.textContent = provider.name;
+                        select.appendChild(option);
+                    });
+                }
+            });
+            
+            // Set values for each model
+            if (llmConfig.aux) {
+                const auxModelProviderSelect = document.getElementById('auxModelProvider');
+                const auxModelNameInput = document.getElementById('auxModelName');
+                
+                if (auxModelProviderSelect) auxModelProviderSelect.value = llmConfig.aux.provider || '';
+                if (auxModelNameInput) auxModelNameInput.value = llmConfig.aux.model || '';
+            }
+            
+            if (llmConfig.main) {
+                const mainModelProviderSelect = document.getElementById('mainModelProvider');
+                const mainModelNameInput = document.getElementById('mainModelName');
+                
+                if (mainModelProviderSelect) mainModelProviderSelect.value = llmConfig.main.provider || '';
+                if (mainModelNameInput) mainModelNameInput.value = llmConfig.main.model || '';
+            }
+            
+            if (llmConfig.expert) {
+                const expertModelProviderSelect = document.getElementById('expertModelProvider');
+                const expertModelNameInput = document.getElementById('expertModelName');
+                
+                if (expertModelProviderSelect) expertModelProviderSelect.value = llmConfig.expert.provider || '';
+                if (expertModelNameInput) expertModelNameInput.value = llmConfig.expert.model || '';
+            }
+        }
+    }
 
-/**
- * Populates the settings form fields with data loaded from the server.
- * @param {object} data - The settings data object.
- */
-export function populateSettingsForm(data = {}) { // Export needed if called from socket error handler
-    // Store the data
-    settingsData = data;
-    
-    // Parse models data and store it globally
-    try {
-        // Parse models data if it exists and isn't empty
-        if (typeof data.models === 'string' && data.models) {
-            globalModelsData = JSON.parse(data.models);
+    populateModelSettings(settings) {
+        // Populate model settings fields
+        if (settings.provider) {
+            document.getElementById('provider-select').value = settings.provider;
+        }
+        
+        if (settings.apiKey) {
+            document.getElementById('api-key-input').value = settings.apiKey;
+        }
+        
+        if (settings.baseUrl) {
+            document.getElementById('base-url-input').value = settings.baseUrl;
+        }
+        
+        if (settings.model) {
+            document.getElementById('model-name-input').value = settings.model;
+        }
+    }
+
+    populateWebSettings(settings) {
+        // Populate web settings fields
+        if (settings.webAccess !== undefined) {
+            document.getElementById('web-access-toggle').checked = settings.webAccess;
+        }
+        
+        // Populate Puppeteer checkbox
+        const usePuppeteerCheckbox = document.getElementById('usePuppeteer');
+        if (usePuppeteerCheckbox && settings.usePuppeteer !== undefined) {
+            usePuppeteerCheckbox.checked = settings.usePuppeteer === true;
+        }
+        
+        // Populate Google CSE ID
+        const googleCseIdInput = document.getElementById('googleCseId');
+        if (googleCseIdInput && settings.googleCseId) {
+            googleCseIdInput.value = settings.googleCseId;
+        }
+        
+        // Populate Google API Key
+        const googleApiKeyInput = document.getElementById('googleApiKey');
+        if (googleApiKeyInput && settings.googleApiKey) {
+            googleApiKeyInput.value = settings.googleApiKey;
+        }
+    }
+
+    populateSecuritySettings(settings) {
+        // Populate security settings fields
+        if (settings.allowUnsafe !== undefined) {
+            document.getElementById('allow-unsafe-toggle').checked = settings.allowUnsafe;
+        }
+        
+        if (settings.disableExecutables !== undefined) {
+            document.getElementById('disable-executables-toggle').checked = settings.disableExecutables;
+        }
+        
+        if (settings.localNetworkAccess !== undefined) {
+            document.getElementById('local-network-toggle').checked = settings.localNetworkAccess;
+        }
+    }
+
+    populateThemeSettings(settings) {
+        // Populate theme settings if the theme selector exists
+        if (this.themeSelect && settings.theme) {
+            this.themeSelect.value = settings.theme;
+        }
+    }
+
+    saveSettings() {
+        // Gather settings from form
+        const settings = {
+            // Basic model settings
+            provider: document.getElementById('provider-select')?.value,
+            apiKey: document.getElementById('api-key-input')?.value,
+            baseUrl: document.getElementById('base-url-input')?.value,
+            model: document.getElementById('model-name-input')?.value,
             
-            // Check that parsed data has expected structure
-            if (!globalModelsData.providers || !Array.isArray(globalModelsData.providers)) {
-                globalModelsData.providers = [];
-            }
+            // Web access settings
+            webAccess: document.getElementById('web-access-toggle')?.checked,
+            usePuppeteer: document.getElementById('usePuppeteer')?.checked,
+            googleCseId: document.getElementById('googleCseId')?.value,
+            googleApiKey: document.getElementById('googleApiKey')?.value,
             
-            if (!globalModelsData.llmConfig) {
-                globalModelsData.llmConfig = {};
-            }
+            // Security settings
+            allowUnsafe: document.getElementById('allow-unsafe-toggle')?.checked,
+            disableExecutables: document.getElementById('disable-executables-toggle')?.checked,
+            localNetworkAccess: document.getElementById('local-network-toggle')?.checked
+        };
+
+        // Add theme settings if theme selector exists
+        if (this.themeSelect) {
+            settings.theme = this.themeSelect.value;
+        }
+        
+        // Update LLM configuration in global models data
+        if (this.globalModelsData) {
+            this.globalModelsData.llmConfig = {
+                aux: {
+                    provider: document.getElementById('auxModelProvider')?.value || '',
+                    model: document.getElementById('auxModelName')?.value || ''
+                },
+                main: {
+                    provider: document.getElementById('mainModelProvider')?.value || '',
+                    model: document.getElementById('mainModelName')?.value || ''
+                },
+                expert: {
+                    provider: document.getElementById('expertModelProvider')?.value || '',
+                    model: document.getElementById('expertModelName')?.value || ''
+                }
+            };
             
-            // If the structure is empty, use default data
-            if (globalModelsData.providers.length === 0) {
-                globalModelsData = createDefaultModelsData();
-            }
+            // Add models data as a string
+            settings.models = JSON.stringify(this.globalModelsData);
         } else {
-            // If no models data, use default
-            globalModelsData = createDefaultModelsData();
+            // Create models data object if none exists
+            const modelsData = {
+                providers: [],
+                llmConfig: {
+                    aux: {
+                        provider: document.getElementById('auxModelProvider')?.value || '',
+                        model: document.getElementById('auxModelName')?.value || ''
+                    },
+                    main: {
+                        provider: document.getElementById('mainModelProvider')?.value || '',
+                        model: document.getElementById('mainModelName')?.value || ''
+                    },
+                    expert: {
+                        provider: document.getElementById('expertModelProvider')?.value || '',
+                        model: document.getElementById('expertModelName')?.value || ''
+                    }
+                }
+            };
+            
+            // Collect providers from the list
+            const providerItems = document.querySelectorAll('.provider-item');
+            providerItems.forEach(item => {
+                modelsData.providers.push({
+                    name: item.dataset.name,
+                    type: item.dataset.type,
+                    options: {} // This is a fallback, should never be needed since we're tracking options
+                });
+            });
+            
+            // Add models data as a string
+            settings.models = JSON.stringify(modelsData);
         }
-    } catch (error) {
-        console.error('Error parsing models data:', error);
-        globalModelsData = createDefaultModelsData();
+
+        // Save settings via API
+        fetch('/api/settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(settings)
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to save settings: ${response.statusText}`);
+            }
+            return response.json();
+        }).then(() => {
+            // Apply theme if it was changed
+            if (this.themeSelect) {
+                this.applyTheme(this.themeSelect.value);
+            }
+            
+            this.closeDialog();
+            
+            // Show success notification
+            if (typeof showNotification === 'function') {
+                showNotification('Settings saved successfully', 'check_circle', 'success');
+            } else {
+                console.log('Settings saved successfully');
+            }
+        }).catch(err => {
+            console.error('Error saving settings:', err);
+            if (typeof showNotification === 'function') {
+                showNotification('Failed to save settings', 'error', 'error');
+            } else {
+                console.error('Failed to save settings');
+            }
+        });
+    }
+
+    applyTheme(themeName) {
+        // Reuse the global applyTheme function from theme-loader.js if available
+        if (typeof window.applyTheme === 'function') {
+            window.applyTheme(themeName);
+            return;
+        }
+        
+        // Fallback implementation if the global function isn't available
+        // Remove any existing theme stylesheets
+        const existingThemeLink = document.getElementById('theme-stylesheet');
+        if (existingThemeLink) {
+            existingThemeLink.remove();
+        }
+
+        // Add the new theme stylesheet if not using default theme
+        if (themeName && themeName !== 'dark') {
+            const link = document.createElement('link');
+            link.id = 'theme-stylesheet';
+            link.rel = 'stylesheet';
+            link.href = `/css/themes/_${themeName}-theme.css`;
+            document.head.appendChild(link);
+        }
+        
+        // Apply the theme to the HTML element
+        document.documentElement.dataset.theme = themeName;
     }
     
-    console.log('Initial global models data:', globalModelsData);
-    
-    // Populate providers list
-    populateProvidersList(globalModelsData.providers || []);
-    
-    // Populate LLM configs
-    populateLlmConfigs(globalModelsData.providers || [], globalModelsData.llmConfig || {});
-    
-    // Web tab
-    if (usePuppeteerCheckbox) usePuppeteerCheckbox.checked = data.usePuppeteer === true;
-    if (googleCseIdInput) googleCseIdInput.value = data.googleCseId || '';
-    if (googleApiKeyInput) googleApiKeyInput.value = data.googleApiKey || '';
-    
-    // Security tab
-    if (enableCommandExecutionCheckbox) enableCommandExecutionCheckbox.checked = data.enableCommandExecution !== false;
-    if (restrictFilesystemCheckbox) restrictFilesystemCheckbox.checked = data.restrictFilesystem === true;
-    if (enableWebAccessCheckbox) enableWebAccessCheckbox.checked = data.enableWebAccess !== false;
 }
 
-/**
- * Populates the providers list in the UI
- * @param {Array} providers - The list of providers
- */
-function populateProvidersList(providers) {
-    if (!providersListElement) return;
+// Initialize settings UI when document is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.settingsUI = new SettingsUI();
     
-    // Clear the list
-    providersListElement.innerHTML = '';
-    
-    // Add each provider
-    providers.forEach(provider => {
-        const providerItem = document.createElement('div');
-        providerItem.className = 'provider-item';
-        providerItem.dataset.name = provider.name;
-        providerItem.dataset.type = provider.type;
-        
-        providerItem.innerHTML = `
-            <div class="provider-header">
-                <span class="provider-name">${provider.name}</span>
-                <div class="provider-info">
-                    <span class="provider-type-label">${provider.type}</span>
-                </div>
-                <div class="provider-actions">
-                    <button class="mini-button edit-provider" title="Edit"><span class="material-icons">edit</span></button>
-                    <button class="mini-button delete-provider" title="Delete"><span class="material-icons">delete</span></button>
-                </div>
-            </div>
-        `;
-        
-        providersListElement.appendChild(providerItem);
-    });
-    
-    // Add event listeners for edit and delete buttons
-    const editButtons = providersListElement.querySelectorAll('.edit-provider');
-    editButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const providerItem = this.closest('.provider-item');
-            const providerName = providerItem.dataset.name;
-            const providerType = providerItem.dataset.type;
-            
-            const provider = providers.find(p => p.name === providerName);
-            if (provider) {
-                showProviderEditModal({
-                    name: provider.name,
-                    type: provider.type,
-                    apiKey: provider.options?.apiKey || '',
-                    apiUrl: provider.options?.url || '',
-                    options: provider.options || {}
+    // Load settings schema and provider data
+    fetch('/api/settings/schema').then(response => {
+        if (!response.ok) {
+            throw new Error(`Failed to load settings schema: ${response.statusText}`);
+        }
+        return response.json();
+    }).then(schemaData => {
+        if (schemaData.providerTypes) {
+            // Update provider types in UI
+            const providerTypesList = document.querySelector('.provider-types-list');
+            if (providerTypesList) {
+                providerTypesList.innerHTML = '';
+                schemaData.providerTypes.forEach(type => {
+                    const badge = document.createElement('span');
+                    badge.className = 'provider-type-badge';
+                    badge.textContent = type.type;
+                    providerTypesList.appendChild(badge);
                 });
             }
-        });
-    });
-    
-    const deleteButtons = providersListElement.querySelectorAll('.delete-provider');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const providerItem = this.closest('.provider-item');
-            const providerName = providerItem.dataset.name;
             
-            // Ensure global models data exists
-            if (!globalModelsData) {
-                globalModelsData = createDefaultModelsData();
+            // Update provider type select
+            const providerTypeSelect = document.getElementById('providerType');
+            if (providerTypeSelect) {
+                providerTypeSelect.innerHTML = '';
+                schemaData.providerTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.type;
+                    option.textContent = type.name;
+                    providerTypeSelect.appendChild(option);
+                });
             }
-            
-            // Filter out the provider with this name
-            globalModelsData.providers = globalModelsData.providers.filter(p => p.name !== providerName);
-            
-            console.log('Global models data after provider deletion:', globalModelsData);
-            
-            // Update the UI
-            populateProvidersList(globalModelsData.providers);
-            populateLlmConfigs(globalModelsData.providers, globalModelsData.llmConfig);
-        });
-    });
-}
-
-/**
- * Populates the LLM configuration fields
- * @param {Array} providers - The list of providers
- * @param {object} llmConfig - The LLM configuration
- */
-function populateLlmConfigs(providers, llmConfig) {
-    // Populate provider selects
-    populateProviderSelects(providers);
-    
-    // Set values for aux model
-    if (auxModelProviderSelect && llmConfig.aux) {
-        auxModelProviderSelect.value = llmConfig.aux.provider || '';
-    }
-    if (auxModelNameInput && llmConfig.aux) {
-        auxModelNameInput.value = llmConfig.aux.model || '';
-    }
-    
-    // Set values for main model
-    if (mainModelProviderSelect && llmConfig.main) {
-        mainModelProviderSelect.value = llmConfig.main.provider || '';
-    }
-    if (mainModelNameInput && llmConfig.main) {
-        mainModelNameInput.value = llmConfig.main.model || '';
-    }
-    
-    // Set values for expert model
-    if (expertModelProviderSelect && llmConfig.expert) {
-        expertModelProviderSelect.value = llmConfig.expert.provider || '';
-    }
-    if (expertModelNameInput && llmConfig.expert) {
-        expertModelNameInput.value = llmConfig.expert.model || '';
-    }
-}
-
-/**
- * Populates the provider select dropdowns
- * @param {Array} providers - The list of providers
- */
-function populateProviderSelects(providers) {
-    const selects = [auxModelProviderSelect, mainModelProviderSelect, expertModelProviderSelect];
-    
-    selects.forEach(select => {
-        if (!select) return;
-        
-        // Store current value
-        const currentValue = select.value;
-        
-        // Clear options
-        select.innerHTML = '';
-        
-        // Add provider options - only actual providers from the list
-        providers.forEach(provider => {
-            const option = document.createElement('option');
-            option.value = provider.name;
-            option.textContent = provider.name;
-            select.appendChild(option);
-        });
-        
-        // Restore selected value if it exists in new options
-        if (currentValue && [...select.options].some(option => option.value === currentValue)) {
-            select.value = currentValue;
-        } else if (select.options.length > 0) {
-            // Select first option if no match
-            select.value = select.options[0].value;
         }
+    }).catch(error => {
+        console.error('Error loading settings schema:', error);
     });
-}
+});
 
-/**
- * Updates the global models data with current UI values
- * This updates only the LLM config part as providers are already managed directly
- */
-function updateModelsDataFromUI() {
-    // Ensure global models data exists
-    if (!globalModelsData) {
-        globalModelsData = createDefaultModelsData();
-        return;
-    }
+// Add the missing provider edit modal implementation
+SettingsUI.prototype.initProviderEditModal = function() {
+    // Get provider edit modal elements
+    this.providerEditModal = document.getElementById('provider-edit-modal');
+    this.providerEditTitle = document.getElementById('provider-edit-title');
+    this.providerNameInput = document.getElementById('providerName');
+    this.providerTypeSelect = document.getElementById('providerType');
+    this.providerSpecificSettingsContainer = document.getElementById('provider-specific-settings');
+    this.providerEditCancelButton = document.getElementById('provider-edit-cancel');
+    this.providerEditSaveButton = document.getElementById('provider-edit-save');
     
-    // Update LLM configs from the UI
-    globalModelsData.llmConfig = {
-        aux: {
-            provider: auxModelProviderSelect ? auxModelProviderSelect.value : '',
-            model: auxModelNameInput ? auxModelNameInput.value : ''
-        },
-        main: {
-            provider: mainModelProviderSelect ? mainModelProviderSelect.value : '',
-            model: mainModelNameInput ? mainModelNameInput.value : ''
-        },
-        expert: {
-            provider: expertModelProviderSelect ? expertModelProviderSelect.value : '',
-            model: expertModelNameInput ? expertModelNameInput.value : ''
-        }
-    };
-    
-    console.log('Updated global models data from UI:', globalModelsData);
-}
-
-/**
- * Collects current values from the settings form fields.
- * @returns {object} The settings object.
- */
-function collectSettingsFromForm() { // Internal helper
-    const settings = {};
-    
-    // Update global models data from UI
-    updateModelsDataFromUI();
-    
-    // Get models data from global state
-    settings.models = JSON.stringify(globalModelsData);
-    
-    // Web tab
-    if (usePuppeteerCheckbox) settings.usePuppeteer = usePuppeteerCheckbox.checked;
-    if (googleCseIdInput) settings.googleCseId = googleCseIdInput.value;
-    if (googleApiKeyInput) settings.googleApiKey = googleApiKeyInput.value;
-    
-    // Security tab
-    if (enableCommandExecutionCheckbox) settings.enableCommandExecution = enableCommandExecutionCheckbox.checked;
-    if (restrictFilesystemCheckbox) settings.restrictFilesystem = restrictFilesystemCheckbox.checked;
-    if (enableWebAccessCheckbox) settings.enableWebAccess = enableWebAccessCheckbox.checked;
-    
-    return settings;
-}
-
-/** Saves the current settings from the form to the server. */
-async function saveSettings() { // Internal helper, called by save button listener
-    if (!settingsSaveButton || !settingsModal) return;
-    const originalButtonText = settingsSaveButton.textContent;
-    settingsSaveButton.disabled = true;
-    settingsSaveButton.textContent = 'Saving...';
-    setLoadingState(true); // Visually indicate saving
-
-    try {
-        const settings = collectSettingsFromForm();
-        await api.saveSettingsToServer(settings);
-        settingsModal.classList.remove('active');
-        addAgentMessage("Settings saved successfully.");
-    } catch (error) {
-        console.error('Error saving settings:', error);
-        alert(`Error saving settings: ${error.message}`);
-    } finally {
-        settingsSaveButton.disabled = false;
-        settingsSaveButton.textContent = originalButtonText;
-        setLoadingState(false); // Remove loading state
-    }
-}
-
-/** Helper to manage loading/saving state appearance */
-function setLoadingState(isLoading) {
-    const loadingIndicator = settingsModal?.querySelector('.settings-loading'); // Assuming .settings-loading exists
-    if (loadingIndicator) {
-        loadingIndicator.style.display = isLoading ? 'flex' : 'none';
-    }
-    const formElements = settingsModal?.querySelectorAll('input, select, button');
-    if (formElements) {
-        formElements.forEach(el => {
-            // Don't disable the cancel button during load/save
-            if (el.id !== 'settings-cancel') {
-                el.disabled = isLoading;
-            }
+    // Add provider button functionality
+    const addProviderButton = document.querySelector('.add-provider-btn');
+    if (addProviderButton) {
+        addProviderButton.addEventListener('click', () => {
+            this.showProviderEditModal();
         });
-        // Ensure save button state is correct after loading finishes
-        if (!isLoading && settingsSaveButton) settingsSaveButton.disabled = false;
     }
-}
+    
+    // Provider edit modal cancel button
+    if (this.providerEditCancelButton) {
+        this.providerEditCancelButton.addEventListener('click', () => {
+            this.closeProviderEditModal();
+        });
+    }
+    
+    // Provider edit modal save button
+    if (this.providerEditSaveButton) {
+        this.providerEditSaveButton.addEventListener('click', () => {
+            this.saveProviderData();
+        });
+    }
+    
+    // Add type change listener
+    if (this.providerTypeSelect) {
+        this.providerTypeSelect.addEventListener('change', () => {
+            this.updateProviderSpecificSettings(this.providerTypeSelect.value, {});
+        });
+    }
+};
 
-/**
- * Shows the provider edit modal, optionally with pre-filled data
- * @param {Object} providerData - Optional provider data to pre-fill the form
- */
-function showProviderEditModal(providerData = null) {
-    if (!providerEditModal) return;
+SettingsUI.prototype.showProviderEditModal = function(providerData = null) {
+    if (!this.providerEditModal) return;
     
     const isEditMode = !!providerData;
     
     // Update modal title based on mode
-    if (providerEditTitle) {
-        providerEditTitle.textContent = isEditMode ? 'Edit Provider' : 'Add Provider';
+    if (this.providerEditTitle) {
+        this.providerEditTitle.textContent = isEditMode ? 'Edit Provider' : 'Add Provider';
     }
     
     // Update save button text
-    if (providerEditSaveButton) {
-        providerEditSaveButton.textContent = isEditMode ? 'Save Provider' : 'Add Provider';
+    if (this.providerEditSaveButton) {
+        this.providerEditSaveButton.textContent = isEditMode ? 'Save Provider' : 'Add Provider';
     }
     
     // Clear or pre-fill form fields
-    if (providerNameInput) {
-        providerNameInput.value = providerData ? providerData.name : '';
+    if (this.providerNameInput) {
+        this.providerNameInput.value = providerData ? providerData.name : '';
         // Store the original name for edit mode
-        providerNameInput.dataset.originalName = providerData ? providerData.name : '';
+        this.providerNameInput.dataset.originalName = providerData ? providerData.name : '';
     }
     
-    if (providerTypeSelect) {
-        const providerType = providerData ? providerData.type : (providerTypeSelect.options.length > 0 ? providerTypeSelect.options[0].value : 'openai');
-        providerTypeSelect.value = providerType;
+    if (this.providerTypeSelect) {
+        const providerType = providerData ? providerData.type : (this.providerTypeSelect.options.length > 0 ? this.providerTypeSelect.options[0].value : 'openai');
+        this.providerTypeSelect.value = providerType;
         // Update dynamic settings fields based on provider type
-        updateProviderSpecificSettings(providerType, providerData ? providerData.options : {});
-        
-        // Add change listener to update fields when provider type changes
-        providerTypeSelect.addEventListener('change', function() {
-            updateProviderSpecificSettings(this.value, {});
-        });
-    }
-    
-    // Update save button event handler
-    if (providerEditSaveButton) {
-        // Remove any existing listeners
-        providerEditSaveButton.removeEventListener('click', saveProviderData);
-        // Add the listener
-        providerEditSaveButton.addEventListener('click', saveProviderData);
+        this.updateProviderSpecificSettings(providerType, providerData ? providerData.options : {});
     }
     
     // Show the modal with active class for animation
-    providerEditModal.classList.add('active');
-}
+    this.providerEditModal.classList.add('active');
+};
 
-/**
- * Saves the provider data from the edit modal
- */
-function saveProviderData() {
-    if (!providerNameInput || !providerTypeSelect) return;
+SettingsUI.prototype.closeProviderEditModal = function() {
+    if (!this.providerEditModal) return;
+    this.providerEditModal.classList.remove('active');
+};
+
+SettingsUI.prototype.updateProviderSpecificSettings = function(providerType, currentValues = {}) {
+    if (!this.providerSpecificSettingsContainer) return;
     
-    const name = providerNameInput.value.trim();
-    const type = providerTypeSelect.value;
-    const originalName = providerNameInput.dataset.originalName || '';
+    // Clear existing fields
+    this.providerSpecificSettingsContainer.innerHTML = '';
+    
+    // Get settings for this provider type from schema
+    // We'll use a simple approach for now - common fields for all providers
+    const settings = ['apiKey', 'url'];
+    
+    // Create a field for each setting
+    settings.forEach(setting => {
+        const formGroup = document.createElement('div');
+        formGroup.className = 'settings-form-group';
+        
+        const label = document.createElement('label');
+        label.setAttribute('for', `provider-setting-${setting}`);
+        label.textContent = setting === 'apiKey' ? 'API Key' : 'API URL';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `provider-setting-${setting}`;
+        input.placeholder = `Enter ${setting === 'apiKey' ? 'API Key' : 'API URL'}`;
+        input.value = currentValues[setting] || '';
+        
+        formGroup.appendChild(label);
+        formGroup.appendChild(input);
+        this.providerSpecificSettingsContainer.appendChild(formGroup);
+    });
+};
+
+SettingsUI.prototype.saveProviderData = function() {
+    if (!this.providerNameInput || !this.providerTypeSelect) return;
+    
+    const name = this.providerNameInput.value.trim();
+    const type = this.providerTypeSelect.value;
+    const originalName = this.providerNameInput.dataset.originalName || '';
     
     // Validate name
     if (!name) {
@@ -638,19 +615,20 @@ function saveProviderData() {
         return;
     }
     
-    // Check for spaces in name
-    if (name.includes(' ')) {
-        alert('Provider name cannot contain spaces');
-        return;
-    }
-    
     // Ensure global models data exists
-    if (!globalModelsData) {
-        globalModelsData = createDefaultModelsData();
+    if (!this.globalModelsData) {
+        this.globalModelsData = {
+            providers: [],
+            llmConfig: {
+                aux: { provider: '', model: '' },
+                main: { provider: '', model: '' },
+                expert: { provider: '', model: '' }
+            }
+        };
     }
     
     // Check if name already exists (unless it's the same provider being edited)
-    if (name !== originalName && globalModelsData.providers.some(p => p.name === name)) {
+    if (name !== originalName && this.globalModelsData.providers.some(p => p.name === name)) {
         alert('A provider with this name already exists');
         return;
     }
@@ -662,8 +640,8 @@ function saveProviderData() {
         options: {}
     };
     
-    // Add all settings from provider-specific fields
-    const settings = providerTypeSettings[type] || [];
+    // Add settings from provider-specific fields
+    const settings = ['apiKey', 'url']; // Same as in updateProviderSpecificSettings
     settings.forEach(setting => {
         const input = document.getElementById(`provider-setting-${setting}`);
         if (input) {
@@ -671,77 +649,50 @@ function saveProviderData() {
         }
     });
     
-    console.log('Saving provider with options:', provider.options);
-    
     // Update or add provider
     if (originalName) {
         // Edit existing provider
-        globalModelsData.providers = globalModelsData.providers.map(p => 
+        this.globalModelsData.providers = this.globalModelsData.providers.map(p => 
             p.name === originalName ? provider : p
         );
         
         // Update the LLM config references if the name changed
         if (originalName !== name) {
-            for (const configKey in globalModelsData.llmConfig) {
-                if (globalModelsData.llmConfig[configKey].provider === originalName) {
-                    globalModelsData.llmConfig[configKey].provider = name;
+            for (const configKey in this.globalModelsData.llmConfig) {
+                if (this.globalModelsData.llmConfig[configKey].provider === originalName) {
+                    this.globalModelsData.llmConfig[configKey].provider = name;
                 }
             }
         }
     } else {
         // Add new provider
-        globalModelsData.providers.push(provider);
+        this.globalModelsData.providers.push(provider);
     }
     
-    console.log('Global models data after provider update:', globalModelsData);
-    
     // Update UI
-    populateProvidersList(globalModelsData.providers);
-    populateLlmConfigs(globalModelsData.providers, globalModelsData.llmConfig);
+    this.populateProvidersData(this.globalModelsData);
     
     // Close modal
-    closeProviderEditModal();
+    this.closeProviderEditModal();
+};
+
+// Add global method to open settings dialog
+function openSettings() {
+    window.settingsUI.openDialog();
 }
 
-/**
- * Updates the provider-specific settings fields based on the selected provider type
- * @param {string} providerType - The selected provider type
- * @param {object} currentValues - Current values for the fields, if any
- */
-function updateProviderSpecificSettings(providerType, currentValues = {}) {
-    if (!providerSpecificSettingsContainer) return;
-    
-    // Clear existing fields
-    providerSpecificSettingsContainer.innerHTML = '';
-    
-    // Get settings for this provider type
-    const settings = providerTypeSettings[providerType] || [];
-    
-    // Create a field for each setting
-    settings.forEach(setting => {
-        const formGroup = document.createElement('div');
-        formGroup.className = 'settings-form-group';
-        
-        const label = document.createElement('label');
-        label.setAttribute('for', `provider-setting-${setting}`);
-        label.textContent = setting.charAt(0).toUpperCase() + setting.slice(1); // Capitalize first letter
-        
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.id = `provider-setting-${setting}`;
-        input.placeholder = `Enter ${setting}`;
-        input.value = currentValues[setting] || '';
-        
-        formGroup.appendChild(label);
-        formGroup.appendChild(input);
-        providerSpecificSettingsContainer.appendChild(formGroup);
-    });
+// Add exports for module imports
+export function populateSettingsForm(settings) {
+    if (window.settingsUI) {
+        window.settingsUI.populateModelSettings(settings);
+        window.settingsUI.populateWebSettings(settings);
+        window.settingsUI.populateSecuritySettings(settings);
+        window.settingsUI.populateThemeSettings(settings);
+    }
 }
 
-/**
- * Closes the provider edit modal
- */
-function closeProviderEditModal() {
-    if (!providerEditModal) return;
-    providerEditModal.classList.remove('active');
+export function showSettingsModal() {
+    if (window.settingsUI) {
+        window.settingsUI.openDialog();
+    }
 }

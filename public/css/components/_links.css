@@ -1,0 +1,29 @@
+/* Link styling */
+a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color var(--transition-fast), text-decoration var(--transition-fast);
+}
+
+a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+a:active {
+    color: var(--link-active);
+}
+
+/* Links inside dynamic content */
+.message-content a,
+#tool-log a,
+.tool-result a {
+    font-weight: var(--font-weight-medium);
+}
+
+/* Links with icons */
+a .material-icons {
+    font-size: 1em;
+    vertical-align: -0.15em;
+    margin-right: 4px;
+}

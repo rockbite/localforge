@@ -1,0 +1,45 @@
+/* Alert/Notice Boxes */
+.alert-box {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: var(--spacing-md) 0;
+    border-left: 4px solid;
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-box .material-icons {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.alert-info {
+    border-color: var(--accent-primary);
+    background: rgba(64, 162, 227, 0.1);
+    color: #9ecff2;
+}
+.alert-info .material-icons { color: var(--accent-primary); }
+
+.alert-success {
+    border-color: var(--status-success);
+    background: rgba(125, 209, 193, 0.1);
+    color: #a8e4d9;
+}
+.alert-success .material-icons { color: var(--status-success); }
+
+.alert-warning {
+    border-color: var(--status-warning);
+    background: rgba(255, 204, 128, 0.1);
+    color: #ffe0b3;
+}
+.alert-warning .material-icons { color: var(--status-warning); }
+
+.alert-error {
+    border-color: var(--status-error);
+    background: rgba(248, 165, 166, 0.1);
+    color: #fbcdd0;
+}
+.alert-error .material-icons { color: var(--status-error); }

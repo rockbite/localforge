@@ -53,7 +53,11 @@ export const SETTINGS_SCHEMA = {
   // ---------- Security tab ----------
   enableCommandExecution: { type: 'boolean', default: true },
   restrictFilesystem:     { type: 'boolean', default: false },
-  enableWebAccess:        { type: 'boolean', default: true }
+  enableWebAccess:        { type: 'boolean', default: true },
+  
+  // ---------- UI tab ----------
+  theme:                { type: 'string',  default: 'dark' },
+  codeFontSize:         { type: 'string',  default: 'medium' }
 };
 
 // Bootstrap defaults on first run ----------------------------------

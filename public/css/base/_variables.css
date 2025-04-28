@@ -1,0 +1,40 @@
+/* Core variables that don't change between themes */
+:root {
+    /* Spacing and sizing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Layout */
+    --header-height: 64px;
+    --footer-height: 300px;
+    --tool-panel-width: 420px; /* Initial width, updated in responsive.css */
+    
+    /* Borders and radiuses */
+    --border-radius: 8px;
+    
+    /* Z-index layers */
+    --z-index-base: 1;
+    --z-index-dropdown: 10;
+    --z-index-header: 20;
+    --z-index-modal: 100;
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --loading-fade-duration: 300ms;
+    
+    /* Font settings */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --code-font: 'Roboto Mono', monospace;
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+}

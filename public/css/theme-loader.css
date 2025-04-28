@@ -1,0 +1,5 @@
+/* Theme loader - loads the current theme */
+@import './themes/_dark-theme.css';
+
+/* For theme switching, uncomment the desired theme */
+/* @import './themes/_light-theme.css'; */

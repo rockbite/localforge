@@ -1,0 +1,162 @@
+/* Chat container layout */
+#chat-container {
+    flex: 1;
+    border-bottom: 1px solid var(--border-primary);
+    width: 100%;
+    background-color: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+    min-height: 0; /* Allow it to shrink below its content height */
+}
+
+/* Chat header styles */
+#chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--border-primary);
+    background-color: var(--bg-primary);
+}
+
+#chat-header .chat-info {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+#chat-header .separator {
+    margin: 0 8px;
+    color: var(--text-secondary);
+}
+
+#project-name {
+    color: var(--text-primary);
+}
+
+#session-name {
+    color: var(--text-secondary);
+}
+
+/* Buttons in chat header */
+.chat-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Chat message area styles */
+#messages {
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+    overflow-y: scroll;
+    padding: 24px;
+}
+
+.message {
+    margin-bottom: 28px;
+    padding: 16px 18px;
+    border-radius: 8px;
+    max-width: 85%;
+    position: relative;
+    display: flex;
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+.user-message {
+    background-color: var(--bg-secondary);
+    margin-left: auto;
+    border: 1px solid var(--border-primary);
+}
+
+.agent-message {
+    background-color: var(--bg-secondary);
+    margin-right: auto;
+    border: 1px solid var(--border-primary);
+}
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 14px;
+    flex-shrink: 0;
+    background-color: var(--accent-quaternary);
+    color: white;
+}
+
+.agent-message .message-avatar {
+    background-color: var(--accent-primary);
+}
+
+.message-avatar .material-icons {
+    font-size: 18px;
+}
+
+.message-content {
+    word-wrap: break-word;
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.5;
+    min-width: 0;
+}
+
+.message-content p {
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* List styling within messages */
+.message-content ul, 
+.message-content ol {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+}
+
+.message-content li {
+    margin-bottom: 0.15em;
+    line-height: 1.4;
+    white-space: normal;
+}
+
+.message-content li:last-child {
+    margin-bottom: 0;
+}
+
+/* Inline code styling within messages */
+.message-content code {
+    background: var(--bg-code);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 90%;
+    color: var(--text-code-inline);
+    max-width: 100%;
+    overflow-x: auto;
+    font-family: var(--code-font);
+}
+
+/* Animation for new messages */
+.new-message {
+    animation: message-appear 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes message-appear {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

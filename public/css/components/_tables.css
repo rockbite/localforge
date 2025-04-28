@@ -1,0 +1,40 @@
+/* Simple Tables */
+.simple-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: var(--spacing-md) 0;
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.simple-table th, 
+.simple-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.simple-table th {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+    border-bottom-width: 2px;
+}
+
+.simple-table tr:last-child td {
+    border-bottom: none;
+}
+
+.simple-table tr:hover {
+    background-color: var(--bg-hover);
+}
+
+.simple-table td code {
+    background: var(--bg-code);
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-size: 90%;
+    color: var(--text-code-inline);
+}

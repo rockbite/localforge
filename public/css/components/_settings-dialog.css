@@ -1,4 +1,4 @@
-/* Settings Dialog Specific Styles */
+/* Settings Dialog Component */
 
 /* Provider type badges */
 .provider-types-list {
@@ -9,12 +9,12 @@
 }
 
 .provider-type-badge {
-    background-color: rgba(30, 30, 30, 0.5);
-    border: 1px solid var(--border-color);
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
     border-radius: 4px;
     padding: 4px 8px;
     font-size: 12px;
-    color: var(--text-color);
+    color: var(--text-primary);
     display: inline-block;
 }
 
@@ -30,9 +30,9 @@
 .providers-list-wrapper {
     max-height: 150px;
     overflow-y: auto;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-primary);
     border-radius: 6px;
-    background-color: rgba(25, 25, 25, 0.3);
+    background-color: var(--bg-secondary);
     margin-bottom: 10px;
 }
 
@@ -43,7 +43,7 @@
 
 .provider-item {
     padding: 6px 10px;
-    border-bottom: 1px solid rgba(60, 60, 60, 0.3);
+    border-bottom: 1px solid var(--border-primary);
 }
 
 .provider-item:last-child {
@@ -58,7 +58,7 @@
 .provider-name {
     font-weight: 500;
     font-size: 13px;
-    color: var(--text-color);
+    color: var(--text-primary);
     flex: 1;
 }
 
@@ -70,8 +70,8 @@
 
 .provider-type-label {
     font-size: 11px;
-    color: var(--secondary-text);
-    background-color: rgba(40, 40, 40, 0.5);
+    color: var(--text-secondary);
+    background-color: var(--bg-tertiary);
     padding: 2px 6px;
     border-radius: 3px;
 }
@@ -84,7 +84,7 @@
 .mini-button {
     background: none;
     border: none;
-    color: var(--secondary-text);
+    color: var(--text-secondary);
     cursor: pointer;
     padding: 2px;
     border-radius: 4px;
@@ -94,7 +94,7 @@
 }
 
 .mini-button:hover {
-    color: var(--text-color);
+    color: var(--text-primary);
     background-color: rgba(60, 60, 60, 0.5);
 }
 
@@ -113,10 +113,6 @@
 }
 
 .add-provider-btn .material-icons {
-    font-size: 14px;
-}
-
-.add-provider-btn .material-icons {
     font-size: 16px;
 }
 
@@ -129,19 +125,19 @@
 }
 
 .llm-config-card {
-    background-color: rgba(30, 30, 30, 0.5);
-    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
     border-radius: 6px;
     overflow: hidden;
 }
 
 .llm-config-header {
-    background-color: rgba(40, 40, 40, 0.7);
+    background-color: var(--bg-tertiary);
     padding: 8px 10px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-color);
-    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-primary);
 }
 
 .llm-config-body {
@@ -167,8 +163,8 @@
 .provider-edit-modal-content {
     max-width: 500px;
     width: 90%;
-    background-color: var(--secondary-bg) !important;
-    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--border-primary);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     animation: provider-modal-fade-in 0.3s ease-out;
 }
@@ -194,18 +190,19 @@
     gap: 8px;
     padding: 16px 20px;
     margin: 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-primary);
     font-size: 18px;
 }
 
 .provider-edit-modal-content .material-icons {
-    color: #40A2E3;
+    color: var(--accent-primary);
 }
 
 /* Web tab */
 #web-tab .settings-section {
     margin-top: 12px;
 }
+
 .settings-modal-content {
     width: 95%;
     max-width: 700px; /* Wider modal for settings */
@@ -214,9 +211,9 @@
     display: flex;
     flex-direction: column;
     padding: 0; /* Remove padding, handle inside */
-    background-color: var(--secondary-bg) !important; /* Force background color */
+    background-color: var(--bg-secondary) !important; /* Force background color */
     animation: settings-modal-slide-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important; /* Override animation */
-    border: 1px solid var(--border-color) !important; /* Use simple border instead of gradient */
+    border: 1px solid var(--border-primary) !important; /* Use simple border instead of gradient */
 }
 
 /* Custom animation specifically for settings modal */
@@ -224,12 +221,12 @@
     from {
         transform: translateY(30px) scale(0.98);
         opacity: 0;
-        background-color: var(--secondary-bg);
+        background-color: var(--bg-secondary);
     }
     to {
         transform: translateY(0) scale(1);
         opacity: 1;
-        background-color: var(--secondary-bg);
+        background-color: var(--bg-secondary);
     }
 }
 
@@ -238,30 +235,31 @@
     position: sticky;
     top: 0;
     z-index: 6; /* Above tabs and content */
-    background-color: var(--secondary-bg); /* Match modal bg */
+    background-color: var(--bg-secondary); /* Match modal bg */
     padding: 24px 24px 12px 24px; /* Padding */
     margin-bottom: 0; /* Remove bottom margin */
     font-size: 20px; /* Slightly smaller title */
-    border-bottom: 1px solid var(--border-color); /* Separator */
+    border-bottom: 1px solid var(--border-primary); /* Separator */
 }
 
 .settings-tabs {
     display: flex;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-primary);
     margin-bottom: 0; /* No margin below tabs */
     position: sticky;
     top: 69px; /* Position below the sticky header (adjust based on header height) */
-    background-color: var(--secondary-bg);
+    background-color: var(--bg-secondary);
     z-index: 5; /* Below header, above content */
     padding: 0 24px; /* Align with content padding */
     flex-shrink: 0; /* Prevent tabs shrinking */
 }
 
-.settings-tab {
+.settings-tab,
+.settings-tab-button {
     padding: 10px 16px;
     background: none;
     border: none;
-    color: var(--secondary-text);
+    color: var(--text-secondary);
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
@@ -270,29 +268,24 @@
     margin-bottom: -1px; /* Overlap container border */
 }
 
-.settings-tab:hover {
-    color: var(--text-color);
+.settings-tab:hover,
+.settings-tab-button:hover {
+    color: var(--text-primary);
 }
 
-.settings-tab.active {
-    color: #40A2E3; /* End gradient color */
-    border-bottom-color: #40A2E3; /* Use solid color for indicator */
+.settings-tab.active,
+.settings-tab-button.active {
+    color: var(--accent-primary); /* End gradient color */
+    border-bottom-color: var(--accent-primary); /* Use solid color for indicator */
 }
-
-/* Removed ::after indicator, using border directly */
-/* .settings-tab.active::after { ... } */
-
 
 .settings-tab-content {
     flex: 1; /* Take remaining vertical space */
     overflow-y: auto; /* Scrollable content area */
     padding: 20px; /* Padding for content */
     position: relative; /* For potential absolute elements inside */
-    background-color: var(--secondary-bg); /* Ensure consistent background */
+    background-color: var(--bg-secondary); /* Ensure consistent background */
 }
-
-/* Removed redundant scroll area wrappers */
-/* .content-scroll-area { ... } */
 
 .settings-section {
     margin-bottom: 6px; /* More space between sections */
@@ -313,7 +306,7 @@
     font-size: 16px;
     font-weight: 500;
     margin-bottom: 16px; /* More space below heading */
-    color: var(--text-color);
+    color: var(--text-primary);
 }
 
 .settings-form-group {
@@ -338,7 +331,7 @@
     display: block; /* Default block display */
     margin-bottom: 6px;
     font-size: 13px;
-    color: var(--secondary-text);
+    color: var(--text-secondary);
     font-weight: 500; /* Slightly bolder labels */
 }
 
@@ -351,9 +344,9 @@
 .model-row {
     margin-bottom: 16px;
     padding: 12px; /* Consistent padding */
-    background-color: rgba(30, 30, 30, 0.5); /* Slightly darker background */
+    background-color: var(--bg-secondary); /* Use theme variable */
     border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-primary);
 }
 
 .model-row.compact {
@@ -368,7 +361,7 @@
 .model-row-label {
     font-weight: 500;
     margin-bottom: 0; /* Remove bottom margin for compact layout */
-    color: var(--text-color);
+    color: var(--text-primary);
     font-size: 14px;
     display: block; /* Ensure it's block */
     min-width: 100px; /* Fixed width for alignment */
@@ -403,7 +396,7 @@
 }
 
 .note-text {
-    color: var(--secondary-text);
+    color: var(--text-secondary);
     font-size: 13px;
     font-style: italic;
 }
@@ -419,9 +412,9 @@
 .settings-modal-content input[type="password"],
 .settings-modal-content input[type="number"], /* Added number type */
 .settings-modal-content select {
-    background-color: var(--input-bg); /* Use specific input background */
-    color: var(--text-color);
-    border: 1px solid #444; /* Match modal input border */
+    background-color: var(--bg-input); /* Use specific input background */
+    color: var(--text-primary);
+    border: 1px solid var(--border-input); /* Match modal input border */
     border-radius: 6px;
     padding: 6px 10px; /* Reduced padding */
     font-size: 14px;
@@ -436,14 +429,14 @@
 .settings-modal-content select[disabled] {
     opacity: 0.7;
     cursor: not-allowed;
-    background-color: var(--secondary-bg);
+    background-color: var(--bg-secondary);
 }
 
 .settings-modal-content input:focus,
 .settings-modal-content select:focus {
     outline: none; /* Remove default outline */
-    border-color: #40A2E3; /* Use end gradient color for focus */
-    box-shadow: 0 0 0 2px rgba(64, 162, 227, 0.3); /* Subtle focus ring */
+    border-color: var(--accent-primary); /* Use end gradient color for focus */
+    box-shadow: 0 0 0 2px var(--focus-shadow); /* Subtle focus ring */
 }
 
 /* Checkbox specific styles */
@@ -479,8 +472,8 @@
     left: 0;
     width: 18px;
     height: 18px;
-    background-color: var(--input-bg); /* Match input background */
-    border: 1px solid #444; /* Match input border */
+    background-color: var(--bg-input); /* Match input background */
+    border: 1px solid var(--border-input); /* Match input border */
     border-radius: 3px;
     pointer-events: none; /* Click handled by label/input */
     transition: border-color 0.2s ease, background-color 0.2s ease;
@@ -502,8 +495,8 @@
 
 /* Checked state */
 .checkbox-container input[type="checkbox"]:checked + .custom-checkbox {
-    background-color: #40A2E3; /* Use end gradient color */
-    border-color: #40A2E3;
+    background-color: var(--accent-primary); /* Use end gradient color */
+    border-color: var(--accent-primary);
 }
 
 .checkbox-container input[type="checkbox"]:checked + .custom-checkbox::after {
@@ -513,9 +506,8 @@
 
 /* Focus state for checkbox */
 .checkbox-container input[type="checkbox"]:focus-visible + .custom-checkbox {
-    box-shadow: 0 0 0 2px rgba(64, 162, 227, 0.3); /* Focus ring */
+    box-shadow: 0 0 0 2px var(--focus-shadow); /* Focus ring */
 }
-
 
 /* Select dropdown styles */
 .select-container {
@@ -527,9 +519,9 @@
     appearance: none; /* Remove default arrow */
     width: 100%;
     padding: 8px 30px 8px 12px; /* Make room for custom arrow */
-    background-color: var(--input-bg);
-    color: var(--text-color);
-    border: 1px solid #444;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border-input);
     border-radius: 6px;
     font-size: 14px;
     cursor: pointer;
@@ -547,13 +539,13 @@
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 5px solid var(--secondary-text); /* Arrow color */
+    border-top: 5px solid var(--text-secondary); /* Arrow color */
     pointer-events: none; /* Don't interfere with select */
     transition: border-color 0.2s ease;
 }
 
 .select-container:hover::after {
-    border-top-color: var(--text-color); /* Lighten arrow on hover */
+    border-top-color: var(--text-primary); /* Lighten arrow on hover */
 }
 
 /* Password/Key input specific styles */
@@ -577,7 +569,7 @@
     height: 100%; /* Match input height */
     background: none;
     border: none;
-    color: var(--secondary-text);
+    color: var(--text-secondary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -588,7 +580,7 @@
 }
 
 .toggle-password:hover {
-    color: var(--text-color);
+    color: var(--text-primary);
 }
 
 .toggle-password .material-icons {
@@ -610,9 +602,9 @@
     gap: 12px;
     position: sticky;
     bottom: 0;
-    background-color: var(--secondary-bg); /* Match modal bg */
+    background-color: var(--bg-secondary); /* Match modal bg */
     padding: 16px 24px; /* Padding */
-    border-top: 1px solid var(--border-color); /* Separator */
+    border-top: 1px solid var(--border-primary); /* Separator */
     z-index: 5; /* Below header/tabs, above content */
     flex-shrink: 0; /* Prevent shrinking */
 }
@@ -630,14 +622,14 @@
 }
 
 .btn.primary {
-    background: linear-gradient(90deg, var(--gradient-mid2), var(--gradient-end)); /* Agent gradient */
+    background-color: var(--accent-primary); /* Match send button */
     color: white;
 }
 
 .btn.secondary {
-    background-color: #3a3f4f; /* Match cancel button color */
+    background-color: var(--button-secondary-bg); /* Match cancel button color */
     border: none; /* No border needed */
-    color: var(--text-color);
+    color: var(--text-primary);
 }
 
 .btn:hover {
@@ -645,16 +637,24 @@
     transform: translateY(-1px); /* Subtle lift */
 }
 
+.btn.primary:hover {
+    background-color: color-mix(in srgb, var(--accent-primary) 90%, white);
+}
+
 .btn:active {
     transform: translateY(0px); /* Reset lift on click */
     opacity: 1;
+}
+
+.btn.primary:active {
+    background-color: color-mix(in srgb, var(--accent-primary) 80%, black);
 }
 
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
-    background: var(--border-color);
+    background: var(--border-primary);
 }
 
 /* Adjustments for single column model controls if needed */
@@ -663,4 +663,20 @@
         grid-template-columns: 1fr; /* Stack controls */
         gap: 12px;
     }
+}
+
+/* Code font size classes */
+.code-font-small pre code,
+.code-font-small .prism-code {
+    font-size: 13px !important;
+}
+
+.code-font-medium pre code,
+.code-font-medium .prism-code {
+    font-size: 14px !important;
+}
+
+.code-font-large pre code,
+.code-font-large .prism-code {
+    font-size: 16px !important;
 }

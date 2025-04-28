@@ -1,0 +1,15 @@
+/* Keyboard Shortcut Styling */
+.kbd {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-input);
+    border-bottom: 2px solid var(--border-primary);
+    border-radius: 4px;
+    box-shadow: 0 1px 0 var(--shadow-color);
+    color: var(--text-primary);
+    display: inline-block;
+    font-size: 0.85em;
+    padding: 2px 6px;
+    margin: 0 2px;
+    font-family: var(--code-font);
+    white-space: nowrap;
+}

@@ -6,8 +6,8 @@ prompt-editor.css
     margin: 0 auto;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     padding: 0;
-    background-color: #1a1a1a;
-    color: #ffffff;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     box-sizing: border-box;
     width: 100%;
     border-radius: 0; /* Explicitly remove border radius */
@@ -18,7 +18,7 @@ prompt-editor.css
     position: relative;
     height: 100%;
     width: 100%;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--border-primary);
     overflow-y: scroll;
 }
 
@@ -35,7 +35,7 @@ prompt-editor.css
 .prompt-editor-container .tab-header {
     display: flex;
     background-color: transparent;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--border-primary);
 }
 
 .prompt-editor-container .tab {
@@ -43,20 +43,20 @@ prompt-editor.css
     cursor: pointer;
     user-select: none;
     font-size: 14px;
-    color: #71717a;
-    border-right: 1px solid #444;
+    color: var(--text-secondary);
+    border-right: 1px solid var(--border-primary);
     background-color: transparent;
     transition: background-color 0.2s;
 }
 
 .prompt-editor-container .tab:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--bg-hover);
 }
 
 .prompt-editor-container .tab.active {
-    background-color: #333;
-    color: #ffffff;
-    border-bottom: 2px solid #444;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-primary);
     margin-bottom: -1px;
 }
 
@@ -80,11 +80,11 @@ prompt-editor.css
 .prompt-editor-container .raw-textarea {
     width: 100%;
     height: 100%;
-    background-color: #222;
+    background-color: var(--bg-code);
     border: none;
     border-radius: 0; /* Removing border radius */
     padding: 10px 15px;
-    color: #adbccc;
+    color: var(--text-primary);
     font-size: 13px;
     font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
     line-height: 1.5;
@@ -108,7 +108,7 @@ prompt-editor.css
     align-items: center;
     justify-content: space-between;
     padding: 10px 15px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-primary);
 }
 
 .prompt-editor-container .message-title {
@@ -120,7 +120,7 @@ prompt-editor.css
 
 .prompt-editor-container .message-title svg {
     margin-right: 10px;
-    color: #71717a;
+    color: var(--text-secondary);
 }
 
 .prompt-editor-container .action-icons {
@@ -139,7 +139,7 @@ prompt-editor.css
     align-items: center;
     justify-content: space-between;
     padding: 0px;
-    color: #71717a;
+    color: var(--text-secondary);
     font-size: 14px;
     user-select: none;
     -webkit-user-select: none;
@@ -161,7 +161,7 @@ prompt-editor.css
 }
 
 .prompt-editor-container .block-content {
-    background-color: #222;
+    background-color: var(--bg-tertiary);
     border-radius: 4px;
     padding: 10px 15px;
     font-size: 14px;
@@ -170,10 +170,10 @@ prompt-editor.css
 
 .prompt-editor-container .block-textarea {
     width: 100%;
-    background-color: #222;
+    background-color: var(--bg-tertiary);
     border: none;
     border-radius: 4px;
-    color: #adbccc;
+    color: var(--text-primary);
     font-size: 13px;
     font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
     resize: none;
@@ -181,6 +181,10 @@ prompt-editor.css
 
 .prompt-editor-container .block-textarea:focus {
     outline: none;
+}
+
+.prompt-editor-container .block-textarea:focus::placeholder {
+    opacity: 0;
 }
 
 .prompt-editor-container .block-footer {
@@ -192,9 +196,9 @@ prompt-editor.css
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #333;
-    color: #fff;
-    border: 1px solid #444;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
     border-radius: 4px;
     height: 30px;
     min-width: 30px;
@@ -204,17 +208,17 @@ prompt-editor.css
 }
 
 .prompt-editor-container .option-button.selected {
-    background-color: #444;
+    background-color: var(--bg-active);
 }
 
 .prompt-editor-container .highlighted {
-    border: 1px solid #555;
+    border: 1px solid var(--border-active);
 }
 
 .prompt-editor-container .add-block {
     display: flex;
     align-items: center;
-    color: #71717a;
+    color: var(--text-secondary);
     padding: 10px;
     font-style: italic;
     cursor: pointer;
@@ -225,7 +229,7 @@ prompt-editor.css
 }
 
 .prompt-editor-container .prompt-text {
-    color: #555;
+    color: var(--text-secondary);
     font-style: italic;
 }
 
@@ -236,7 +240,7 @@ prompt-editor.css
 
 .prompt-editor-container .menu-icon {
     cursor: pointer;
-    color: #71717a;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -249,13 +253,13 @@ prompt-editor.css
 }
 
 .prompt-editor-container .menu-icon:hover {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .prompt-editor-container .block-name-input {
     background: transparent;
     border: none;
-    color: #71717a;
+    color: var(--text-secondary);
     font-size: inherit;
     font-family: inherit;
     padding: 0;
@@ -282,7 +286,7 @@ prompt-editor.css
     display: flex;
     justify-content: space-between;
     padding: 10px;
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--border-primary);
     margin-top: 20px;
 }
 
@@ -291,7 +295,7 @@ prompt-editor.css
     position: absolute;
     left: 24px;
     width: 1px;
-    background-color: #333;
+    background-color: var(--border-primary);
     z-index: 0;
 }
 
@@ -315,9 +319,9 @@ prompt-editor.css
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #222;
+    background-color: var(--bg-tertiary);
     border-radius: 50%;
-    border: 1px solid #444;
+    border: 1px solid var(--border-primary);
     margin-bottom: 10px;
     opacity: 0.5;
     transition: opacity 0.2s;
@@ -341,10 +345,10 @@ prompt-editor.css
     position: absolute;
     left: 36px;
     top: 0;
-    background-color: #222;
+    background-color: var(--bg-secondary);
     border-radius: 4px;
     padding: 10px;
-    border: 1px solid #444;
+    border: 1px solid var(--border-primary);
     z-index: 10;
     min-width: 140px;
 }
@@ -356,7 +360,7 @@ prompt-editor.css
 }
 
 .prompt-editor-container .add-btn:hover {
-    background-color: #333;
+    background-color: var(--bg-hover);
 }
 
 .prompt-editor-container .item-type {

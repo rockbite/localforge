@@ -3,202 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coding Agent</title>
-    <link rel="stylesheet" href="/css/base.css">
-    <link rel="stylesheet" href="/css/layout.css">
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/projects.css">
-    <link rel="stylesheet" href="/css/chat.css">
-    <link rel="stylesheet" href="/css/tool-panel.css">
-    <link rel="stylesheet" href="/css/tasks-panel.css">
-    <link rel="stylesheet" href="/css/footer-input.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/code-blocks.css">
-    <link rel="stylesheet" href="/css/modals.css">
-    <link rel="stylesheet" href="/css/settings-dialog.css">
-    <link rel="stylesheet" href="/css/responsive.css">
+    <title>Agent</title>
+    <!-- Main CSS file with all theme and base styles -->
+    <link rel="stylesheet" href="/css/main.css">
+    
+    <!-- Component CSS files that haven't been refactored yet -->
     <link rel="stylesheet" href="/css/prompt-editor.css">
+    
     <style>
         /* Badge styling for model names */
         #model-info .model-badge {
-            background-color: var(--border-color);
-            color: var(--text-color);
+            background-color: var(--border-primary);
+            color: var(--text-primary);
             border-radius: 12px;
-            padding: 2px 8px;
             font-size: 12px;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            max-width: 60px;
-        }
-
-        #model-info .token-badge {
-            max-width: 120px;
-            text-align: right;
-            overflow: auto;
-        }
-        
-        /* Loading screen styles */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background-color: var(--primary-bg);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity var(--loading-fade-duration) ease-in-out;
-        }
-        
-        .loader-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-        
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-left-color: #FF715B;
-            border-top-color: #FFD166;
-            animation: spin 1s linear infinite;
-            margin-bottom: 24px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            color: var(--text-color);
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-        
-        .loading-subtext {
-            color: var(--secondary-text);
-            font-size: 14px;
-        }
-
-        /* Hide main content initially */
-        .main-content {
-            display: none;
-            opacity: 0;
-            transition: opacity var(--loading-fade-duration) ease-in-out;
-            width: 100%;
-            height: 100vh;
-        }
-        
-        /* Show main content when loading is done */
-        .main-content.loaded {
-            display: block;
-            opacity: 1;
-        }
-        
-        /* Make container take full width */
-        .container {
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* Project status indicators */
-        .project-status {
+            padding: 3px 8px;
             display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 4px;
         }
         
-        .project-status.active {
-            background-color: #4CAF50;
-        }
-        
-        .project-status.archived {
-            background-color: #9E9E9E;
+        #model-info .model-name {
+            font-weight: var(--font-weight-medium);
         }
     </style>
-    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
-    <!-- Include Prism.js for syntax highlighting -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <!-- Add common language components to avoid loading delay -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-    <!-- Add Prism line numbers plugin -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
-    <!-- Include marked.js for markdown rendering -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Include socket.io client -->
-    <script src="/socket.io/socket.io.js"></script>
-    <!-- Shoelace components -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    
+    <!-- Shoelace components (required for dialog elements) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/themes/dark.css" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/shoelace-autoloader.js"></script>
+    
     <!-- Tippy.js for tooltips and popovers -->
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
-    <!-- File Tree Widget -->
-    <script src="js/file-tree.js"></script>
-    <script type="module" src="js/task-tracker-widget.js"></script>
-    <!-- Update Checker -->
-    <script src="js/update-checker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-jsx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-tsx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-rust.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-ruby.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-swift.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-kotlin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-graphql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-docker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-nginx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Load non-module scripts first -->
+    <script src="/js/theme-loader.js"></script>
+    <script src="/js/update-checker.js"></script>
+    <script src="/js/cost-animator.js"></script>
+    <script src="/js/file-tree.js"></script>
+    <script src="/js/prompt-editor.js"></script>
+    <script src="/js/loader.js"></script>
+    <script src="/js/bridge.js"></script>
+    <script src="/js/ui/settings.js" type="module"></script>
+    
+    <!-- Load modules after settings.js has initialized -->
+    <script src="/js/utils.js" type="module"></script>
+    <script src="/js/socket.js" type="module"></script>
+    <script src="/js/api.js" type="module"></script>
+    <script src="/js/state.js" type="module"></script>
+    <script src="/js/ui/chat-context.js" type="module"></script>
+    <script src="/js/ui/chat.js" type="module"></script>
+    <script src="/js/ui/projects.js" type="module"></script>
+    <script src="/js/ui/status.js" type="module"></script>
+    <script src="/js/ui/toolLog.js" type="module"></script>
+    <script src="/js/ui/layout.js" type="module"></script>
+    <script src="/js/ui/workspace.js" type="module"></script>
+    <script src="/js/task-tracker-widget.js" type="module"></script>
+    <script src="/js/main.js" type="module"></script>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loader-container">
-            <div class="spinner"></div>
-            <div class="loading-text">Loading Projects</div>
-            <div class="loading-subtext">Please wait...</div>
+    <div class="container">
+        <%- include('partials/header') %>
+        <div class="main-content">
+            <%- include('partials/projects-panel') %>
+            <%- include('partials/main-panel') %>
+            <%- include('partials/right-panel') %>
         </div>
     </div>
-    
-    <!-- Main Application Content -->
-    <div id="main-content" class="main-content">
-        <div class="container">
-            <%- include('partials/header') %>
-            
-            <%- include('partials/setup-modal') %>
-            
-            <div id="split-container">
-                <%- include('partials/projects-panel') %>
-                <%- include('partials/main-panel') %>
-                <div id="drag-bar">
-                    <div class="drag-handle-icon">
-                        <span class="material-icons">drag_handle</span>
-                    </div>
-                </div>
-                <%- include('partials/right-panel') %>
-            </div>
-        </div>
-        
-        <!-- Context menu -->
-        <%- include('partials/project-context-menu') %>
-        
-        <!-- Settings dialog -->
-        <%- include('partials/settings-modal') %>
-        
-        <!-- Chat Context View modal -->
-        <%- include('partials/chat-context-view-modal') %>
-    </div>
+
+    <%- include('partials/chat-context-view-modal') %>
+    <%- include('partials/settings-modal') %>
+    <%- include('partials/setup-modal') %>
+    <%- include('partials/project-context-menu') %>
     
     <!-- Global Modal Dialogs - Must be outside all panels to avoid z-index issues -->
     <!-- Confirmation dialog -->
@@ -208,12 +115,5 @@
         <sl-button slot="footer" variant="neutral" class="cancel-button">Cancel</sl-button>
         <sl-button slot="footer" variant="danger" class="confirm-button">Confirm</sl-button>
     </sl-dialog>
-    
-    <!-- Load scripts -->
-    <script type="module" src="js/cost-animator.js"></script>
-    <script type="module" src="js/loader.js"></script>
-    <script src="js/prompt-editor.js"></script>
-    <script type="module" src="js/main.js"></script>
-    <!-- Note: app.js is not loaded anymore, main.js replaces it -->
 </body>
 </html>

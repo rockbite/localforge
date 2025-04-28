@@ -303,9 +303,22 @@ export function addUserMessage(message) {
 
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content';
-    // Display user messages as plain text (or basic markdown if desired)
-    // Using textContent prevents potential XSS from user input if interpreting HTML
-    messageContent.textContent = message;
+    
+    // Replace newlines with <br> tags to preserve line breaks without using white-space: pre-wrap
+    if (typeof message === 'string') {
+        // Use innerHTML safely after escaping the content and converting \n to <br>
+        const escapedContent = message
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+            .replace(/\n/g, '<br>');
+        messageContent.innerHTML = escapedContent;
+    } else {
+        messageContent.textContent = message;
+    }
+    
     messageDiv.appendChild(messageContent);
 
     messagesContainer.appendChild(messageDiv);

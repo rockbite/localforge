@@ -1,0 +1,164 @@
+/* Common panel styles */
+
+/* Divider panel */
+#projects-panel {
+    background-color: var(--bg-primary);
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-primary);
+}
+
+/* Right panel */
+#right-panel {
+    background-color: var(--bg-primary);
+    width: var(--tool-panel-width);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border-primary);
+}
+
+/* Drag bar for resizing panels */
+#drag-bar {
+    width: 8px;
+    background-color: transparent;
+    cursor: ew-resize;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+#drag-bar::after {
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 1px;
+    background-color: var(--border-primary);
+    z-index: 1;
+}
+
+.drag-handle-icon {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 12px;
+    height: 22px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: 2px;
+    z-index: 6;
+}
+
+.drag-handle-icon .material-icons {
+    font-size: 10px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    transition: opacity var(--transition-fast);
+    transform: rotate(90deg);
+}
+
+#drag-bar:hover .material-icons {
+    opacity: 1;
+}
+
+/* Main content panel */
+#main-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+    min-height: 0; /* Allow flex children to shrink */
+}
+
+/* Tool Panel */
+#tool-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+    overflow: hidden;
+}
+
+#tool-panel h3 {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+#tool-panel h3 .material-icons {
+    margin-right: var(--spacing-xs);
+    color: var(--accent-tertiary);
+    font-size: 20px;
+}
+
+#cost-display {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-normal);
+}
+
+/* Model info section */
+#model-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: var(--spacing-xs) 0;
+}
+
+#model-info .material-icons {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-right: var(--spacing-xs);
+}
+
+/* Working directory display */
+#working-dir {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-primary);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+#working-dir:hover {
+    background-color: var(--bg-tertiary);
+}
+
+#working-dir .material-icons {
+    margin-right: var(--spacing-xs);
+    color: var(--accent-primary);
+    font-size: 18px;
+}
+
+#current-dir {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Tasks panel */
+#tasks-panel {
+    border-top: 1px solid var(--border-primary);
+    padding: var(--spacing-md);
+    min-height: 350px;
+    max-height: 350px;
+    background-color: var(--bg-primary);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
