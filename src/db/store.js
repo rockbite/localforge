@@ -31,20 +31,43 @@ export class Store {
             modelsData = typeof models === 'string' ? JSON.parse(models) : models;
         } catch (error) {
             console.error('Error parsing models data:', error);
-            return null;
+            // Initialize with default empty structure instead of returning null
+            modelsData = { providers: [], llmConfig: {} };
+            
+            // Store the fixed empty structure to prevent future parsing errors
+            this.setSetting('models', JSON.stringify(modelsData));
         }
         
         const { providers = [], llmConfig = {} } = modelsData;
         
+        // If no config exists for this name, return a default config
         if (!llmConfig[llmConfigName]) {
-            return null;
+            // Return a default configuration with OpenAI/GPT-4 as fallback
+            return {
+                config: llmConfigName,
+                model: 'gpt-4-turbo',  // Default model as fallback
+                provider: {
+                    name: 'openai',    // Default provider
+                    type: 'openai',    // Default type
+                    options: {}
+                }
+            };
         }
         
         const config = llmConfig[llmConfigName];
         const provider = providers.find(p => p.name === config.provider);
         
+        // If provider reference is invalid, use default provider
         if (!provider) {
-            return null;
+            return {
+                config: llmConfigName,
+                model: config.model || 'gpt-4-turbo',  // Use existing model or default
+                provider: {
+                    name: 'openai',    // Default provider
+                    type: 'openai',    // Default type
+                    options: {}
+                }
+            };
         }
         
         return {
@@ -66,7 +89,11 @@ export class Store {
             modelsData = typeof models === 'string' ? JSON.parse(models) : models;
         } catch (error) {
             console.error('Error parsing models data:', error);
-            return [];
+            // Initialize with default empty structure instead of returning empty array
+            modelsData = { providers: [], llmConfig: {} };
+            
+            // Store the fixed empty structure to prevent future parsing errors
+            this.setSetting('models', JSON.stringify(modelsData));
         }
         
         return modelsData.providers || [];
@@ -80,7 +107,11 @@ export class Store {
             modelsData = typeof models === 'string' ? JSON.parse(models) : models;
         } catch (error) {
             console.error('Error parsing models data:', error);
-            return {};
+            // Initialize with default empty structure instead of returning empty object
+            modelsData = { providers: [], llmConfig: {} };
+            
+            // Store the fixed empty structure to prevent future parsing errors
+            this.setSetting('models', JSON.stringify(modelsData));
         }
         
         return modelsData.llmConfig || {};
