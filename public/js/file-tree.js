@@ -306,11 +306,11 @@ class FileTreeWidget {
         return `
         /* File Tree Widget Styles */
         .file-tree-widget {
-            background-color: var(--primary-bg, #1E1E1E);
+            background-color: var(--bg-code);
             border-radius: var(--border-radius, 8px);
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border: 1px solid var(--border-color, #333);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            border: 1px solid var(--border-primary);
             position: relative;
             width: 100%;
             margin: 10px 0;
@@ -353,11 +353,11 @@ class FileTreeWidget {
         }
 
         .file-tree-node:hover {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: var(--bg-hover);
         }
 
         .file-tree-node.active {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-active);
         }
 
         .file-tree-node .name {
@@ -377,35 +377,35 @@ class FileTreeWidget {
         }
 
         .file-node-folder > .file-tree-node .name {
-            color: var(--folder-color, #40A2E3);  /* Now blue (was yellow) */
+            color: var(--accent-primary);
         }
 
         .file-node-file > .file-tree-node .name.js {
-            color: var(--js-file-color, #7dd1c1);
+            color: var(--status-success);
         }
 
         .file-node-file > .file-tree-node .name.css {
-            color: var(--css-file-color, #7B61FF);
+            color: var(--accent-secondary);
         }
 
         .file-node-file > .file-tree-node .name.html {
-            color: var(--html-file-color, #FF715B);
+            color: var(--accent-quaternary);
         }
 
         .file-node-file > .file-tree-node .name.json {
-            color: var(--json-file-color, #FFD166);  /* Now yellow (was blue) */
+            color: var(--accent-tertiary);
         }
 
         .file-node-file > .file-tree-node .name.img {
-            color: var(--image-file-color, #E57373);
+            color: var(--status-error);
         }
 
         .file-node-file > .file-tree-node .name.txt {
-            color: var(--text-file-color, #d9dfe7);
+            color: var(--text-primary);
         }
         
         .file-node-file > .file-tree-node .name.gray {
-            color: var(--secondary-text, #888);
+            color: var(--text-secondary);
         }
 
         .file-node-children {
@@ -428,10 +428,10 @@ class FileTreeWidget {
 
         .file-tree-path {
             font-size: 12px;
-            color: var(--secondary-text, #888);
+            color: var(--text-secondary);
             padding: 8px 16px;
-            background-color: rgba(0, 0, 0, 0.2);
-            border-top: 1px solid var(--border-color, #333);
+            background-color: var(--bg-code-overlay);
+            border-top: 1px solid var(--border-primary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -440,8 +440,8 @@ class FileTreeWidget {
         .file-tree-info {
             padding: 8px 16px;
             font-size: 12px;
-            color: var(--secondary-text, #888);
-            border-top: 1px solid var(--border-color, #333);
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-primary);
             display: flex;
             justify-content: space-between;
         }
