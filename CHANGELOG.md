@@ -5,6 +5,8 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) co
 ## [1.0.12] – 2025-04-25
 * Chat messages context now show system prompt
 * Fixed bug with simultaneous tool call + content response
+* Total refactor for CSS structure and support for multiple themes (introduced light/dark mode)
+* Auto updating feature for npm case
 
 ---
 
