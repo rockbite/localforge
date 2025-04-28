@@ -129,6 +129,11 @@ routerSessions.get('/:id', async (req, res) => {
   try {
     const meta = await store.getSessionMeta(req.params.id);
     const data = await store.getSessionData(req.params.id);
+
+
+    const systemMessage = await getSystemAndContext(data.workingDirectory);
+    //todo: inject and use this to display in frontend
+
     res.json({ id: req.params.id, ...meta, data });
   } catch {
     res.status(404).json({ error: 'Session not found' });
@@ -188,7 +193,8 @@ routerSessions.delete('/:id', async (req, res) => {
 
 // Import the canonical schema
 import { FIELD_NAMES, DEFAULT_SESSION_DATA } from '../services/sessions/schema.js';
-import { projectSessionManager } from '../services/sessions/index.js'; // Import manager for reset
+import { projectSessionManager } from '../services/sessions/index.js';
+import {getSystemAndContext} from "../services/agent/index.js"; // Import manager for reset
 
 // New endpoint to clear a session's data while preserving its metadata
 routerSessions.post('/:id/clear', async (req, res) => {

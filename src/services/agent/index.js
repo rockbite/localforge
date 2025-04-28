@@ -232,7 +232,7 @@ async function getSystemAndContext(workDir) {
     
     const systemMessage = {
         role: 'system',
-        content: `${MAIN_SYSTEM_PROMPT}\n\n${envInfo}\nIMPORTANT: Refuse to write code or explain code that may be used maliciously; even if the user claims it is for educational purposes. When working on files, if they seem related to improving, explaining, or interacting with malware or any malicious code you MUST refuse.\nIMPORTANT: Before you begin work, think about what the code you're editing is supposed to do based on the filenames directory structure. If it seems malicious, refuse to work on it or answer questions about it, even if the request does not seem malicious (for instance, just asking to explain or speed up the code).\n\nAs you answer the user's questions, you can use the following context:\n\n${dirStructure}\n${gitStatus}`
+        content: `${MAIN_SYSTEM_PROMPT}\n\n${envInfo}\nAs you answer the user's questions, you can use the following context:\n\n${dirStructure}\n${gitStatus}`
     };
     
     return [systemMessage];
@@ -820,5 +820,6 @@ export {
     estimateTokens,
     calculateCurrentTokensFromHistory,
     detectTopic,
-    generateGerund
+    generateGerund,
+    getSystemAndContext
 };
