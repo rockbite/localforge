@@ -18,6 +18,7 @@ import { projectSessionManager, sessionAccountingEvents } from '../sessions/inde
 // Import tool registry for metadata access
 import { TOOL_REGISTRY } from '../../../tools/index.js';
 import {AUX_MODEL, callLLMByType, MAIN_MODEL} from "../../middleware/llm.js";
+import os from "os";
 
 // Token count constants
 const MAX_TOKENS = 1000000; // 1 million tokens maximum
@@ -65,9 +66,19 @@ initializePrompts({agentName: "Jeff"}).then();
 async function getEnvironmentInfo(workDir) {
     const cwd = workDir || process.cwd();
     let isGitRepo = false;
-    let platform = process.platform;
     const today = new Date().toLocaleDateString();
-    
+
+
+    const tag   = os.platform();   // e.g. "darwin"
+    const pretty = ({
+        darwin : "macOS",
+        win32  : "Windows",
+        linux  : "Linux"
+    }[tag]) || tag;
+    let platform = pretty + ` (${tag}) ` + os.version(); // e.g. "macOS 12.6.1" or "Windows 10" or "Linux 5.4.0-42-generic"
+
+    let nodeV = globalThis.process?.versions?.node ?? 'n/a'
+
     try {
         // Only check git status if directory is provided
         if (workDir) {
@@ -85,6 +96,7 @@ Working directory: ${workDir ? cwd : 'Not set'}
 Is directory a git repo: ${isGitRepo ? 'Yes' : 'No'}
 Platform: ${platform}
 Today's date: ${today}
+Node.js version: ${nodeV}
 </env>`;
 }
 
@@ -227,12 +239,14 @@ function calculateCurrentTokensFromHistory(historyArray) {
  */
 async function getSystemAndContext(workDir) {
     const envInfo = await getEnvironmentInfo(workDir);
-    const dirStructure = await getDirectoryStructure(workDir);
-    const gitStatus = await getGitStatus(workDir);
+
+    //todo: this is outdated and deprecated
+    //const dirStructure = await getDirectoryStructure(workDir);
+    //const gitStatus = await getGitStatus(workDir);
     
     const systemMessage = {
         role: 'system',
-        content: `${MAIN_SYSTEM_PROMPT}\n\n${envInfo}\nAs you answer the user's questions, you can use the following context:\n\n${dirStructure}\n${gitStatus}`
+        content: `${MAIN_SYSTEM_PROMPT}\n\n${envInfo}\n`
     };
     
     return [systemMessage];
@@ -376,24 +390,27 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
             console.log(`LLM requested ${llmResponse.tool_calls.length} tool calls`);
             
             // If we have both content and tool calls, handle content first
+
+            let toolUseObject = {
+                role: 'assistant',
+                content: llmResponse.tool_calls.map(call => ({
+                    type: 'tool_use',
+                    id: call.id,
+                    name: call.function.name,
+                    input: typeof call.function.arguments === 'string'
+                        ? JSON.parse(call.function.arguments)
+                        : call.function.arguments
+                }))
+            };
+
             if (hasContent) {
-                console.log(`[${sessionId}] LLM response has BOTH content and tool calls.`);
-                
-                // Persist text content first (only for main agents)
-                if (!sessionId.startsWith('sub_')) {
-                    console.log(`[${sessionId}] Persisting text content part first.`);
-                    await projectSessionManager.appendAssistantMessage(sessionId, {
-                        role: 'assistant',
-                        content: llmResponse.content
-                        // No tool_calls here
-                    });
-                }
-                
+                toolUseObject.content.push({type: 'text', text: llmResponse.content});
                 // Notify frontend about interim content to display immediately
                 if (streamCallback) {
                     streamCallback({
                         type: 'interim_content',
                         content: llmResponse.content,
+                        tool_calls: llmResponse.tool_calls,
                         sessionId: sessionId // Include sessionId for proper session tracking
                     });
                 }
@@ -402,17 +419,7 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
             // Then save tool_use message (only for main agents)
             if (!sessionId.startsWith('sub_')) {
                 // Persist the tool use query in history
-                await projectSessionManager.appendAssistantMessage(sessionId, {
-                    role: 'assistant',
-                    content: llmResponse.tool_calls.map(call => ({
-                        type: 'tool_use',
-                        id: call.id,
-                        name: call.function.name,
-                        input: typeof call.function.arguments === 'string' 
-                            ? JSON.parse(call.function.arguments) 
-                            : call.function.arguments
-                    }))
-                });
+                await projectSessionManager.appendAssistantMessage(sessionId, toolUseObject);
             }
             
             if (streamCallback) {

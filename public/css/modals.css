@@ -229,7 +229,7 @@
 
 .context-message-content {
     color: var(--secondary-text);
-    max-height: 300px; /* Reduced from 500px */
+    max-height: 400px; /* Increased from 300px for system message */
     overflow-y: auto;
     margin: 0;
     white-space: pre-wrap;

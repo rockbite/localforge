@@ -77,7 +77,7 @@ export async function callLLMProvider(providerName, options) {
         const msg = res.choices[0].message;
         const out = {
             role: 'assistant',
-            content: msg.tool_calls ? null : msg.content,
+            content: msg.content,
             tool_calls: msg.tool_calls ?? null,
         };
 

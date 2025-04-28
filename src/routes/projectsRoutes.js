@@ -132,9 +132,8 @@ routerSessions.get('/:id', async (req, res) => {
 
 
     const systemMessage = await getSystemAndContext(data.workingDirectory);
-    //todo: inject and use this to display in frontend
-
-    res.json({ id: req.params.id, ...meta, data });
+    
+    res.json({ id: req.params.id, ...meta, data, systemMessage });
   } catch {
     res.status(404).json({ error: 'Session not found' });
   }

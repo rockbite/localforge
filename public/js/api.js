@@ -74,15 +74,14 @@ export async function getFullSessionContext(sessionId) {
         // 2. All conversation history (user/assistant pairs)
         // The call that constructs this is in agentCore.js line ~560:
         // messagesForLLM = systemAndContextMessages.concat(persistentHistory).concat(userMessageForLLM);
+
+        let systemText = sessionData.systemMessage[0].content;
         
         return {
             ...sessionData,
             fullContext: {
                 messages: history,
-                systemPromptSummary: {
-                    role: 'system',
-                    content: 'System prompt + Environment info + Directory structure + Git status'
-                }
+                systemPromptSummary: systemText
             }
         };
     } catch (error) {

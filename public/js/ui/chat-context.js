@@ -86,15 +86,23 @@ function renderFullContext(contextData) {
     const messagesContainer = document.createElement('div');
     messagesContainer.className = 'context-messages-list';
     contextMessages.appendChild(messagesContainer);
-    
+
     // First, add the system message
     if (contextData.systemPromptSummary) {
         const systemMessage = createContextMessageElement(
             'system', 
             'System Message (First message sent to LLM)', 
             'Includes prompts, environment, directory structure, and git status',
-            contextData.systemPromptSummary.content
+            contextData.systemPromptSummary
         );
+        
+        // Add max-height and scrollable styles to the content element
+        const contentElement = systemMessage.querySelector('.context-message-content');
+        if (contentElement) {
+            contentElement.style.maxHeight = '250px';
+            contentElement.style.overflowY = 'auto';
+        }
+        
         messagesContainer.appendChild(systemMessage);
     }
     
