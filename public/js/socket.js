@@ -71,9 +71,9 @@ export function initializeSocket() {
     socket.on('connect_error', (err) => {
         console.error('Connection Error:', err.message);
         setStatus('error', 'Connection Failed');
-        addAgentMessage(`⚠️ Failed to connect to the server: ${err.message}. Please ensure the backend is running and refresh.`);
+        addAgentMessage(`Failed to connect to the server: ${err.message}. Please ensure the backend is running and refresh.`);
         enableChatInput(false); // Disable input on connection error
-    });
+    })
 
 
     socket.on('error', (error) => { // General errors from the server via socket.emit('error', ...)
@@ -86,7 +86,7 @@ export function initializeSocket() {
         }
         
         removeThinkingWidget(); // Stop thinking indicator on error
-        addAgentMessage(`⚠️ Server Error: ${error?.message || 'Unknown error occurred'}`);
+        addAgentMessage(`Server Error: ${error?.message || 'Unknown error occurred'}`);
         setStatus('error', 'Server Error'); // Set status to error
         enableChatInput(true); // Usually allow input after a server error, unless it's critical
 

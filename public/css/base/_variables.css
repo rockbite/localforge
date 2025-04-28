@@ -10,6 +10,7 @@
     /* Layout */
     --header-height: 64px;
     --footer-height: 300px;
+    --projects-panel-width: 280px; /* Initial width, updated via JS */
     --tool-panel-width: 420px; /* Initial width, updated in responsive.css */
     
     /* Borders and radiuses */

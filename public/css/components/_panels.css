@@ -3,7 +3,7 @@
 /* Divider panel */
 #projects-panel {
     background-color: var(--bg-primary);
-    width: 280px;
+    width: var(--projects-panel-width, 280px);
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-primary);
@@ -18,8 +18,8 @@
     border-left: 1px solid var(--border-primary);
 }
 
-/* Drag bar for resizing panels */
-#drag-bar {
+/* Drag bars for resizing panels */
+#drag-bar, #projects-drag-bar {
     width: 8px;
     background-color: transparent;
     cursor: ew-resize;
@@ -30,7 +30,7 @@
     position: relative;
 }
 
-#drag-bar::after {
+#drag-bar::after, #projects-drag-bar::after {
     content: "";
     position: absolute;
     height: 100%;

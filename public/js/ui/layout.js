@@ -5,6 +5,7 @@
 const loadingScreen = document.getElementById('loading-screen');
 const mainContent = document.getElementById('main-content');
 const dragBar = document.getElementById('drag-bar');
+const projectsDragBar = document.getElementById('projects-drag-bar');
 const footerDragHandle = document.getElementById('footer-drag-handle');
 const mainPanel = document.getElementById('main-panel');
 const projectsPanel = document.getElementById('projects-panel');
@@ -29,6 +30,13 @@ export function initDragBar() {
         console.warn("Footer drag elements not found, skipping initialization.");
     }
 
+    // Initialize the projects drag bar if it exists
+    if (projectsDragBar) {
+        initProjectsDragBar();
+    } else {
+        console.warn("Projects drag bar not found, skipping initialization.");
+    }
+
     let dragging = false;
     let startX, startRightPanelWidth; // For desktop horizontal drag
     let startY, startMainPanelHeight; // For mobile vertical drag (if needed)
@@ -38,6 +46,9 @@ export function initDragBar() {
         isMobile = window.innerWidth <= 768;
         // Adjust cursor based on orientation (assuming horizontal for desktop, vertical for mobile)
         dragBar.style.cursor = isMobile ? 'ns-resize' : 'ew-resize';
+        if (projectsDragBar) {
+            projectsDragBar.style.cursor = isMobile ? 'ns-resize' : 'ew-resize';
+        }
         // Reset styles if switching views to avoid conflicts
         // mainPanel.style.height = '';
         // rightPanel.style.width = '';
@@ -161,6 +172,60 @@ function initFooterDragHandle() {
     });
     
     console.log("Footer drag handle initialized.");
+}
+
+/**
+ * Initializes the projects panel drag bar for resizing the projects panel width.
+ */
+function initProjectsDragBar() {
+    let dragging = false;
+    let startX, startProjectsPanelWidth;
+    
+    // Store the initial projects panel width in a CSS variable
+    const initialProjectsPanelWidth = projectsPanel.offsetWidth;
+    document.documentElement.style.setProperty('--projects-panel-width', `${initialProjectsPanelWidth}px`);
+    
+    projectsDragBar.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        dragging = true;
+        startX = e.clientX;
+        startProjectsPanelWidth = projectsPanel.offsetWidth;
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'ew-resize';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+
+        // Calculate the new projects panel width based on mouse movement
+        const deltaX = e.clientX - startX;
+        let newProjectsPanelWidth = startProjectsPanelWidth + deltaX;
+        
+        // Set reasonable min/max constraints
+        const minWidth = 200; // Minimum projects panel width
+        const maxWidth = Math.min(window.innerWidth * 0.4, 500); // Max 40% of viewport width or 500px
+        
+        newProjectsPanelWidth = Math.max(minWidth, Math.min(newProjectsPanelWidth, maxWidth));
+        
+        // Use requestAnimationFrame for smoother visual updates
+        requestAnimationFrame(() => {
+            // Update the projects panel width
+            projectsPanel.style.width = `${newProjectsPanelWidth}px`;
+            
+            // Update CSS variable to store the value
+            document.documentElement.style.setProperty('--projects-panel-width', `${newProjectsPanelWidth}px`);
+        });
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (dragging) {
+            dragging = false;
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+        }
+    });
+    
+    console.log("Projects panel drag bar initialized.");
 }
 
 /**
