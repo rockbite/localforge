@@ -43,9 +43,13 @@ export default {
   // our new, beefier impl lives in fsTools.LS
   execute: async (args) => LSTool(args),
 
-  getDescriptiveText: (args) =>
-      `Listing contents of ${args.path} (depth ${args.depth ?? 1})`,
-
+  getDescriptiveText: (args) => {
+    const cleanPath = args.path.endsWith('/') ? args.path.slice(0, -1) : args.path;
+    const dirName = cleanPath.split('/').pop();
+    const depth = args.depth ?? 1;
+    const text = `${dirName}:${depth}`;
+    return text;
+  },
   ui: {
     icon: 'folder_open'
   }

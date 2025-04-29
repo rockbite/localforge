@@ -89,7 +89,9 @@ const edit = async ({ file_path, old_string, new_string, workingDirectory }) => 
 };
 
 const replace = async ({ file_path, content, workingDirectory }) => {
-    if(!path.resolve(file_path).startsWith(workingDirectory)) return { error: 'Access denied' };
+    if(!path.resolve(file_path).startsWith(workingDirectory)) {
+        return { error: 'Access denied' };
+    }
     await fs.writeFile(file_path, content);
     return { success: true };
 };

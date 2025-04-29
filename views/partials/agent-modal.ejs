@@ -1,0 +1,110 @@
+<!-- Agent Edit Modal -->
+<div id="agent-modal" class="modal">
+    <div class="modal-content agent-modal-content">
+        <div class="agent-modal-header">
+            <span class="agent-modal-title">Agent Editor</span>
+            <button type="button" id="agent-modal-close" class="btn secondary mini-close-btn">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        
+        <div class="agent-modal-body">
+            <!-- Top Section -->
+            <div class="agent-modal-top-section">
+                <!-- Agent Info -->
+                <div class="agent-info-section">
+                    <div class="agent-info-header">
+                        <div class="agent-icon">
+                            <span class="material-icons">smart_toy</span>
+                        </div>
+                        <div class="agent-name-container">
+                            <input type="text" id="agent-name-input" class="agent-name-input" placeholder="Agent Name">
+                        </div>
+                    </div>
+                    <div class="agent-description-container">
+                        <textarea id="agent-description-input" class="agent-description-input" placeholder="Agent Description"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Agent LLMs -->
+                <div class="agent-llms-section">
+                    <div class="agent-llms-container">
+                        <div class="agent-llm-card">
+                            <div class="agent-llm-header">Main</div>
+                            <div class="agent-llm-body">
+                                <div class="agent-llm-form-group">
+                                    <label for="am-main-provider">Provider</label>
+                                    <select id="am-main-provider" name="am-main-provider">
+                                        <!-- Provider options will be populated dynamically -->
+                                    </select>
+                                </div>
+                                <div class="agent-llm-form-group">
+                                    <input type="text" id="am-main-model" name="am-main-model" placeholder="model-name">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="agent-llm-card">
+                            <div class="agent-llm-header">Expert</div>
+                            <div class="agent-llm-body">
+                                <div class="agent-llm-form-group">
+                                    <label for="am-expert-provider">Provider</label>
+                                    <select id="am-expert-provider" name="am-expert-provider">
+                                        <!-- Provider options will be populated dynamically -->
+                                    </select>
+                                </div>
+                                <div class="agent-llm-form-group">
+                                    <input type="text" id="am-expert-model" name="am-expert-model" placeholder="model-name">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="agent-llm-card">
+                            <div class="agent-llm-header">Auxiliary</div>
+                            <div class="agent-llm-body">
+                                <div class="agent-llm-form-group">
+                                    <label for="am-aux-provider">Provider</label>
+                                    <select id="am-aux-provider" name="am-aux-provider">
+                                        <!-- Provider options will be populated dynamically -->
+                                    </select>
+                                </div>
+                                <div class="agent-llm-form-group">
+                                    <input type="text" id="am-aux-model" name="am-aux-model" placeholder="model-name">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tools List -->
+                <div class="agent-tools-section">
+                    <div class="agent-tools-container" id="agent-tools-list">
+                        <!-- Tool items will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs Section -->
+            <div class="agent-modal-tabs-section">
+                <div class="agent-tabs-list" id="agent-tabs-list">
+                    <!-- Tabs will be added here -->
+                </div>
+                <button type="button" id="add-tab-button" class="add-tab-button">
+                    <span class="material-icons">add</span>
+                </button>
+            </div>
+            
+            <!-- Prompt Content Section -->
+            <div class="agent-modal-content-section">
+                <div id="agent-prompt-editor" class="agent-prompt-editor prompt-editor-container"></div>
+                <div id="no-prompts-message" class="no-prompts-message" style="display: none;">
+                    <div class="no-prompts-content">
+                        <span class="material-icons">description</span>
+                        <p>No prompt overrides for this agent</p>
+                        <p class="hint-text">Add a new tab to start editing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

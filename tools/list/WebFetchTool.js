@@ -1,5 +1,4 @@
 import { webFetchTool, isValidHttpUrl } from '../utils/webFetchUtils.js';
-import { SETTINGS_SCHEMA } from '../../src/routes/settingsRoutes.js';
 import store from '../../src/db/store.js';
 
 export default {

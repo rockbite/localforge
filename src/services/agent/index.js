@@ -19,21 +19,29 @@ import { projectSessionManager, sessionAccountingEvents } from '../sessions/inde
 import { TOOL_REGISTRY } from '../../../tools/index.js';
 import {AUX_MODEL, callLLMByType, MAIN_MODEL} from "../../middleware/llm.js";
 import os from "os";
+import agentStore from "../../db/agentStore.js";
+import {getPromptOverride} from "../../utils.js";
+import {generateImageDescription} from "../image/index.js";
 
 // Token count constants
 const MAX_TOKENS = 1000000; // 1 million tokens maximum
 
 // Load prompts from EJS templates
-async function loadPrompt(templateName, data = {}) {
+async function loadPrompt(templateName, data = null) {
     const templatePath = path.join(__dirname, '../../../prompts', `${templateName}.ejs`);
     try {
         const template = await fs.readFile(templatePath, 'utf8');
-        return ejs.render(template, data);
+        if(data) {
+            return ejs.render(template, data);
+        } else {
+            return template;
+        }
     } catch (error) {
         console.error(`Error loading prompt template '${templateName}':`, error);
         throw error;
     }
 }
+
 
 // Load prompts at initialization time
 let MAIN_SYSTEM_PROMPT = '';
@@ -46,7 +54,7 @@ async function initializePrompts(config = {}) {
         // Default agent name is "Jeff" but can be overridden
         const agentName = config.agentName;
         
-        MAIN_SYSTEM_PROMPT = await loadPrompt('main-system', { agentName });
+        MAIN_SYSTEM_PROMPT = await loadPrompt('main-system');
         TOPIC_DETECTION_PROMPT = await loadPrompt('topic-detection');
         WHIMSICAL_GERUND_PROMPT = await loadPrompt('whimsical-gerund');
         console.log(`Prompt templates loaded successfully for agent: ${agentName}`);
@@ -237,16 +245,24 @@ function calculateCurrentTokensFromHistory(historyArray) {
  * Combines system prompt, environment info, and context
  * @param {string} workDir - Working directory path
  */
-async function getSystemAndContext(workDir) {
+async function getSystemAndContext(workDir, sessionData = null) {
     const envInfo = await getEnvironmentInfo(workDir);
 
     //todo: this is outdated and deprecated
     //const dirStructure = await getDirectoryStructure(workDir);
     //const gitStatus = await getGitStatus(workDir);
-    
-    const systemMessage = {
+
+    // todo, change it so that env info is injected and ejs parsed each time
+
+    let promptText = MAIN_SYSTEM_PROMPT;
+
+    promptText = await getPromptOverride(sessionData, "main-system", promptText);
+    // render
+    promptText = ejs.render(promptText, {agentName: "Jeff", envInfo: envInfo});
+
+    let systemMessage = {
         role: 'system',
-        content: `${MAIN_SYSTEM_PROMPT}\n\n${envInfo}\n`
+        content: `${promptText}`
     };
     
     return [systemMessage];
@@ -350,9 +366,11 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
         // Check if this is a sub-agent session (starts with "sub_")
         const isSubAgentSession = sessionId.startsWith('sub_');
 
+        let sessionData = await projectSessionManager.getSession(sessionId); // todo: check if this is fast or not
+
         const llmResponse = await callLLMByType(MAIN_MODEL, {
             messages: loopMessages,
-            tools: agentTools.getSchemas(),
+            tools: await agentTools.getSchemas(sessionData),
             sessionId: isSubAgentSession ? null : sessionId, // Only pass sessionId for main agents
             signal, // Pass the signal down
             responseCallback: streamCallback ? (update) => {
@@ -368,7 +386,7 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
                     ...update
                 });
             } : null
-        }).catch(error => {
+        }, sessionData).catch(error => {
             if (error.name === 'AbortError' || error.message === 'ABORT_ERR') {
                 console.log(`[${sessionId}] LLM call aborted.`);
                 throw new Error('ABORT_ERR'); // Re-throw standardized error
@@ -378,6 +396,9 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
         
         // Add LLM's response to the messages list
         loopMessages.push(llmResponse);
+
+        // cleanup system-image if present
+        cleanupLoopHistoryFromImageMessage(loopMessages);
         
         // Analyze the response - check if it has content, tool calls, or both
         const hasContent = llmResponse.content && llmResponse.content.trim().length > 0;
@@ -492,7 +513,7 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
                 }
 
                 // Run the tool using provided agent tools, passing the signal
-                const result = await agentTools.run(call, workingDirectory, signal)
+                let result = await agentTools.run(call, sessionData, signal)
                     .catch(error => {
                         if (error.name === 'AbortError' || error.message === 'ABORT_ERR') {
                             console.log(`[${sessionId}] Tool execution aborted: ${call.function.name}`);
@@ -503,14 +524,50 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
                         return { error: `Tool execution failed: ${error.message}` }; // Return an error object instead of throwing
                     });
                 console.log(`Tool execution completed for ${call.function.name}`);
-                
-                // Add the tool result to the messages list
-                // TODO: this is sus..
-                loopMessages.push({
+
+                let toolResultObject = {
                     role: 'tool',
                     tool_call_id: call.id,
                     content: JSON.stringify(result)
-                });
+                };
+                // check if result is a string or an image object
+                let wasImage = false;
+                let imageData = null;
+                if (typeof result === 'object') {
+                    if(result.hasOwnProperty('image-base64') && result.hasOwnProperty('text')) {
+                        toolResultObject.content = result.text;
+                        // we'll take care of image later because of this flag
+                        wasImage = true;
+                        imageData = result['image-base64'];
+                        result = result.text;
+                    } else {
+                        toolResultObject.content = JSON.stringify(result);
+                    }
+                } else {
+                    toolResultObject.content = result;
+                }
+                // Add the tool result to the messages list
+                loopMessages.push(toolResultObject);
+
+                // but if it was an image we need to add temporary user message to delete it later, because tools cant carry multimodal data
+                // system-image type contents must be cleaned up after sending from history
+                if(wasImage) {
+                    loopMessages.push( {
+                        role: 'user',
+                        content: [
+                            {
+                                type: "text",
+                                text: "[system-image]"
+                            },
+                            {
+                                type: "image_url",
+                                image_url: {
+                                    url: imageData,
+                                },
+                            }
+                        ]
+                    })
+                }
                 
                 // Persist the tool result message (only for main agents)
                 if (!sessionId.startsWith('sub_')) {
@@ -574,6 +631,18 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
         } else {
             // If we have a standard text response, return it
             return llmResponse;
+        }
+    }
+}
+
+
+function cleanupLoopHistoryFromImageMessage(loopMessages) {
+    for (let i = loopMessages.length - 1; i >= 0; i--) {
+        const message = loopMessages[i];
+        if(message.role === 'user' && message.content.length > 0) {
+            if(message.content[0].type === "text" && message.content[0].text === "[system-image]") {
+                loopMessages.splice(i, 1);
+            }
         }
     }
 }
@@ -673,7 +742,7 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
         }
 
         // 3. Prepare system/context messages (common)
-        const systemAndContextMessages = await getSystemAndContext(workingDirectory);
+        const systemAndContextMessages = await getSystemAndContext(workingDirectory, sessionData);
 
         // 4. Build the LLM user message for this turn
         const userMessageForLLM = {

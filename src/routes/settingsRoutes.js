@@ -56,7 +56,7 @@ export const SETTINGS_SCHEMA = {
   enableWebAccess:        { type: 'boolean', default: true },
   
   // ---------- UI tab ----------
-  theme:                { type: 'string',  default: 'dark' },
+  theme:                { type: 'string',  default: 'dark-coffee' },
   codeFontSize:         { type: 'string',  default: 'medium' }
 };
 

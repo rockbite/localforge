@@ -11,6 +11,11 @@ import View from './list/ViewTool.js';
 import WebFetchTool from './list/WebFetchTool.js';
 import ExpertAdviceTool from './list/ExpertAdviceTool.js';
 import TaskTrackingTool from './list/TaskTrackingTool.js';
+import {getFilteredToolList} from "../src/utils.js";
+import BrowserClaim from "./list/browser/BrowserClaim.js";
+import BrowserNavigate from "./list/browser/BrowserNavigate.js";
+import BrowserInteract from "./list/browser/BrowserInteract.js";
+import BrowserScreenshot from "./list/browser/BrowserScreenshot.js";
 
 // Explicit list of all tools
 const tools = [
@@ -25,8 +30,25 @@ const tools = [
   View,
   WebFetchTool,
   ExpertAdviceTool,
-  TaskTrackingTool
+  TaskTrackingTool,
+  BrowserClaim, BrowserNavigate, BrowserInteract, BrowserScreenshot
 ];
+
+const defaultAllow = [
+  Bash.name,
+  BatchTool.name,
+  dispatch_agent.name,
+  Edit.name,
+  GlobTool.name,
+  GrepTool.name,
+  LS.name,
+  Replace.name,
+  View.name,
+  WebFetchTool.name,
+  ExpertAdviceTool.name,
+  TaskTrackingTool.name,
+];
+
 
 // Map of tool name to its execute function
 const TOOL_IMPLEMENTATIONS = Object.fromEntries(
@@ -55,8 +77,11 @@ function createToolRegistry(allowedToolNames) {
     .filter(t => allowedToolNames.includes(t.name))
     .map(t => t.schema);
   return {
-    getSchemas: () => allowedSchemas,
-    async run(call, workingDirectory, signal = null) {
+    getSchemas: async (sessionData) => {
+      return await getFilteredToolList(sessionData, allowedSchemas, defaultAllow);
+    },
+    async run(call, sessionData, signal = null) {
+      let workingDirectory = sessionData.workingDirectory;
       const toolName = call.function.name;
       if (!allowedToolNames.includes(toolName)) {
         return { error: `Tool \"${toolName}\" is not available.` };
@@ -64,6 +89,8 @@ function createToolRegistry(allowedToolNames) {
       const args = typeof call.function.arguments === 'string'
         ? JSON.parse(call.function.arguments)
         : call.function.arguments;
+
+      sessionData.sessionId = this.sessionId;
         
       // Add sessionId to args if available in the registry
       const toolContext = {
@@ -83,7 +110,7 @@ function createToolRegistry(allowedToolNames) {
         }
         
         if (toolName === 'dispatch_agent') {
-          return await TOOL_IMPLEMENTATIONS[toolName](args, workingDirectory, toolContext);
+          return await TOOL_IMPLEMENTATIONS[toolName]({...args, sessionData, workingDirectory, toolContext});
         }
         // Handle Bash command special cases
         if (toolName === 'Bash') {
@@ -100,12 +127,14 @@ function createToolRegistry(allowedToolNames) {
             };
           }*/
 
+
           // Execute command with working directory, signal and sessionId for interruption support
           const result = await TOOL_IMPLEMENTATIONS[toolName]({
             ...args,
             workingDirectory,
             signal,
-            sessionId: this.sessionId
+            sessionId: this.sessionId,
+            sessionData
           });
           
           // Extract file paths if successful
@@ -119,7 +148,7 @@ function createToolRegistry(allowedToolNames) {
           return result;
         }
         // Pass registry for tools that need nested calls (e.g. BatchTool)
-        return await TOOL_IMPLEMENTATIONS[toolName](args, this);
+        return await TOOL_IMPLEMENTATIONS[toolName]({...args, sessionData}, this);
       } catch (err) {
         return { error: err.message };
       }

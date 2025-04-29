@@ -114,7 +114,7 @@ export function renderOrUpdateToolWidget(toolCallId, allLogs, currentAgentState)
         } else {
             toolIconName = toolIconMap['success'];
             iconColorStyle = `style="color: var(--status-success);"`;
-            statusText = toolEndLog.descriptiveText || 'Tool completed';
+            statusText = toolEndLog.descriptiveText || toolStartLog.descriptiveText || 'Tool completed';
         }
         stopToolExecutionTimer(toolCallId); // Ensure timer is stopped
 

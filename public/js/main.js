@@ -73,13 +73,15 @@ async function initializeApp() {
                 const sessionData = await api.fetchSessionDetails(appState.currentSessionId);
                 if (sessionData) {
                     appState.currentSession = sessionData;
-                    appState.workingDirectory = sessionData.workingDirectory || null;
+                    appState.workingDirectory = sessionData.data?.workingDirectory || null;
+                    appState.agentId = sessionData.data?.agentId || null;
                     console.log("Initial session details loaded.");
                 } else {
                     console.warn(`Current session ${appState.currentSessionId} details not found. Might have been deleted.`);
                     // Reset IDs if session is gone? Or let backend handle invalid session on join?
                     // For now, proceed with potentially invalid IDs, socket join will fail.
                     appState.workingDirectory = null;
+                    appState.agentId = null;
                 }
                 appState.currentProject = appState.projects.find(p => p.id === appState.currentProjectId) || null;
 
@@ -104,6 +106,10 @@ async function initializeApp() {
         toolLogUI.initToolLog();          // Prepare tool log area
         // Settings UI is now initialized automatically in the module
         workspaceUI.initWorkspaceSetup();   // Setup WD display click/modal form
+        
+        // Load agents list for the agent selector dropdown
+        const { loadAgentsList } = await import('./utils.js');
+        loadAgentsList();
         
         // Initialize chat context view
         const { initChatContextView } = await import('./ui/chat-context.js');

@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (settings.theme) {
             applyTheme(settings.theme);
         } else {
-            // Default to dark theme if no theme specified
-            applyTheme('dark');
+            // Default to dark-coffee theme if no theme specified
+            applyTheme('dark-coffee');
         }
     } catch (error) {
         console.error('Error loading theme settings:', error);
-        // Default to dark theme on error
-        applyTheme('dark');
+        // Default to dark-coffee theme on error
+        applyTheme('dark-coffee');
     }
 });
 

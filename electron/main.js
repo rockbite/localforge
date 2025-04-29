@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { app, BrowserWindow, dialog, shell, ipcMain } from 'electron';
+app.setName('Localforge'); // has to be as early as possible
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { startServer } from './server.js';
@@ -10,6 +11,7 @@ import semver from 'semver';
 import { readFileSync } from 'fs';
 import {exec} from "child_process";
 import {runUpdate} from "./updater.js";
+
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);

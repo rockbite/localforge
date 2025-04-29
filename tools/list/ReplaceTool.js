@@ -7,7 +7,7 @@ export default {
     type: 'function',
     function: {
       name: 'OverwriteFile',
-      description: "Write a file to the local filesystem as new. WARNING: This tool COMPLETELY OVERWRITES the entire content of a file if it existed, It DELETES the existing content and replaces it with the new content.\n\nBefore using this tool:\n\n1. Use the ReadFile tool to understand the file's contents and context\n\n2. Directory Verification (only applicable when creating new files):\n   - Use the LS tool to verify the parent directory exists and is the correct location",
+      description: "Write a file to the local filesystem as new. WARNING: This tool COMPLETELY OVERWRITES the entire content of a file if it existed, It DELETES the existing content and replaces it with the new content.\n\nBefore using this tool:\n\n1. Use the ReadFile tool to understand the file's contents and context\n\n2. Directory Verification (only applicable when creating new files):\n   - Use the LS tool to verify the parent directory exists and is the correct location. Note if the entire directory path of file does not yet exist, you need to create it first using bash tool",
       parameters: {
         type: 'object',
         properties: {

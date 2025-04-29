@@ -141,86 +141,19 @@ class BlockEditor {
         const blockContent = document.createElement('div');
         blockContent.className = 'block-content';
 
-        const textarea = document.createElement('textarea');
-        textarea.className = 'block-textarea';
-        textarea.placeholder = 'Prompt text...';
-        textarea.rows = 1;
-        // Add event listener to update block content in real-time
-        textarea.addEventListener('input', () => {
-            // Update block data when text changes
-            const blockId = blockDiv.dataset.blockId;
-            const blockData = this.blocks.find(block => block.id === blockId);
-            if (blockData) {
-                blockData.content = textarea.value;
-            }
-            // Adjust layout
-            this.updateAllBlockLayouts();
-        });
-        blockContent.appendChild(textarea);
-        makeSmartTextarea(textarea, {}, this);
+        const blockContentId = `block-content-${id}`;
+        blockContent.id = blockContentId;
 
-        // inside createBlockElement(), just after textarea is created
-        textarea.addEventListener('keydown', e => {
-            if (e.key !== 'Tab') return;          // bail if it’s not the Tab key
-            e.preventDefault();
-
-            const indent = '    ';                // 4 spaces (‘\t’ works too)
-            const { value } = textarea;
-            let  { selectionStart: start, selectionEnd: end } = textarea;
-
-            // Locate the first/last line boundaries that the caret or selection touches
-            const firstLineStart = value.lastIndexOf('\n', start - 1) + 1;
-            const lastLineEnd    = (value.indexOf('\n', end) === -1) ? value.length
-                : value.indexOf('\n', end);
-
-            // Slice out the affected block (one or many lines)
-            const block   = value.slice(firstLineStart, lastLineEnd);
-            const lines   = block.split('\n');
-
-            if (e.shiftKey) {
-                // -------- Shift-Tab = outdent --------
-                let removed = 0;
-                const newLines = lines.map(line => {
-                    if (line.startsWith(indent)) {
-                        removed += indent.length;
-                        return line.slice(indent.length);
-                    }
-                    return line;
-                });
-
-                const newBlock = newLines.join('\n');
-                textarea.value = value.slice(0, firstLineStart) + newBlock + value.slice(lastLineEnd);
-
-                // Shrink the selection (can’t go past the start of the document)
-                const shrink = Math.min(removed, start - firstLineStart);
-                textarea.selectionStart = start - shrink;
-                textarea.selectionEnd   = end   - removed;
-            } else {
-                // -------- Tab = indent --------
-                const newLines = lines.map(line => indent + line);
-                const newBlock = newLines.join('\n');
-                textarea.value = value.slice(0, firstLineStart) + newBlock + value.slice(lastLineEnd);
-
-                // Grow the selection to account for added spaces
-                textarea.selectionStart = start + indent.length;
-                textarea.selectionEnd   = end   + (indent.length * lines.length);
-            }
-        });
-
-
-        const blockFooter = document.createElement('div');
-        blockFooter.className = 'block-footer';
-
-        mainContent.append(blockHeader, blockContent, blockFooter);
+        mainContent.append(blockHeader, blockContent, document.createElement('div'));
         blockDiv.append(leftControls, mainContent);
 
         // Add event listeners for copy functionality
         const copyIcon = blockDiv.querySelector('.copy-icon');
         if (copyIcon) {
             copyIcon.addEventListener('click', () => {
-                const textArea = blockDiv.querySelector('.block-textarea');
-                if (textArea) {
-                    navigator.clipboard.writeText(textArea.value)
+                if (this.codeMirrors && this.codeMirrors[id]) {
+                    const content = this.codeMirrors[id].getValue();
+                    navigator.clipboard.writeText(content)
                         .then(() => {
                             // Optional: Visual feedback
                             copyIcon.style.color = '#4CAF50';
@@ -317,7 +250,10 @@ class BlockEditor {
         }
 
         this.updateAllBlockLayouts();
-        requestAnimationFrame(() => blockEl.querySelector('.block-textarea')?.focus());
+        
+        // Initialize CodeMirror for this block
+        this.initializeCodeMirror(id);
+        
         return blockData;
     }
 
@@ -335,6 +271,12 @@ class BlockEditor {
         if (blockElement) {
             // Remove from DOM
             blockElement.remove();
+
+            // Remove CodeMirror instance
+            if (this.codeMirrors && this.codeMirrors[id]) {
+                this.codeMirrors[id].toTextArea();
+                delete this.codeMirrors[id];
+            }
 
             // Remove from internal array
             const index = this.blocks.findIndex(block => block.id === id);
@@ -440,18 +382,25 @@ class BlockEditor {
     updateAllBlockLayouts() {
         const els = Array.from(this.container.querySelectorAll('.block'));
         els.forEach((el, i) => {
-            const ta         = el.querySelector('.block-textarea');
-            const topSeg     = el.querySelector('.top-segment');
-            const bottomSeg  = el.querySelector('.bottom-segment');
-            const addBtn     = el.querySelector('.add-button');
-            const textBtn    = el.querySelector('.text-button');
-            if (!ta || !topSeg || !bottomSeg || !addBtn || !textBtn) return;
+            const blockId = el.dataset.blockId;
+            const topSeg = el.querySelector('.top-segment');
+            const bottomSeg = el.querySelector('.bottom-segment');
+            const addBtn = el.querySelector('.add-button');
+            const textBtn = el.querySelector('.text-button');
+            if (!topSeg || !bottomSeg || !addBtn || !textBtn) return;
 
-            ta.style.height = 'auto';
-            let h = ta.scrollHeight-1;
+            // Get the height of the block content
+            let h = 100; // Default height if we can't determine it
+            
+            if (this.codeMirrors && this.codeMirrors[blockId]) {
+                // For CodeMirror, we need to force a refresh to get accurate dimensions
+                this.codeMirrors[blockId].refresh();
+                const editorEl = this.codeMirrors[blockId].getWrapperElement();
+                h = editorEl.offsetHeight;
+            }
+
             h = Math.min(h, 200);
-            ta.style.height = `${h}px`;
-
+            
             const connH = h + 7;
             topSeg.style.height = `${connH}px`;
             addBtn.style.marginTop = `${connH}px`;
@@ -530,6 +479,71 @@ class BlockEditor {
         this.updateAllBlockLayouts();
     }
 
+    // Initialize CodeMirror for a block
+    initializeCodeMirror(blockId) {
+        if (!window.CodeMirror) {
+            console.error('CodeMirror is not loaded');
+            return;
+        }
+        
+        if (!this.codeMirrors) {
+            this.codeMirrors = {};
+        }
+        
+        const blockElement = this.getBlockElement(blockId);
+        if (!blockElement) return;
+        
+        const blockContent = blockElement.querySelector('.block-content');
+        if (!blockContent) return;
+        
+        // Create a textarea for CodeMirror to use
+        const textarea = document.createElement('textarea');
+        blockContent.appendChild(textarea);
+        
+        // Get stored content if any
+        const blockData = this.blocks.find(block => block.id === blockId);
+        const content = blockData ? blockData.content || '' : '';
+        
+        // Initialize CodeMirror
+        const cm = CodeMirror.fromTextArea(textarea, {
+            mode: 'markdown',
+            theme: 'custom',
+            lineNumbers: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            styleActiveLine: true,
+            lineWrapping: true,
+            tabSize: 4,
+            placeholder: 'Prompt text...',
+            extraKeys: {
+                'Tab': function(cm) {
+                    cm.replaceSelection('    ', 'end');
+                },
+                'Ctrl-/': 'toggleComment',
+                'Cmd-/': 'toggleComment'
+            }
+        });
+        
+        // Set initial content
+        cm.setValue(content);
+        
+        // Set appropriate size
+        cm.setSize('100%', 'auto');
+        
+        // Add event listener to update block content in real-time
+        cm.on('change', () => {
+            // Update block data when text changes
+            const blockData = this.blocks.find(block => block.id === blockId);
+            if (blockData) {
+                blockData.content = cm.getValue();
+            }
+            // Adjust layout
+            this.updateAllBlockLayouts();
+        });
+        
+        // Store the CodeMirror instance
+        this.codeMirrors[blockId] = cm;
+    }
 
     /**
      * Rebuild the editor from a PT-style JSON object
@@ -546,6 +560,9 @@ class BlockEditor {
 
         /* wipe current state */
         this.container.innerHTML = '';
+        
+        // Clear any existing CodeMirror instances
+        this.codeMirrors = {};
 
         /* recreate every block exactly as described */
         this.blocks.forEach(raw => {
@@ -558,9 +575,7 @@ class BlockEditor {
 
             /* build DOM */
             const el = this.createBlockElement(id);
-            const ta = el.querySelector('.block-textarea');
-            if (ta) ta.value = data.content;
-
+            
             /* honour muted flag visually & internally */
             if (data.muted) {
                 el.classList.add('muted');
@@ -573,6 +588,9 @@ class BlockEditor {
             }
 
             this.container.appendChild(el);
+            
+            // Initialize CodeMirror after the element is in the DOM
+            this.initializeCodeMirror(id);
         });
 
         this.updateAllBlockLayouts();
@@ -589,12 +607,15 @@ class BlockEditor {
      */
     getPTJson() {
         const blocks = this.blocks.map(b => {
-            /* pull latest textarea text from the DOM (in case user edited) */
-            const el = this.getBlockElement(b.id);
-            const ta = el?.querySelector('.block-textarea');
+            /* pull latest content from CodeMirror if available */
+            let content = b.content ?? '';
+            if (this.codeMirrors && this.codeMirrors[b.id]) {
+                content = this.codeMirrors[b.id].getValue();
+            }
+            
             return {
                 id      : b.id,
-                content : ta ? ta.value : (b.content ?? ''),
+                content : content,
                 muted   : !!b.muted
             };
         });
@@ -603,8 +624,69 @@ class BlockEditor {
     }
 }
 
-function promptEditorBoot(container, options = {}) {
+function loadCodeMirror(callback) {
+    // Skip if already loaded
+    if (window.CodeMirror) {
+        if (callback) callback();
+        return;
+    }
+    
+    // Load CodeMirror script dynamically
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js';
+    script.onload = () => {
+        // Register custom theme
+        if (window.CodeMirror && !window.CodeMirror.theme) {
+            window.CodeMirror.defineOption('theme', 'default', function(cm, val, old) {
+                if (old && old != val) {
+                    cm.display.wrapper.classList.remove('cm-s-' + old);
+                }
+                if (val) {
+                    cm.display.wrapper.classList.add('cm-s-' + val);
+                }
+            });
+        }
+        
+        // Load additional CodeMirror resources after the main script is loaded
+        const resources = [
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/markdown/markdown.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/closebrackets.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/matchbrackets.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/comment/comment.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/selection/active-line.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/display/placeholder.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css'
+        ];
+        
+        let loaded = 0;
+        const totalResources = resources.length;
+        
+        resources.forEach(url => {
+            if (url.endsWith('.js')) {
+                const script = document.createElement('script');
+                script.src = url;
+                script.onload = () => {
+                    loaded++;
+                    if (loaded === totalResources && callback) callback();
+                };
+                document.head.appendChild(script);
+            } else if (url.endsWith('.css')) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = url;
+                link.onload = () => {
+                    loaded++;
+                    if (loaded === totalResources && callback) callback();
+                };
+                document.head.appendChild(link);
+            }
+        });
+    };
+    document.head.appendChild(script);
+}
 
+function promptEditorBoot(container, options = {}) {
     if(container.innerHTML.trim() === '') {
         container.innerHTML = `    <div class="tab-container">
         <div class="tab-header">
@@ -614,7 +696,7 @@ function promptEditorBoot(container, options = {}) {
 
         <div class="tab-content-container">
             <div class="tab-content text active">
-                <textarea class="raw-textarea plain-text" placeholder="Prompt text…"></textarea>
+                <div id="text-editor-container" class="text-editor-container"></div>
             </div>
 
             <div class="tab-content prompt">
@@ -623,30 +705,100 @@ function promptEditorBoot(container, options = {}) {
         </div>
     </div>`;
     }
-
     /* local handles ---------------------------------------------------------- */
     const editorContainer = container.querySelector('.editor-container');
-    const textarea        = container.querySelector('.plain-text');
-    const tabs            = container.querySelectorAll('.tab');
-    const editor          = new BlockEditor(editorContainer, options);
-
+    const textEditorContainer = container.querySelector('#text-editor-container');
+    const tabs = container.querySelectorAll('.tab');
+    const blockEditor = new BlockEditor(editorContainer, options);
+    let textEditor = null;
+    
     options.placeholder = options.placeholder || 'Prompt text…';
 
-    textarea.placeholder = options.placeholder;
-
-    makeSmartTextarea(textarea);
-    
-    // Add Cmd+Enter handling for the plain text textarea
-    textarea.addEventListener('keydown', function(event) {
-        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-            event.preventDefault();
-            // Find the nearest form and submit it
-            const form = container.closest('form');
-            if (form) {
-                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-            }
-        }
+    // Load CodeMirror and initialize both editors
+    loadCodeMirror(() => {
+        // Initialize the text editor with CodeMirror
+        initializeTextEditor();
     });
+    
+    function initializeTextEditor() {
+        if (!window.CodeMirror) {
+            console.error('CodeMirror is not loaded');
+            return;
+        }
+        
+        // Create a textarea for the text editor
+        const textarea = document.createElement('textarea');
+        textarea.className = 'raw-textarea plain-text';
+        textarea.placeholder = options.placeholder;
+        textEditorContainer.appendChild(textarea);
+        
+        // Initialize CodeMirror for the text editor
+        textEditor = CodeMirror.fromTextArea(textarea, {
+            mode: 'markdown',
+            theme: 'custom',
+            lineNumbers: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            styleActiveLine: true,
+            lineWrapping: true,
+            tabSize: 4,
+            placeholder: options.placeholder,
+            extraKeys: {
+                'Tab': function(cm) {
+                    cm.replaceSelection('    ', 'end');
+                },
+                'Ctrl-/': 'toggleComment',
+                'Cmd-/': 'toggleComment'
+            }
+            // Cmd+Enter and Ctrl+Enter handlers removed to prevent double submission
+            // The document-level handler in chat.js will handle these keystrokes instead
+        });
+        
+        // Set appropriate size
+        textEditor.setSize('100%', '100%');
+        
+        // Add custom CodeMirror CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            .prompt-editor-container .CodeMirror {
+                height: 100%;
+                font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+                background-color: var(--bg-code);
+                color: var(--text-primary);
+            }
+            .prompt-editor-container .CodeMirror-gutters {
+                background-color: var(--bg-tertiary);
+                border-right: 1px solid var(--border-primary);
+            }
+            .prompt-editor-container .CodeMirror-linenumber {
+                color: var(--text-secondary);
+            }
+            .prompt-editor-container .CodeMirror-cursor {
+                border-left: 1px solid var(--text-primary);
+            }
+            .prompt-editor-container .CodeMirror-activeline-background {
+                background-color: var(--bg-active);
+            }
+            .prompt-editor-container .CodeMirror-placeholder {
+                color: var(--text-placeholder);
+                opacity: 0.7;
+            }
+            /* Syntax highlighting */
+            .prompt-editor-container .cm-comment {
+                color: var(--code-comment);
+            }
+            .prompt-editor-container .cm-string {
+                color: var(--code-string);
+            }
+            .prompt-editor-container .cm-property {
+                color: var(--code-property);
+            }
+            .prompt-editor-container .cm-keyword {
+                color: var(--code-keyword);
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
     /* tab switching ---------------------------------------------------------- */
     tabs.forEach(tab => {
@@ -666,42 +818,70 @@ function promptEditorBoot(container, options = {}) {
 
             /* sync textarea ⇄ block-editor --------------------------------------- */
             if (targetClass === 'prompt') {
-                syncTextareaToEditor(textarea, editor);
+                syncTextEditorToBlockEditor();
             } else {
-                // When switching to text editor, update textarea with current block content
-                textarea.value = ptToRawText(editor.getPTJson());
+                // When switching to text editor, update CodeMirror with current block content
+                syncBlockEditorToTextEditor();
             }
         });
     });
 
-    return editor;
-}
-
-function syncTextareaToEditor(textarea, editor) {
-    const pt  = rawTextToPt(textarea.value);
-
-    if (pt.blocks.length === 1 && editor.blocks.length <= 1) {
-        if (editor.blocks.length === 0) {
-            editor.addBlock(pt.blocks[0]);
-        } else {
-            editor.blocks[0].content = pt.blocks[0].content;
-        }
-    } else {
-        pt.blocks.forEach(block => {
-            const hit = editor.blocks.find(b => b.id === block.id);
-            if (hit) hit.content = block.content;
-        });
+    function syncTextEditorToBlockEditor() {
+        if (!textEditor) return;
+        
+        const text = textEditor.getValue();
+        const pt = rawTextToPt(text);
+        blockEditor.loadFromPTJson(pt);
     }
 
-    // Always load from PT Json to ensure proper syncing
-    editor.loadFromPTJson();
-    editor.updateAllBlockLayouts();
+    function syncBlockEditorToTextEditor() {
+        if (!textEditor) return;
+        
+        const pt = blockEditor.getPTJson();
+        const text = ptToRawText(pt);
+        textEditor.setValue(text);
+    }
+    
+    /**
+     * Clears the content of both text editor and block editor
+     */
+    function clearContent() {
+        // Clear the text editor
+        if (textEditor) {
+            textEditor.setValue('');
+            textEditor.clearHistory();
+        }
+        
+        // Clear the block editor
+        const emptyJson = { 
+            blocks: [{ 
+                id: Math.random().toString(16).slice(2, 8), 
+                content: '', 
+                muted: false 
+            }] 
+        };
+        blockEditor.loadFromPTJson(emptyJson);
+        
+        // Ensure all CodeMirror instances are cleared and refreshed
+        if (blockEditor.codeMirrors) {
+            Object.values(blockEditor.codeMirrors).forEach(cm => {
+                cm.setValue('');
+                cm.clearHistory();
+                cm.refresh();
+            });
+        }
+    }
+
+    return {
+        blockEditor,
+        getTextEditor: () => textEditor,
+        clearContent // Add the new clear method
+    };
 }
 
-
 /**
- * Convert a PT-style JSON snapshot into the “raw text” format.
- *  • If there’s only one block, return its text verbatim.
+ * Convert a PT-style JSON snapshot into the "raw text" format.
+ *  • If there's only one block, return its text verbatim.
  *  • If there are several, emit each block as:
  *        ---block[<id>]---
  *        <content>
@@ -736,7 +916,7 @@ function ptToRawText(pt) {
 function rawTextToPt(text) {
     if (typeof text !== 'string') text = '';
 
-    /* Regex picks up “---block[ID]---\n” delimiters */
+    /* Regex picks up "---block[ID]---\n" delimiters */
     const delim = /---block\[(.*?)\]---\n?/g;
 
     if (!delim.test(text)) {
@@ -763,121 +943,4 @@ function rawTextToPt(text) {
     }
 
     return { blocks };
-}
-
-/**
- * Give a plain <textarea> some basic code-editor super-powers.
- * @param {HTMLTextAreaElement} ta
- * @param {Object} [opts]
- * @param {number} [opts.tabSize=4]   – how many spaces a “tab” inserts
- * @param {number} [opts.maxUndo=200] – max history snapshots to keep
- */
-function makeSmartTextarea(ta, opts = {}, editor) {
-    const TAB     = " ".repeat(opts.tabSize ?? 4);
-    const MAX_UNDO = opts.maxUndo ?? 200;
-
-    // --- simple undo / redo history -----------------------------------------
-    const history =  [];
-    let   index   = -1;
-    const push = () => {
-        // squash identical consecutives
-        if (index >= 0 && history[index].value === ta.value) return;
-        history.splice(index + 1);                 // drop forward stack
-        history.push({ value: ta.value, start: ta.selectionStart, end: ta.selectionEnd });
-        if (history.length > MAX_UNDO) history.shift();
-        index = history.length - 1;
-        if(editor) editor.updateAllBlockLayouts();
-    };
-    const apply = delta => {
-        if (!history.length) return;
-        index = Math.min(Math.max(index + delta, 0), history.length - 1);
-        const snap = history[index];
-        ta.value = snap.value;
-        ta.setSelectionRange(snap.start, snap.end);
-        if(editor) editor.updateAllBlockLayouts();
-    };
-    push();               // initial snapshot
-    ta.addEventListener("input", push, { passive: true });   // new snapshot on any change
-
-    // ------------------------------------------------- helper utils ----------
-    const getLineStart = pos => ta.value.lastIndexOf("\n", pos - 1) + 1;
-    const getLine      = pos => {
-        const start = getLineStart(pos);
-        const end   = ta.value.indexOf("\n", pos);
-        return ta.value.slice(start, end === -1 ? undefined : end);
-    };
-
-    ta.addEventListener("keydown", e => {
-        const { key, ctrlKey, metaKey, shiftKey } = e;
-        const mod = ctrlKey || metaKey;
-
-        // -------- undo / redo (uses our own stack, survives blur) --------------
-        if (mod && key === "z") { e.preventDefault(); apply( shiftKey ? +1 : -1 ); return; }
-        if (mod && key === "y") { e.preventDefault(); apply(+1); return; }
-
-        // ---------------------- TAB / SHIFT-TAB --------------------------------
-        if (key === "Tab") {
-            e.preventDefault();
-            const { selectionStart: s, selectionEnd: ePos, value } = ta;
-            const linesStart = getLineStart(s);
-            const linesEnd   = ePos;
-            const before     = value.slice(0, linesStart);
-            const selected   = value.slice(linesStart, linesEnd);
-            const after      = value.slice(linesEnd);
-
-            if (shiftKey) {
-                // out-dent every line that starts with TAB
-                const outdented = selected
-                    .split("\n")
-                    .map(l => l.startsWith(TAB) ? l.slice(TAB.length) : l)
-                    .join("\n");
-
-                ta.value = before + outdented + after;
-                const delta = selected.length - outdented.length;
-                ta.selectionStart = s - (s === linesStart ? 0 : TAB.length); // keep anchor
-                ta.selectionEnd   = ePos - delta;
-            } else {
-                // indent
-                const indented = selected.replace(/^/gm, TAB);
-                ta.value = before + indented + after;
-                const delta = indented.length - selected.length;
-                ta.selectionStart = s + TAB.length;
-                ta.selectionEnd   = ePos + delta;
-            }
-            if(editor) editor.updateAllBlockLayouts();
-            return;
-        }
-
-        // -------------------- auto-indent + bullets + pair ---------------------
-        if (key === "Enter") {
-            e.preventDefault();
-            const { selectionStart: s, selectionEnd: ePos, value } = ta;
-            const line = getLine(s);
-            const indentMatch = line.match(/^\s+/);
-            const indent = indentMatch ? indentMatch[0] : "";
-            const bulletMatch = line.match(/^(\s*)([*-]\s)/);
-            const bullet = bulletMatch ? bulletMatch[2] : "";
-
-            const nl = "\n" + indent + bullet;
-            ta.value = value.slice(0, s) + nl + value.slice(ePos);
-            const pos = s + nl.length;
-            ta.setSelectionRange(pos, pos);
-            if(editor) editor.updateAllBlockLayouts();
-            return;
-        }
-
-        // ---------------------- bracket / quote pair ---------------------------
-        const PAIRS = { "(":")", "[":"]", "{":"}", "'":"'", '"':'"' };
-        if (PAIRS[key] && !mod) {
-            const { selectionStart: s, selectionEnd: ePos, value } = ta;
-            e.preventDefault();
-            const open = key, close = PAIRS[key];
-            const inside = value.slice(s, ePos);
-            ta.value = value.slice(0, s) + open + inside + close + value.slice(ePos);
-            const cursor = inside ? ePos + 2 : s + 1;
-            ta.setSelectionRange(inside ? s : cursor, inside ? ePos + 2 : cursor);
-            if(editor) editor.updateAllBlockLayouts();
-            return;
-        }
-    });
 }

@@ -6,9 +6,10 @@
     background-color: var(--button-secondary-bg);
     color: var(--text-primary);
     border: 1px solid var(--border-primary);
-    border-radius: 6px;
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-sm);
+    border-radius: 4px;
+    padding: 3px 8px;  /* Reduced padding for smaller height */
+    font-size: 12px;   /* Smaller font size to match select */
+    height: 28px;      /* Match height of select box */
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -22,7 +23,7 @@
 }
 
 .secondary-button .material-icons {
-    font-size: 18px;
+    font-size: 16px; /* Reduced icon size */
 }
 
 .danger-button {

@@ -2,6 +2,105 @@
 // Purpose: Contains shared utility functions used across different modules.
 
 /**
+ * Shows a notification message to the user.
+ * @param {string} message - The message to display.
+ * @param {string} [icon='info'] - The material icon to show.
+ * @param {string} [type='info'] - The type of notification (success, error, warning, info).
+ * @param {number} [duration=3000] - How long to show the notification in ms.
+ */
+export function showNotification(message, icon = 'info', type = 'info', duration = 3000) {
+    // Create notification element if it doesn't exist
+    let notification = document.getElementById('app-notification');
+    
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'app-notification';
+        notification.classList.add('app-notification');
+        document.body.appendChild(notification);
+        
+        // Add the CSS if it doesn't exist
+        if (!document.getElementById('notification-style')) {
+            const style = document.createElement('style');
+            style.id = 'notification-style';
+            style.textContent = `
+                .app-notification {
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    padding: 10px 16px;
+                    border-radius: 6px;
+                    background-color: var(--bg-secondary);
+                    color: var(--text-primary);
+                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 14px;
+                    z-index: 1000;
+                    opacity: 0;
+                    transform: translateY(20px);
+                    transition: opacity 0.3s, transform 0.3s;
+                    border-left: 4px solid var(--border-primary);
+                    max-width: 300px;
+                }
+                .app-notification.visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                .app-notification.success {
+                    border-left-color: #4caf50;
+                }
+                .app-notification.error {
+                    border-left-color: #f44336;
+                }
+                .app-notification.warning {
+                    border-left-color: #ff9800;
+                }
+                .app-notification.info {
+                    border-left-color: #2196f3;
+                }
+                .app-notification .icon {
+                    color: var(--text-secondary);
+                }
+                .app-notification.success .icon {
+                    color: #4caf50;
+                }
+                .app-notification.error .icon {
+                    color: #f44336;
+                }
+                .app-notification.warning .icon {
+                    color: #ff9800;
+                }
+                .app-notification.info .icon {
+                    color: #2196f3;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    // Clear any existing content and classes except the base class
+    notification.className = 'app-notification';
+    notification.classList.add(type);
+    
+    // Set content
+    notification.innerHTML = `
+        <span class="icon material-icons">${icon}</span>
+        <span class="message">${message}</span>
+    `;
+    
+    // Make visible
+    setTimeout(() => {
+        notification.classList.add('visible');
+    }, 10);
+    
+    // Hide after duration
+    setTimeout(() => {
+        notification.classList.remove('visible');
+    }, duration);
+}
+
+/**
  * Formats elapsed time in milliseconds into a human-readable string (e.g., "1.2s", "15s").
  * @param {HTMLElement | null} element - The DOM element to update (optional).
  * @param {number} elapsedMs - The elapsed time in milliseconds.
@@ -119,3 +218,155 @@ export function showConfirmationModal({
 // export function configureMarkdown() {
 //     // Example: marked.setOptions(...)
 // }
+
+/**
+ * Load the list of agents and populate the agent selector dropdown
+ * @param {boolean} [preserveSelection=true] - Whether to preserve the current selection
+ * @returns {Promise<Array>} - The list of agents
+ */
+export function loadAgentsList(preserveSelection = true) {
+    const agentSelector = document.getElementById('agent-selector');
+    if (!agentSelector) return Promise.resolve([]);
+    
+    // Store current selection if preserving
+    const currentSelection = preserveSelection ? agentSelector.value : null;
+    
+    return fetch('/api/agents')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to load agents: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(agents => {
+            if (!Array.isArray(agents)) {
+                console.error('Expected agents to be an array but got:', typeof agents);
+                return [];
+            }
+            
+            // Clear existing options except the first one
+            while (agentSelector.options.length > 1) {
+                agentSelector.remove(1);
+            }
+            
+            // Add agent options
+            agents.forEach(agent => {
+                const option = document.createElement('option');
+                option.value = agent.id;
+                option.textContent = agent.name;
+                agentSelector.appendChild(option);
+            });
+            
+            // If not already set up, add change event listener for saving agent selection
+            if (!agentSelector.dataset.hasChangeListener) {
+                agentSelector.addEventListener('change', handleAgentSelection);
+                agentSelector.dataset.hasChangeListener = 'true';
+            }
+            
+            // Set up listener for agent-updated events if not already set
+            if (!agentSelector.dataset.hasUpdateListener) {
+                window.addEventListener('agents-updated', () => {
+                    // Reload the agent list but preserve selection when agents change
+                    loadAgentsList(true);
+                });
+                agentSelector.dataset.hasUpdateListener = 'true';
+            }
+            
+            // Restore previous selection if applicable
+            if (preserveSelection && currentSelection) {
+                // Check if the previously selected agent still exists
+                const agentExists = Array.from(agentSelector.options).some(option => option.value === currentSelection);
+                if (agentExists) {
+                    agentSelector.value = currentSelection;
+                } else {
+                    // If agent was deleted, reset to default
+                    agentSelector.value = '';
+                    // Update backend with empty agent ID
+                    import('./state.js').then(({ appState }) => {
+                        if (appState?.currentSessionId) {
+                            import('./api.js').then(api => {
+                                api.saveAgentId(appState.currentSessionId, '');
+                            });
+                        }
+                    });
+                }
+            } else {
+                // Load current agent from session if not preserving selection
+                loadCurrentAgentSelection();
+            }
+            
+            return agents;
+        })
+        .catch(error => {
+            console.error('Error loading agents:', error);
+            return [];
+        });
+}
+
+/**
+ * Handle agent selection change event
+ * @param {Event} event - The change event
+ */
+function handleAgentSelection(event) {
+    const agentId = event.target.value;
+    
+    // Import modules dynamically to avoid circular dependencies
+    Promise.all([
+        import('./api.js'),
+        import('./socket.js'),
+        import('./state.js')
+    ]).then(([api, socket, state]) => {
+        const { appState } = state;
+
+        if (!appState || !appState.currentSessionId) {
+            console.warn("Cannot save agent selection: no active session.");
+            return;
+        }
+        
+        // First save the agent ID to the session data
+        api.saveAgentId(appState.currentSessionId, agentId)
+            .then(() => {
+                console.log(`Agent ${agentId || 'none'} selected for session ${appState.currentSessionId}`);
+                
+                // Then emit the agent selection via socket
+                if (appState.socket) {
+                    socket.emitSetAgent(appState.socket, agentId);
+                } else {
+                    console.warn("Socket not available to emit set_agent.");
+                }
+            })
+            .catch(error => {
+                console.error('Error saving agent selection:', error);
+            });
+    });
+}
+
+/**
+ * Load the current agent selection from the session data
+ */
+function loadCurrentAgentSelection() {
+    const agentSelector = document.getElementById('agent-selector');
+    if (!agentSelector) return;
+    
+    // Import state module dynamically to avoid circular dependencies
+    import('./state.js').then(({ appState }) => {
+        if (!appState || !appState.currentSessionId) {
+            console.warn("Cannot load agent selection: no active session.");
+            return;
+        }
+        
+        // Check if current session has agentId property
+        if (appState.currentSession && appState.currentSession.data && appState.currentSession.data.agentId) {
+            const agentId = appState.currentSession.data.agentId;
+            agentSelector.value = agentId;
+            console.log(`Loaded agent ${agentId} for session ${appState.currentSessionId}`);
+        } else if (appState.agentId) {
+            // Fallback to appState.agentId if available
+            agentSelector.value = appState.agentId;
+            console.log(`Loaded agent ${appState.agentId} from appState`);
+        } else {
+            // Default to empty selection if no agent is set
+            agentSelector.value = '';
+        }
+    });
+}

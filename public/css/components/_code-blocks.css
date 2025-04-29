@@ -22,9 +22,7 @@ pre::before {
     top: 0;
     width: 3px;
     height: 100%;
-    background-color: var(--accent-primary);
-    border-top-left-radius: var(--border-radius);
-    border-bottom-left-radius: var(--border-radius);
+    background-color: color-mix(in srgb, var(--accent-secondary), transparent 50%);
 }
 
 /* Base Prism styles */

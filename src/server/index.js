@@ -60,6 +60,10 @@ import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} 
 
     /** @type {import('express').Router} */
     app.use('/api/sessions', routerSessions);
+    
+    // Import and use agents routes
+    const agentsRoutes = await import('../routes/agentsRoutes.js');
+    app.use('/api/agents', agentsRoutes.default);
 })();
 
 // Set EJS as the view engine
@@ -325,6 +329,7 @@ io.on('connection', (socket) => {
                 tasks: sessionData.tasks || [],
                 accounting: sessionData.accounting || { models: {}, totalUSD: 0 },
                 workingDirectory: sessionData.workingDirectory,
+                agentId: sessionData.agentId,
                 toolLogs: sessionData.toolLogs || [],
                 agentState: sessionData.agentState || { 
                     status: 'idle', 
@@ -556,6 +561,27 @@ io.on('connection', (socket) => {
             } catch (error) {
                 console.error(`Error getting initial tasks:`, error);
             }
+        }
+    });
+    
+    // Handle agent selection
+    socket.on('set_agent', async (data) => {
+        try {
+            const { agentId } = data;
+            const sessionId = socket.userData.currentSessionId;
+            
+            if (!sessionId) {
+                console.warn('Attempted to set agent with no active session');
+                return;
+            }
+            
+            // Update the agent ID in the session
+            await projectSessionManager.setAgentId(sessionId, agentId);
+            
+            console.log(`Set agent ID for session ${sessionId}: ${agentId || 'none'}`);
+            
+        } catch (error) {
+            console.error('Error setting agent:', error);
         }
     });
     

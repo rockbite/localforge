@@ -2,7 +2,7 @@ import path from 'path';
 import { promises as fs } from 'fs';
 import ejs from 'ejs';
 import { fileURLToPath } from 'url';
-import {callLLMByType, MAIN_MODEL} from "../../middleware/llm.js";
+import {callLLMByType, getModelNameByType, MAIN_MODEL} from "../../middleware/llm.js";
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -33,19 +33,28 @@ async function loadImageDescriptionPrompt() {
  * @param {string} [modelName]   - Model to use. Defaults to MAIN_MODEL.
  * @returns {Promise<string>} A plain‑text description.
  */
-async function generateImageDescription(imageDataUrl, modelName = MAIN_MODEL) {
+async function generateImageDescription(imageDataUrl, modelName = MAIN_MODEL, additionalPrompt = null, sessionData = null) {
     const prompt = await loadImageDescriptionPrompt();
+
+    let content = [];
+
+    if(additionalPrompt) {
+        content.push({
+            type: "text",
+            text: "Pay attention to: " + additionalPrompt
+        })
+    }
+
+    content.push({
+        type: 'image_url',
+        image_url: { url: imageDataUrl }
+    });
 
     const messages = [
         { role: 'system', content: prompt },
         {
             role: 'user',
-            content: [
-                {
-                    type: 'image_url',
-                    image_url: { url: imageDataUrl }
-                }
-            ]
+            content: content
         }
     ];
 
@@ -54,6 +63,23 @@ async function generateImageDescription(imageDataUrl, modelName = MAIN_MODEL) {
         temperature: 0.5,
         max_tokens: 512
     });
+
+    if(sessionData) {
+        let sessionId = sessionData.sessionId;
+        if (sessionId) {
+            const { estimateTokens } = await import('../../services/agent/index.js');
+            const { projectSessionManager } = await import('../../services/sessions/index.js');
+            // Get token counts either from API response or estimate them
+            const promptTokens = resp?.usage?.prompt_tokens
+                ?? estimateTokens(JSON.stringify(imageDataUrl));
+            const completionTokens = resp?.usage?.completion_tokens
+                ?? estimateTokens(JSON.stringify(resp.content || ''));
+
+            // Add usage to session accounting through the manager
+            let model = getModelNameByType(MAIN_MODEL);
+            await projectSessionManager.addUsage(sessionId, model, promptTokens, completionTokens);
+        }
+    }
 
     return (resp && resp.content) ? resp.content.trim() : '[No description]';
 }

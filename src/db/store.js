@@ -3,6 +3,7 @@
 
 import os   from 'os';
 import path from 'path';
+import fs from 'fs/promises';
 import Conf from 'conf';
 import { Level } from 'level';
 
@@ -11,10 +12,25 @@ const CURRENT_SESSION_KEY = 'currentSessionId';
 export class Store {
     constructor(projectName = 'localforge') {
         this.conf = new Conf({ projectName });
+        this.projectName = projectName;
 
-        const dbPath = path.join(os.homedir(), `.${projectName}`, 'db');
+        // Set up file paths
+        this.appDir = path.join(os.homedir(), `.${projectName}`);
+        
+        // Create necessary directories if they don't exist
+        this._ensureDirectoriesExist();
+
+        const dbPath = path.join(this.appDir, 'db');
         this.db      = new Level(dbPath, { valueEncoding: 'json' });
         this.dbReady = this.db.open();
+    }
+    
+    async _ensureDirectoriesExist() {
+        try {
+            await fs.access(this.appDir);
+        } catch (error) {
+            await fs.mkdir(this.appDir, { recursive: true });
+        }
     }
 
     /* ─────────── Settings ─────────── */
@@ -80,7 +96,19 @@ export class Store {
             }
         };
     }
-    
+
+    findProviderById(name) {
+        let list = this.getProviderList();
+        for(let idx in list) {
+            let elem = list[idx];
+            if(elem.name === name) {
+                return elem;
+            }
+        }
+
+        return null;
+    }
+
     getProviderList() {
         const models = this.getSetting('models', '{}');
         let modelsData;

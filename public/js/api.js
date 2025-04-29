@@ -275,6 +275,33 @@ export async function saveWorkingDirectory(sessionId, directory) {
 }
 
 /**
+ * Saves the agent ID preference for a specific session.
+ * @param {string} sessionId - The ID of the session.
+ * @param {string | null} agentId - The agent ID or null to unset.
+ * @returns {Promise<object>} The response data.
+ */
+export async function saveAgentId(sessionId, agentId) {
+    if (!sessionId) {
+        console.warn("Attempted to save agent ID without a session ID.");
+        return Promise.resolve({ message: "No session ID, skipping save." });
+    }
+    try {
+        const response = await fetch(`/api/sessions/${sessionId}/data`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: { agentId: agentId } })
+        });
+        if (!response.ok) {
+            throw new Error('Failed to save agent ID to session');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error saving agent ID:', error);
+        throw error;
+    }
+}
+
+/**
  * Loads application settings from the server.
  * @returns {Promise<object>} The settings object.
  */
