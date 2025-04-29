@@ -2,7 +2,7 @@
 All notable changes to **Localforge** will be documented in this file.  
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
-## [1.0.12] – 2025-04-25
+## [1.0.14] – 2025-04-25
 * Chat messages context now show system prompt
 * Fixed bug with simultaneous tool call + content response
 * Total refactor for CSS structure and support for multiple themes (introduced light/dark mode)
