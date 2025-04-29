@@ -33,22 +33,6 @@ npm run start
 
 Main guide here: [https://localforge.dev/how-to](https://localforge.dev/how-to)
 
-1. **Launch Localforge**  
-   • **CLI** – `localforge`
-
-2. **Open Settings** (top-right) and add your credentials:
-
-| Credential | Used for | Where to get it |
-|------------|----------|-----------------|
-| **OpenAI API key** (required) | all LLM tasks | <https://platform.openai.com/account/api-keys> → **Create secret key** |
-| **Google API key + CSE ID** (optional) | smarter web look-ups | Google Cloud Console → enable **Custom Search JSON API** → create key.<br>Then <https://cse.google.com/cse/create/new> → copy **Search engine ID** |
-
-> Keys are stored locally in `~/.localforge/* and never leave your machine.
-
-3. **Optional tweaks**  
-   • Toggle **Web Integration** to start/stop the headless Chrome helper (on by default; disable to save RAM).  
-   • Model slots are pre-filled (`gpt-4o-mini`, `gpt-4o`, `o3`) and can be edited later.
-
 ---
 
 ### License
