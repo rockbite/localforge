@@ -8,7 +8,7 @@
 ![Stars](https://img.shields.io/github/stars/rockbite/localforge?style=social)
 [![](https://dcbadge.limes.pink/api/server/KJrTd6cw8D?style=flat)](https://discord.gg/KJrTd6cw8D)
 
-![Localforge screenshot](https://github.com/user-attachments/assets/94966e7c-0f9b-440a-b76d-f9e3cf53314b)
+![Localforge screenshot](https://github.com/user-attachments/assets/32d37f86-49cc-41e1-83f5-144a4fc379c2)
 
 ---
 
