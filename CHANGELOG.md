@@ -7,6 +7,8 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) co
 * Fixed bug with simultaneous tool call + content response
 * Total refactor for CSS structure and support for multiple themes (introduced light/dark mode)
 * Auto updating feature for npm case
+* Added support for creating agent flavours for system prompt, model and tool overrides per chat
+* Added Caramel Latte & Dark Coffee themes
 
 ---
 
