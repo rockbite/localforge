@@ -15,6 +15,12 @@
 ## Quick Start
 
 ```bash
+npm i -g @rockbite/localforge
+```
+
+## Or use sources
+
+```bash
 # install dependencies
 npm install
 
@@ -22,13 +28,10 @@ npm install
 npm run start
 ```
 
-## Or better yet - Use NPM install
-
-```bash
-npm i -g @rockbite/localforge
-```
 
 ## Setup
+
+Main guide here: [https://localforge.dev/how-to](https://localforge.dev/how-to)
 
 1. **Launch Localforge**  
    • **CLI** – `localforge`
