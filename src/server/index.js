@@ -427,14 +427,7 @@ io.on('connection', (socket) => {
                 socket.emit('error', { message: 'No active session joined. Cannot send message.' });
                 return;
             }
-            
-            // check if we have API key set in settings
-            const apiKey = store.getSetting('openaiApiKey');
-            if(apiKey === undefined || apiKey === null || apiKey === '') {
-                socket.emit('error', { message: 'API_KEY_MISSING' });
-                return;
-            }
-            
+
             if (!content) {
                 socket.emit('error', { message: 'Message content is required' });
                 return;

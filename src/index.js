@@ -3,10 +3,7 @@
 // Import server
 import { startServer } from './server/index.js';
 
-// Start the server when this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-    startServer();
-}
+startServer();
 
 // Re-export all modules for easy access
 export * from './server/index.js';
