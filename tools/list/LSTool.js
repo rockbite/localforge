@@ -44,6 +44,7 @@ export default {
   execute: async (args) => LSTool(args),
 
   getDescriptiveText: (args) => {
+    if(!args.path) return "/*";
     const cleanPath = args.path.endsWith('/') ? args.path.slice(0, -1) : args.path;
     const dirName = cleanPath.split('/').pop();
     const depth = args.depth ?? 1;

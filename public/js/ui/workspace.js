@@ -5,6 +5,7 @@ import { appState } from '../state.js';
 import * as api from '../api.js';
 import { emitSetupWorkspace } from '../socket.js'; // Only need the emitter
 import { addAgentMessage } from './chat.js'; // For user feedback
+import { isElectronEnvironment } from '../utils.js'; // Import utility for Electron detection
 
 // DOM Elements specific to workspace
 const setupModal = document.getElementById('setup-modal');
@@ -22,14 +23,36 @@ export function initWorkspaceSetup() {
         return; // Can't initialize without the display element
     }
 
-    // Make the working directory display clickable to open the modal
+    // Make the working directory display clickable to open directory selector
     workingDirDisplay.style.cursor = 'pointer';
-    workingDirDisplay.onclick = showDirectoryModal; // Use the exported function
+    workingDirDisplay.onclick = handleDirectorySelection; // Use the new handler function that checks environment
 
     // Setup listeners for the modal form
     setupDirectoryFormListener();
 
-    console.log("Workspace setup initialized.");
+    console.log("Workspace setup initialized. Running in " + (isElectronEnvironment() ? "Electron" : "Web") + " mode.");
+}
+
+/**
+ * Handles directory selection based on the environment (Electron or Web)
+ */
+export async function handleDirectorySelection() {
+    if (isElectronEnvironment()) {
+        // In Electron environment, use the native file picker
+        try {
+            const result = await window.electronAPI.showDirectoryPicker();
+            if (!result.canceled && result.filePath) {
+                await saveAndApplyWorkingDirectory(result.filePath);
+            }
+        } catch (error) {
+            console.error("Error showing native directory picker:", error);
+            // Fall back to the modal if there's an error with the native picker
+            showDirectoryModal();
+        }
+    } else {
+        // In web environment, use the modal
+        showDirectoryModal();
+    }
 }
 
 /**
@@ -48,6 +71,34 @@ export function showDirectoryModal() {
     }
 }
 
+/**
+ * Save and apply the working directory path
+ * @param {string|null} directoryPath - The directory path to set
+ */
+export async function saveAndApplyWorkingDirectory(directoryPath) {
+    const directoryToSet = directoryPath && directoryPath.trim() !== '' ? directoryPath : null;
+    
+    appState.workingDirectory = directoryToSet;
+    setWorkingDirectoryDisplay(directoryToSet);
+    
+    try {
+        await api.saveWorkingDirectory(appState.currentSessionId, directoryToSet);
+        console.log("Working directory saved to session data.");
+    } catch (error) {
+        alert(`Error saving working directory preference: ${error.message}`);
+    }
+    
+    if (appState.socket) {
+        emitSetupWorkspace(appState.socket, directoryToSet);
+        if (directoryToSet) {
+            addAgentMessage(`Working directory set to: \`${directoryToSet}\``);
+        } else {
+            addAgentMessage("Working directory has been unset. File access tools will be limited.");
+        }
+    } else {
+        console.warn("Socket not available to emit setup_workspace.");
+    }
+}
 
 /**
  * Sets up event listeners for the directory selection modal form.
@@ -67,32 +118,9 @@ function setupDirectoryFormListener() { // Keep as internal helper, called by in
     directoryForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const directory = directoryInput.value.trim();
-        const directoryToSet = directory === '' ? null : directory;
-
-        appState.workingDirectory = directoryToSet;
-        setWorkingDirectoryDisplay(directoryToSet);
+        await saveAndApplyWorkingDirectory(directory);
         setupModal.classList.remove('active');
-
-        try {
-            await api.saveWorkingDirectory(appState.currentSessionId, directoryToSet);
-            console.log("Working directory saved to session data.");
-        } catch (error) {
-            alert(`Error saving working directory preference: ${error.message}`);
-        }
-
-        if (appState.socket) {
-            emitSetupWorkspace(appState.socket, directoryToSet);
-            if (directoryToSet) {
-                addAgentMessage(`Working directory set to: \`${directoryToSet}\``);
-            } else {
-                addAgentMessage("Working directory has been unset. File access tools will be limited.");
-            }
-        } else {
-            console.warn("Socket not available to emit setup_workspace.");
-        }
     });
-
-    // console.log("Directory form listener set up."); // Less noisy log
 }
 
 /**

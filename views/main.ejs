@@ -90,6 +90,22 @@
     <script src="/js/ui/agents.js" type="module"></script>
     <script src="/js/ui/agent-modal.js" type="module"></script>
     
+    <!-- Add Electron API shim for web environments -->
+    <script>
+      // Provide a fallback electronAPI for web environments
+      if (!window.electronAPI) {
+        window.electronAPI = {
+          isElectron: () => false,
+          showDirectoryPicker: () => {
+            console.log('Native directory picker not available in web environment');
+            return Promise.resolve({ canceled: true });
+          },
+          onUpdateAvailable: () => {},
+          showUpdateDialog: () => {}
+        };
+      }
+    </script>
+    
     <!-- Load modules after settings.js has initialized -->
     <script src="/js/utils.js" type="module"></script>
     <script src="/js/socket.js" type="module"></script>

@@ -19,5 +19,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   showUpdateDialog: () => {
     console.log('Sending show-update-dialog event');
     ipcRenderer.send('show-update-dialog');
-  }
+  },
+  
+  // Open directory selector dialog
+  showDirectoryPicker: () => {
+    console.log('Sending show-directory-picker event');
+    return ipcRenderer.invoke('show-directory-picker');
+  },
+  
+  // Check if running in Electron
+  isElectron: () => true
 });

@@ -230,6 +230,31 @@ app.whenReady().then(async () => {
         console.error('Error checking for updates in dialog handler:', err);
       });
   });
+  
+  // Set up IPC handler for directory picker dialog
+  ipcMain.handle('show-directory-picker', async () => {
+    try {
+      const result = await dialog.showOpenDialog(win, {
+        properties: ['openDirectory', 'createDirectory'],
+        title: 'Select Working Directory'
+      });
+      
+      if (result.canceled) {
+        return { canceled: true };
+      }
+      
+      return { 
+        canceled: false, 
+        filePath: result.filePaths[0] 
+      };
+    } catch (error) {
+      console.error('Error showing directory picker:', error);
+      return { 
+        canceled: true, 
+        error: error.message 
+      };
+    }
+  });
 });
 
 // Quit when all windows are closed, except on macOS.

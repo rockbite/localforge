@@ -220,6 +220,14 @@ export function showConfirmationModal({
 // }
 
 /**
+ * Checks if the application is running in Electron environment
+ * @returns {boolean} - True if running in Electron, false otherwise
+ */
+export function isElectronEnvironment() {
+    return window.electronAPI && typeof window.electronAPI.isElectron === 'function' && window.electronAPI.isElectron();
+}
+
+/**
  * Load the list of agents and populate the agent selector dropdown
  * @param {boolean} [preserveSelection=true] - Whether to preserve the current selection
  * @returns {Promise<Array>} - The list of agents

@@ -17,9 +17,12 @@ import { setStatus } from './ui/status.js'; // Direct import for initial status
 /**
  * Initializes the update notification system by connecting Electron IPC with Socket.IO
  */
-function initUpdateNotifications() {
+async function initUpdateNotifications() {
+    // Import the utility function
+    const { isElectronEnvironment } = await import('./utils.js');
+    
     // Check if we're running in Electron
-    if (window.electronAPI) {
+    if (isElectronEnvironment()) {
         console.log('Initializing update notification system');
         
         // Listen for update notifications from Electron main process
