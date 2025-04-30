@@ -1,8 +1,10 @@
 name: Build / Notarize macOS & Windows → Release
 
 on:
-  # Manual trigger
   workflow_dispatch:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 env:                       # shared across jobs
   APP_NAME: Localforge
