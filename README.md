@@ -8,11 +8,17 @@
 ![Stars](https://img.shields.io/github/stars/rockbite/localforge?style=social)
 [![](https://dcbadge.limes.pink/api/server/KJrTd6cw8D?style=flat)](https://discord.gg/KJrTd6cw8D)
 
-![Localforge screenshot](https://github.com/user-attachments/assets/94966e7c-0f9b-440a-b76d-f9e3cf53314b)
+![latest-gif-mov](https://github.com/user-attachments/assets/b12792ea-2498-4b71-bd86-bae2cfdcd5dc)
 
 ---
 
 ## Quick Start
+
+```bash
+npm i -g @rockbite/localforge
+```
+
+## Or use sources
 
 ```bash
 # install dependencies
@@ -22,29 +28,10 @@ npm install
 npm run start
 ```
 
-## Or better yet - Use NPM install
-
-```bash
-npm i -g @rockbite/localforge
-```
 
 ## Setup
 
-1. **Launch Localforge**  
-   • **CLI** – `localforge`
-
-2. **Open Settings** (top-right) and add your credentials:
-
-| Credential | Used for | Where to get it |
-|------------|----------|-----------------|
-| **OpenAI API key** (required) | all LLM tasks | <https://platform.openai.com/account/api-keys> → **Create secret key** |
-| **Google API key + CSE ID** (optional) | smarter web look-ups | Google Cloud Console → enable **Custom Search JSON API** → create key.<br>Then <https://cse.google.com/cse/create/new> → copy **Search engine ID** |
-
-> Keys are stored locally in `~/.localforge/* and never leave your machine.
-
-3. **Optional tweaks**  
-   • Toggle **Web Integration** to start/stop the headless Chrome helper (on by default; disable to save RAM).  
-   • Model slots are pre-filled (`gpt-4o-mini`, `gpt-4o`, `o3`) and can be edited later.
+Main guide here: [https://localforge.dev/how-to](https://localforge.dev/how-to)
 
 ---
 
@@ -57,9 +44,3 @@ Want to support us?
 [Buy Supporter Edition →](https://azakhary.gumroad.com/l/htqavs)
 
 Get priority on discord, and help the project grow!
-
-
-Example Results:
-
-<img src="https://github.com/user-attachments/assets/153dda0e-a41f-46ad-84bc-71d32b883b67" alt="snakes" width="50%">
-
