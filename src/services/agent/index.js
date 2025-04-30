@@ -439,8 +439,9 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
             
             // Then save tool_use message (only for main agents)
             if (!sessionId.startsWith('sub_')) {
-                // Persist the tool use query in history
-                await projectSessionManager.appendAssistantMessage(sessionId, toolUseObject);
+                // Persist the tool use query in history (todo: this is wrong, we should persist what we put in loop), only change when image
+                //await projectSessionManager.appendAssistantMessage(sessionId, toolUseObject);
+                await projectSessionManager.appendAssistantMessage(sessionId, llmResponse); // append as is to history
             }
             
             if (streamCallback) {
@@ -569,12 +570,19 @@ async function runAgentLoop(sessionId, currentMessages, agentTools, workingDirec
                     })
                 }
                 
-                // Persist the tool result message (only for main agents)
+                // Persist the tool result message (only for main agents) //todo: here we need to append TOOL message not user message, just like openai requires it, not this garbage
                 if (!sessionId.startsWith('sub_')) {
                     // Save the tool result in history with the TOOL_RESULT format
+                    /*
                     await projectSessionManager.appendUserMessageOnly(sessionId, {
                         role: 'user',
                         content: `\`\`\`TOOL_RESULT: Tool result for ${call.id}:\n${JSON.stringify(result)}`
+                    });
+                     */
+                    await projectSessionManager.appendUserMessageOnly(sessionId, {
+                        role: 'tool',
+                        tool_call_id: call.id,
+                        content: JSON.stringify(result)
                     });
                 }
                 

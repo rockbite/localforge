@@ -73,6 +73,7 @@ app.set('views', path.join(__dirname, '../../views'));
 // Main chat endpoint
 app.post('/agent/chat', async (req, res) => {
     try {
+        //todo: is this even ever used?
         const { projectId, sessionId, message, stream } = req.body;
         
         // Validate required parameters
