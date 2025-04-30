@@ -1,80 +1,23 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { app } from 'electron';
-import fs from 'fs';
+import { app, utilityProcess } from 'electron';
+import {createWindow} from "./main.js";
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * This method spawns a process to start the src/index.js which is the actual express server
+ */
 export function startServer() {
   const isDev = !app.isPackaged;
-  let serverProcess;
-
-  // Base path calculation - prioritize APP_BASE_PATH from cli.js for consistency
-  const appBasePath = process.env.APP_BASE_PATH || 
-                     (isDev ? path.join(__dirname, '..') : app.getAppPath());
-  console.log(`App base path: ${appBasePath}`);
-
-  // --- Calculate Server Script Path ---
-  let serverScript;
-  if (isDev) {
-    serverScript = path.join(appBasePath, 'src', 'index.js'); // Assuming server entry is src/index.js in dev
-  } else {
-    serverScript = path.join(appBasePath, 'src', 'index.js'); // Adjust 'src/index.js' if needed
-    console.log('Using ASAR-packed server script.');
-  }
-
-  console.log(`Resolved server script path: ${serverScript}`);
-  // fs.existsSync might not work reliably for ASAR paths, but should for unpacked
-  if (!isDev && !fs.existsSync(serverScript)) {
-    console.warn(`Warning: fs.existsSync returned false for unpacked script path, proceeding anyway.`);
-  }
 
 
-  // --- Determine Node Executable and Args ---
-  // Use process.execPath (the Electron executable) in packaged app
-  // For Windows, make sure we check if node is available in PATH when in dev mode
-  let nodeExecutable = isDev ? 'node' : process.execPath;
-  
-  // On Windows in dev mode, if can't find node in PATH, use process.execPath with ELECTRON_RUN_AS_NODE
-  if (isDev && process.platform === 'win32') {
-    try {
-      // Simple check if we can find node in PATH
-      const testPath = process.env.PATH.split(path.delimiter)
-        .some(dir => {
-          const nodePath = path.join(dir, 'node.exe');
-          try { return fs.existsSync(nodePath); } 
-          catch (e) { return false; }
-        });
-      
-      if (!testPath) {
-        console.log('Node not found in PATH on Windows, using Electron as Node');
-        nodeExecutable = process.execPath;
-      }
-    } catch (e) {
-      console.log('Error checking for node.exe, using Electron as Node');
-      nodeExecutable = process.execPath;
-    }
-  }
-  
-  const nodeArgs = [serverScript]; // Pass the script to be run
-
-  // --- Determine CWD ---
-  // Let Node.js determine the CWD based on the script location in packaged mode.
-  // Setting it explicitly can interfere with module resolution (especially with ASAR).
-  
-  // Fix for Windows global installation - use appBasePath for both dev and prod
-  const serverCwd = appBasePath; // Always use the app base path to ensure consistent behavior
-  console.log(`Setting server CWD to: ${serverCwd ?? 'default (undefined)'}`);
-
-  console.log(`Attempting to start server with:`);
-  console.log(` Executable: ${nodeExecutable}`);
-  console.log(` Args: ${nodeArgs.join(' ')}`);
-  console.log(` CWD: ${serverCwd ?? 'default (undefined)'}`);
 
   // --- Spawn the Process ---
+  /*
   try {
     serverProcess = spawn(nodeExecutable, nodeArgs, {
       cwd: serverCwd, // Use calculated CWD
@@ -99,19 +42,61 @@ export function startServer() {
   } catch (error) {
     console.error("Error during server spawn:", error);
     return; // Stop if spawn fails immediately
+  }*/
+
+  try {
+    const scriptPath = path.join(__dirname, '../src/server/index.js');
+    let serverProcess = utilityProcess.fork(scriptPath, [], {
+      stdio: 'pipe', // Pipe stdout/stderr to main process console
+      // serviceName: 'my-express-server' // Optional service name
+    });
+
+    serverProcess.stdout.on('data', (data) => {
+      console.log(`[Server Process stdout]: ${data.toString()}`);
+      // You can parse this output to get the port number if needed
+      // Example: Check for a specific line like "Server listening on port XXXX"
+      const match = data.toString().match(/Agent backend server listening on port (\d+)/);
+      if (match && match[1]) {
+        global.serverPort = parseInt(match[1], 10);
+        createWindow();
+      }
+    });
+
+    serverProcess.stderr.on('data', (data) => {
+      console.error(`[Server Process stderr]: ${data.toString()}`);
+    });
+
+    serverProcess.on('exit', (code) => {
+      console.log(`Server process exited with code: ${code}`);
+      serverProcess = null;
+      // Handle unexpected exit - maybe try restarting or quit the app
+      if (code !== 0) {
+        console.error("Server process crashed!");
+        // Optionally show an error to the user and quit
+        // dialog.showErrorBox(...)
+        // app.quit();
+      }
+    });
+
+
+  } catch (error) {
+    console.error('Failed to fork utility process:', error);
+    // Handle error - quit app or show dialog
+    app.quit();
+    return;
   }
 
 
-  // --- Cleanup ---
-  const cleanup = () => {
-    if (serverProcess && !serverProcess.killed) {
-      console.log('Terminating server process...');
-      serverProcess.kill();
-    }
-  };
+  app.on('quit', () => {
+      // todo: add if needed
 
-  app.on('quit', cleanup);
-  process.on('exit', cleanup); // Ensure cleanup on various exit scenarios
+  });
 
-  return serverProcess;
+
+  process.on('exit', () => {
+    // todo: add if needed
+
+
+  });
+
 }

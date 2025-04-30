@@ -22,6 +22,7 @@ export class Store {
 
         const dbPath = path.join(this.appDir, 'db');
         this.db      = new Level(dbPath, { valueEncoding: 'json' });
+
         this.dbReady = this.db.open();
     }
     

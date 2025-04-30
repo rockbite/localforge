@@ -1,11 +1,3 @@
-// Main entry point for the application
-
-// Import server
-import { startServer } from './server/index.js';
-
-startServer();
-
-// Re-export all modules for easy access
 export * from './server/index.js';
 export * from './services/agent/index.js';
 export * from './middleware/llm.js';

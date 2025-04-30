@@ -97,7 +97,7 @@ function checkForNpmUpdate() {
   });
 }
 
-function createWindow() {
+export function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
     width: 1280,
@@ -205,17 +205,13 @@ app.whenReady().then(async () => {
 
   try {
     startServer(); // Start the server process
-    console.log('Server process spawn initiated. Creating window...');
+    console.log('Server process spawn initiated.');
   } catch (error) {
     console.error("Error initiating server start:", error);
     dialog.showErrorBox('Fatal Error', `Could not initiate the server process. The application cannot start.\n\n${error.message}`);
     app.quit();
     return;
   }
-  
-  createWindow(); // Create the window, which will then try to connect
-  
-  // Check for updates will happen after window fully loads (see win.webContents.on('did-finish-load'))
   
   // Set up IPC handler for update dialog
   ipcMain.on('show-update-dialog', () => {
@@ -261,13 +257,5 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
-  }
-});
-
-app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (win === null) {
-    createWindow();
   }
 });

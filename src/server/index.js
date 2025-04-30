@@ -632,7 +632,7 @@ app.get('/', (req, res) => {
 });
 
 // Start the server only if not already running
-const startServer = () => {
+const startExpressServer = () => {
     try {
         server.listen(port, () => {
             console.log(`Agent backend server listening on port ${port}`);
@@ -645,14 +645,6 @@ const startServer = () => {
         }
     }
 };
-
-// Check if this file is being run directly (not imported)
-if (import.meta.url === `file://${process.argv[1]}`) {
-    startServer();
-}
-
-// Export for use in other modules
-export { app, server, startServer };
 
 // Listen for task events from ProjectSessionManager and forward to clients
 sessionTaskEvents.on('task_diff_update', ({ sessionId, type, task, taskId }) => {
@@ -706,3 +698,5 @@ io.on('connection', (socket) => {
         });
     }
 });
+
+startExpressServer();
