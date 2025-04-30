@@ -127,10 +127,8 @@ export default {
       }
     }
   },
-  execute: async (args, workingDirectory, toolContext) => {
-    // Extract the parent sessionId from the toolContext if available
-    const parentSessionId = toolContext?.sessionId || 'unknown_parent';
-    return dispatchAgent(args, workingDirectory, parentSessionId);
+  execute: async (args) => {
+    return dispatchAgent(args, args.workingDirectory, args.sessionData.sessionId);
   },
   ui: {
     icon: 'memory',
