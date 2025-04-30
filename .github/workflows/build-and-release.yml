@@ -42,16 +42,19 @@ jobs:
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
 
       # ---------- build / package ----------
-      - name: Package Electron app
+      - name: Package Electron OSX App
+        if: runner.os == 'macOS'
         env:
-          # mac signing ID available only on mac runner
           MACOS_SIGNING_IDENTITY_FROM_ACTION: ${{ steps.import_cert.outputs.signing-identity }}
         run: |
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            npm run package:mac 
-          else
-            npm run package:win 
-          fi
+          echo "Packaging for Mac..."
+          npm run package:mac
+
+      - name: Package Electron Windows App
+        if: runner.os == 'Windows'
+        run: |
+            echo "Packaging for Windows..."
+            npm run package:win
 
       # ---------- macOS-only : notarize, staple, dmg ----------
       - name: Notarise & staple (macOS)
@@ -169,5 +172,4 @@ jobs:
             *.dmg
             *.exe
             *.msi
-          draft: false
-          prerelease: false
+          draft: true
