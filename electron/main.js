@@ -13,6 +13,8 @@ import {exec} from "child_process";
 import {runUpdate} from "./updater.js";
 
 
+let serverProcess;
+
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -179,9 +181,7 @@ export function createWindow() {
       });
   };
 
-  // Give the server more time to start initially
-  console.log('Waiting 3 seconds for server to potentially start...');
-  setTimeout(loadApp, 3000); // Increased initial delay
+  loadApp();
 
   win.on('closed', () => {
     win = null;
@@ -204,7 +204,7 @@ app.whenReady().then(async () => {
   }
 
   try {
-    startServer(); // Start the server process
+    serverProcess = startServer(); // Start the server process
     console.log('Server process spawn initiated.');
   } catch (error) {
     console.error("Error initiating server start:", error);
@@ -255,7 +255,9 @@ app.whenReady().then(async () => {
 
 // Quit when all windows are closed, except on macOS.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
+  if(serverProcess) {
+    serverProcess.kill(); // Ensure server process is killed
+    console.log('Server process killed.');
   }
+  app.quit();
 });

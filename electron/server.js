@@ -78,7 +78,7 @@ export function startServer() {
       }
     });
 
-
+    return serverProcess;
   } catch (error) {
     console.error('Failed to fork utility process:', error);
     // Handle error - quit app or show dialog
