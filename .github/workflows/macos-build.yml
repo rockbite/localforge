@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-macos:
-    runs-on: ubuntu-latest # Use the latest available Ubuntu runner
+    runs-on: macos-latest # Use the latest available Ubuntu runner
 
     steps:
       - name: Checkout code
