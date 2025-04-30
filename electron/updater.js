@@ -55,30 +55,22 @@ function runDownloadCommand() {
         let downloadUrl;
 
         const owner = 'rockbite';
-        const repo = 'localforge';
+        const repo = 'Localforge';
 
         // Determine the asset name and construct the download URL based on the OS
         if (platform === 'win32') {
             assetName = `${repo}-win32-x64.zip`; // As per your naming convention
-            downloadUrl = `https://github.com/${owner}/${repo}/releases/download/${assetName}/latest`;
+            downloadUrl = `https://github.com/${owner}/${repo}/releases/latest/download/${assetName}`;
+
         } else if (platform === 'darwin') { // darwin is the identifier for macOS
             assetName = `${repo}.dmg`; // As per your naming convention
-            downloadUrl = `https://github.com/${owner}/${repo}/releases/download/${assetName}/latest`;
+            downloadUrl = `https://github.com/${owner}/${repo}/releases/latest/download/${assetName}`;
         } else if (platform === 'linux') {
-            // Decide how to handle Linux. You could open the releases page,
-            // or provide a specific Linux asset link if available.
-            // For now, we reject as no specific file link is opened.
-            console.log('Linux OS detected. Manual download might be required from the releases page.');
-            // Option 1: Reject
-            return reject(new Error('Automatic asset opening for Linux is not supported by this function yet.'));
-            // Option 2: Open the main releases page instead
-            // downloadUrl = `https://github.com/${owner}/${repo}/releases/tag/${tag}`;
-            // assetName = 'Release Page'; // For logging purposes
+            downloadUrl = `https://github.com/rockbite/localforge/releases`;
         } else {
             return reject(new Error(`Unsupported platform: ${platform}`));
         }
 
-        console.log(`Attempting to open download URL for ${assetName} (${platform}, tag ${tag}) in browser...`);
         console.log(`URL: ${downloadUrl}`);
 
         // Use Electron's shell module to open the URL in the default browser
