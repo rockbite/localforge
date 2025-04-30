@@ -14,7 +14,7 @@
     "server": "node src/index.js",
     "start": "electron .",
     "build:web": "vite build",
-    "package:mac": "electron-packager . Localforge --platform=darwin --arch=arm64 --out=dist --icon=build/icons/mac/icon.icns --overwrite --asar.unpackDir=\"{public,views,tools,prompts,node_modules/level/**,node_modules/@level/**,node_modules/classic-level/**,node_modules/abstract-level/**}\" --osx-sign --osx-sign.identity=\"$MACOS_SIGNING_IDENTITY_FROM_ACTION\" --osx-sign.entitlements=build/entitlements.mac.plist",
+    "package:mac": "electron-packager . Localforge --platform=darwin --arch=arm64 --out=dist --icon=build/icons/mac/icon.icns --overwrite --asar.unpackDir=\"{public,views,tools,prompts,node_modules/level/**,node_modules/@level/**,node_modules/classic-level/**,node_modules/abstract-level/**}\" --osx-sign.identity=\"$MACOS_SIGNING_IDENTITY_FROM_ACTION\" --osx-sign.entitlements=build/entitlements.mac.plist",
     "package:win": "electron-packager . Localforge --platform=win32 --arch=x64 --out=dist --icon=build/icons/win/icon.ico --overwrite --asar.unpackDir=\"{src,public,views,tools,prompts,node_modules/level/**,node_modules/@level/**,node_modules/classic-level/**,node_modules/abstract-level/**}\"",
     "package:linux": "electron-packager . Localforge --platform=linux --arch=x64 --out=dist --icon=build/icons/png/512x512.png --overwrite --asar.unpackDir=\"{src,public,views,tools,prompts,node_modules/level/**,node_modules/@level/**,node_modules/classic-level/**,node_modules/abstract-level/**}\"",
     "release": "npm run package",
