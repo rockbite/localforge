@@ -118,15 +118,6 @@ export function createWindow() {
 
   // --- MODIFIED DEVTOOLS LOGIC ---
   const isGlobalInstall = process.env.GLOBAL_NPM_INSTALL === 'true';
-  const isDebugFlag = process.argv.includes('--debug');
-  // Optional: A more robust way to detect local dev, e.g., set NODE_ENV=development when running locally
-  const isLocalDevEnvironment = process.env.NODE_ENV === 'development';
-  if ((isDebugFlag || isLocalDevEnvironment) && !isGlobalInstall) {
-    console.log('Opening DevTools (Debug flag or Local Dev Environment detected, not global install)');
-    win.webContents.openDevTools();
-  } else if (isGlobalInstall) {
-    console.log('Running from global install, DevTools will not be opened by default.');
-  }
 
   win.once('ready-to-show', () => {
     console.log('Window ready to show, making visible.');
