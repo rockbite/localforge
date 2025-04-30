@@ -9,7 +9,6 @@ yarn-error.log
 
 # Build directories
 dist/
-build/
 out/
 
 # IDE files
