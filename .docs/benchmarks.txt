@@ -3,4 +3,11 @@ PROMPT:
 Create a browser Snake game using Node.js + TypeScript with a Vite scaffold and clean multi‑file structure: two AI‑controlled snakes battle on a 50×50 pastel grid, seek random food, avoid walls and each other, respawn small after death, and reset the board while keeping cumulative scores. Scoring: +1 per second alive, +10 per food eaten, +50 when the rival dies and this snake survives, −10 on death. Implement smart path‑finding AI, silently consult experts as needed, and reply only after the entire, fully‑tested game is finished. Before starting fully discuss this task with an Expert so it can help you craft a detailed high level task-list and the architecture, after, start implementing. Let expert know that your goal is to keep things simple, and you are tight on time.
 Expected Result: Completed one shot under 2$ (best result $1.6)
 
+2. CALCULATOR
+PROMPT:
+Implement most authentic web calculator sim html, with simple flat design, responsive UI,
+with all buttons and lcd screen and all, modern look, input by button clicking.
+
+2. SOME KIND OF GAME
+
 # need to add more benchmarks

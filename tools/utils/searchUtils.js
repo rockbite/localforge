@@ -1,12 +1,13 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { glob } from 'glob';
+import {resolveSecurePath} from "./fileSystemUtils.js";
 
 async function globTool({ pattern, path: searchPath, workingDirectory }) {
-    const basePath = searchPath || workingDirectory;
-    if(!path.resolve(basePath).startsWith(workingDirectory)) {
-        return { error: 'Access denied' };
-    }
+    let basePath = searchPath || workingDirectory;
+
+    basePath = resolveSecurePath(basePath, workingDirectory);
+    if(!basePath) { return { error: 'Access denied' }; }
     
     try {
         const files = await glob(pattern, { 
@@ -36,13 +37,11 @@ async function globTool({ pattern, path: searchPath, workingDirectory }) {
 
 async function grepTool({ pattern, path: searchPath = process.cwd(), include = '*', workingDirectory }) {
     // Ensure searchPath is not undefined or null
-    const basePath = searchPath || process.cwd();
+    let basePath = searchPath || process.cwd();
     console.log(`[GrepTool] Searching with pattern "${pattern}", include: "${include}", path: "${basePath}"`);
-    
-    if(!path.resolve(basePath).startsWith(workingDirectory)) {
-        console.log(`[GrepTool] Access denied for path "${basePath}". workingDirectory: "${workingDirectory}"`);
-        return { error: 'Access denied' };
-    }
+
+    basePath = resolveSecurePath(basePath, workingDirectory);
+    if(!basePath) { return { error: 'Access denied' }; }
     
     try {
         // Ensure pattern is recursive if it doesn't already have a glob pattern
