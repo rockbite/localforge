@@ -125,7 +125,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: localforge-windows-installer          # <- release job will grab *-installer
-          # adjust path later if you move to electron-builder (.exe / .msi)
           path: dist/Localforge-win32-x64.zip
           if-no-files-found: error
 
@@ -167,9 +166,7 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.tag.outputs.tag_name }}
           files: |
-            *.dmg
-            *.exe
-            *.msi
+            localforge-osx-installer/*.dmg
+            localforge-windows-installer/*.zip
           draft: true
