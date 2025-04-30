@@ -1,0 +1,171 @@
+name: Build / Notarize macOS & Windows → Release
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+
+env:                       # shared across jobs
+  APP_NAME: Localforge
+  NODE_VERSION: '20'
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────────
+  # 1. Build matrix – macOS + Windows run in parallel
+  # ────────────────────────────────────────────────────────────────────────────────
+  build:
+    strategy:
+      matrix:
+        os: [macos-14, windows-latest]          # add linux-latest if you need it
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # ---------- common ----------
+      - name: Checkout code
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Or your required version
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ---------- macOS-only : import cert & env ----------
+      - name: Import macOS code-sign cert
+        if: runner.os == 'macOS'
+        id: import_cert # Give this step an ID to reference its output
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+
+      # ---------- build / package ----------
+      - name: Package Electron app
+        env:
+          # mac signing ID available only on mac runner
+          MACOS_SIGNING_IDENTITY_FROM_ACTION: ${{ steps.import_cert.outputs.signing-identity }}
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            npm run package:mac 
+          else
+            npm run package:win 
+          fi
+
+      # ---------- macOS-only : notarize, staple, dmg ----------
+      - name: Notarise & staple (macOS)
+        if: runner.os == 'macOS'
+        env:
+          APPLE_ID:                    ${{ secrets.APPLE_ID_EMAIL }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID:               ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          APP_PATH="dist/Localforge-darwin-arm64/Localforge.app"
+          ZIP_PATH="dist/Localforge-mac.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
+          
+          echo "Submitting to notarisation…"
+          xcrun notarytool submit "$ZIP_PATH" \
+            --apple-id  "$APPLE_ID" \
+            --password  "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id   "$APPLE_TEAM_ID" \
+            --output-format json --wait
+          
+          xcrun stapler staple --verbose "$APP_PATH"
+          
+          npx electron-installer-dmg "$APP_PATH" "Localforge" \
+            --out="dist/installers" \
+            --icon="build/icons/mac/icon.icns" \
+            --overwrite
+
+      # ---------- Windows portable build via electron-packager --------
+      - name: Package Windows (portable)
+        if: runner.os == 'Windows'
+        run: npm run package:win
+
+      # Optional signing ------------------------------------------------- (120$, maybe later)
+#      - name: Sign main executable
+#        if: runner.os == 'Windows' && env.CSC_LINK != ''
+#        env:
+#          CSC_LINK:         ${{ secrets.WIN_CODESIGN_PFX }}
+#          CSC_KEY_PASSWORD: ${{ secrets.WIN_CODESIGN_PFX_PASSWORD }}
+#        run: |
+#          echo "%CSC_LINK%" | base64 -d > code.pfx
+#          # Sign the main EXE
+#          "/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/signtool.exe" sign ^
+#            /f code.pfx ^
+#            /p "%CSC_KEY_PASSWORD%" ^
+#            /tr http://timestamp.digicert.com ^
+#            /td sha256 ^
+#            /fd sha256 ^
+#            "dist/Localforge-win32-x64/Localforge.exe"
+
+      # Zip the folder so users download one file -----------------------
+      - name: Zip portable build
+        if: runner.os == 'Windows'
+        run: |
+          7z a -r dist/Localforge-win32-x64.zip dist/Localforge-win32-x64\*          
+
+      # ───────────── macOS artifact (.dmg) ─────────────
+      - name: Upload macOS artifact
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: localforge-osx-installer            # <- release job will grab *-installer
+          path: dist/installers/*.dmg
+          if-no-files-found: error
+
+      # ───────────── Windows artifact (portable .zip or installer) ─────────────
+      - name: Upload Windows artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: localforge-windows-installer          # <- release job will grab *-installer
+          # adjust path later if you move to electron-builder (.exe / .msi)
+          path: dist/Localforge-win32-x64.zip
+          if-no-files-found: error
+
+  # ────────────────────────────────────────────────────────────────────────────────
+  # 2. Release job – waits for both installers, attaches to one GitHub Release
+  # ────────────────────────────────────────────────────────────────────────────────
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        # we need the tags in order to figure out the latest one
+        with: { fetch-depth: 0 }
+
+      # ---------- decide which tag to use ----------
+      - name: Compute tag name
+        id: tag
+        run: |
+          # If this run was triggered by `git push --tag`, use that tag
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+          else
+            # Manual run → grab *latest* annotated or lightweight tag
+            git fetch --tags --force
+            TAG_NAME="$(git describe --tags --abbrev=0)"
+          fi
+          echo "Using tag: $TAG_NAME"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-installer'     # grabs macOS-installer & Windows-installer
+          path: .
+
+      # publish / update the release
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag_name }}
+          files: |
+            *.dmg
+            *.exe
+            *.msi
+          draft: false
+          prerelease: false
