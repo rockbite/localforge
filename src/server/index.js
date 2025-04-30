@@ -25,6 +25,10 @@ const server = http.createServer(app);
 const io = new Server(server);
 const port = 3001;
 
+
+import fixPath from "fix-path";
+fixPath(); // fix path for electron
+
 // Map sessionId -> Set of sockets interested in this session
 const sessionSocketMap = new Map();
 
