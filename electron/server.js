@@ -12,8 +12,9 @@ export function startServer() {
   const isDev = !app.isPackaged;
   let serverProcess;
 
-  // Base path calculation
-  const appBasePath = isDev ? path.join(__dirname, '..') : app.getAppPath();
+  // Base path calculation - prioritize APP_BASE_PATH from cli.js for consistency
+  const appBasePath = process.env.APP_BASE_PATH || 
+                     (isDev ? path.join(__dirname, '..') : app.getAppPath());
   console.log(`App base path: ${appBasePath}`);
 
   // --- Calculate Server Script Path ---
@@ -34,13 +35,38 @@ export function startServer() {
 
   // --- Determine Node Executable and Args ---
   // Use process.execPath (the Electron executable) in packaged app
-  const nodeExecutable = isDev ? 'node' : process.execPath;
+  // For Windows, make sure we check if node is available in PATH when in dev mode
+  let nodeExecutable = isDev ? 'node' : process.execPath;
+  
+  // On Windows in dev mode, if can't find node in PATH, use process.execPath with ELECTRON_RUN_AS_NODE
+  if (isDev && process.platform === 'win32') {
+    try {
+      // Simple check if we can find node in PATH
+      const testPath = process.env.PATH.split(path.delimiter)
+        .some(dir => {
+          const nodePath = path.join(dir, 'node.exe');
+          try { return fs.existsSync(nodePath); } 
+          catch (e) { return false; }
+        });
+      
+      if (!testPath) {
+        console.log('Node not found in PATH on Windows, using Electron as Node');
+        nodeExecutable = process.execPath;
+      }
+    } catch (e) {
+      console.log('Error checking for node.exe, using Electron as Node');
+      nodeExecutable = process.execPath;
+    }
+  }
+  
   const nodeArgs = [serverScript]; // Pass the script to be run
 
   // --- Determine CWD ---
   // Let Node.js determine the CWD based on the script location in packaged mode.
   // Setting it explicitly can interfere with module resolution (especially with ASAR).
-  const serverCwd = isDev ? appBasePath : undefined; // Use project root in dev, undefined in packaged
+  
+  // Fix for Windows global installation - use appBasePath for both dev and prod
+  const serverCwd = appBasePath; // Always use the app base path to ensure consistent behavior
   console.log(`Setting server CWD to: ${serverCwd ?? 'default (undefined)'}`);
 
   console.log(`Attempting to start server with:`);
