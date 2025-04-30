@@ -29,3 +29,5 @@ sandbox/
 release-builds/
 # Ignore packaged apps directory
 packaged-apps/
+
+.secrets

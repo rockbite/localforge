@@ -1,0 +1,89 @@
+name: Build and Notarize macOS App
+
+on:
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build-macos:
+    runs-on: ubuntu-latest # Use the latest available Ubuntu runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Or your required version
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci # 'ci' is generally preferred in CI for reproducible builds
+
+      - name: Import Code Signing Certificate
+        id: import_cert # Give this step an ID to reference its output
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+
+      - name: Build Electron App for macOS
+        env:
+          MACOS_SIGNING_IDENTITY_FROM_ACTION: ${{ steps.import_cert.outputs.signing-identity }}
+          APPLE_ID: ${{ secrets.APPLE_ID_EMAIL }} # Standard name for notarization tools
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          echo "Using signing identity: ${{ steps.import_cert.outputs.signing-identity }}" # Optional: Log the identity being used
+          npm run package:mac # Runs electron-packager, which should now use the identity via the env var
+
+      - name: Define App Path and Zip Path
+        id: paths
+        run: |
+          APP_PATH="dist/Localforge-darwin-arm64/Localforge.app"
+          ZIP_PATH="dist/Localforge-mac.zip"
+          echo "APP_PATH=$APP_PATH" >> $GITHUB_OUTPUT
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_OUTPUT
+          
+      - name: Zip the .app bundle
+        # Using ditto is often recommended for macOS apps
+        run: ditto -c -k --sequesterRsrc --keepParent "${{ steps.paths.outputs.APP_PATH }}" "${{ steps.paths.outputs.ZIP_PATH }}"
+
+      - name: Notarize App (using notarytool)
+        env:
+          AC_USERNAME:  ${{ secrets.APPLE_ID_EMAIL }}
+          AC_PASSWORD:  ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ZIP_PATH:     ${{ steps.paths.outputs.ZIP_PATH }}
+        run: |
+          echo "Submitting $ZIP_PATH to Apple notarisation service…"
+          # --wait blocks until finished and exits non-zero on failure, so no manual polling needed
+          xcrun notarytool submit "$ZIP_PATH" \
+            --apple-id  "$AC_USERNAME" \
+            --password  "$AC_PASSWORD" \
+            --team-id   "$APPLE_TEAM_ID" \
+            --output-format json \
+            --wait
+          echo "Notarisation succeeded"
+
+      # --- Staple the ticket to the .app bundle ---
+      - name: Staple Notarisation Ticket
+        run: |
+          xcrun stapler staple --verbose "${{ steps.paths.outputs.APP_PATH }}"
+
+      # --- Create DMG ---
+      - name: Create DMG from Stapled App
+        run: |
+          npx electron-installer-dmg \
+            "./dist/Localforge-darwin-arm64/Localforge.app" \ # Path to the STAPLED .app bundle
+            "Localforge" \                                   # App name (used for DMG name)
+            --out="dist/installers" \                        # Output directory
+            --icon="build/icons/mac/icon.icns" \             # Icon for the DMG
+            --overwrite                                      # Overwrite if DMG exists
+
+      # --- Upload Artifact ---
+      - name: Upload DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Localforge-macOS-Installer
+          path: dist/installers/Localforge.dmg
