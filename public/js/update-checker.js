@@ -4,18 +4,18 @@ console.log('Update checker initialized');
 document.addEventListener('DOMContentLoaded', () => {
   const updateIndicator = document.getElementById('update-indicator');
   const updateText = document.getElementById('update-text');
-  
   if (!updateIndicator || !updateText) {
     console.error('Update indicator elements not found in the DOM');
     return;
   }
+
   
   // Socket listener for update_available event
   const handleUpdateAvailable = (data) => {
     console.log('Update available:', data);
     
     // Show update notification with version number
-    updateText.textContent = `Update available: v${data.latest}`;
+    updateText.textContent = `Update v${data.latest} available`;
     updateIndicator.style.display = 'flex';
     
     // Store update info for dialog
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentVersion = updateIndicator.dataset.currentVersion || '';
     const latestVersion = updateIndicator.dataset.latestVersion || '';
     const packageName = '@rockbite/localforge';
-    
+
     // If running in Electron, use a dialog
     if (window.electronAPI) {
       window.electronAPI.showUpdateDialog();

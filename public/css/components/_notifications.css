@@ -1,47 +1,5 @@
-/* Update Notification */
-.update-notification {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px var(--shadow-color);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    z-index: var(--z-index-modal);
-    max-width: 320px;
-    animation: slide-in 0.3s ease-out;
-}
-
-.update-notification .material-icons {
-    color: var(--accent-primary);
-    font-size: 24px;
-}
-
-.update-content {
-    flex: 1;
-}
-
-.update-title {
-    font-weight: var(--font-weight-bold);
-    margin-bottom: 4px;
-}
-
-.update-info {
-    font-size: 0.85em;
-    color: var(--text-secondary);
-}
-
-@keyframes slide-in {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
+/* Update Notification - Now using header indicator instead of this popup */
+/* 
+.update-notification styles removed - we're using the header indicator instead
+See _header.css for #update-indicator styles 
+*/
