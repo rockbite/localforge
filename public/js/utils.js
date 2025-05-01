@@ -228,6 +228,38 @@ export function isElectronEnvironment() {
 }
 
 /**
+ * Initialize global ESC key handler to close active modals
+ * Call this once during app initialization
+ */
+export function initGlobalModalEscHandler() {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            // Check for any active modals in order of priority
+            const activeModals = document.querySelectorAll('.modal.active, [id$="-modal"].active');
+            
+            if (activeModals.length > 0) {
+                // Get the last active modal (assuming it's the one on top)
+                const lastModal = activeModals[activeModals.length - 1];
+                
+                // Find close button within the modal
+                const closeButton = lastModal.querySelector('[id$="-close"], .modal-close, .close-button');
+                
+                if (closeButton) {
+                    // Simulate a click on the close button
+                    closeButton.click();
+                } else {
+                    // If no close button found, simply remove the active class
+                    lastModal.classList.remove('active');
+                }
+                
+                // Prevent other ESC handlers from firing
+                e.stopPropagation();
+            }
+        }
+    });
+}
+
+/**
  * Load the list of agents and populate the agent selector dropdown
  * @param {boolean} [preserveSelection=true] - Whether to preserve the current selection
  * @returns {Promise<Array>} - The list of agents

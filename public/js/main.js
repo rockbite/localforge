@@ -117,6 +117,10 @@ async function initializeApp() {
         // Initialize chat context view
         const { initChatContextView } = await import('./ui/chat-context.js');
         initChatContextView();
+        
+        // Initialize global ESC key handler for modals
+        const { initGlobalModalEscHandler } = await import('./utils.js');
+        initGlobalModalEscHandler();
         console.log("UI components initialized.");
 
         // 4. Initialize WebSocket connection
