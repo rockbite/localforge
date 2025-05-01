@@ -105,7 +105,7 @@ export default {
      *   { apiUrl?: 'http://localhost:11434', timeout?: number }
      */
     async chat(options, providerOptions = {}) {
-        const base   = providerOptions.apiUrl?.replace(/\/+$/, '') || 'http://localhost:11434';
+        const base   = providerOptions.url?.replace(/\/+$/, '') || 'http://localhost:11434';
         const url    = `${base}/api/chat`;
         const body   = processOptions(options);
 

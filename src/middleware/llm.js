@@ -2,10 +2,12 @@
 import providers from './providers/index.js';
 import store from "../db/store.js";
 import agentStore from "../db/agentStore.js";
+import crypto from 'crypto';
 
 let MAIN_MODEL = 0;
 let AUX_MODEL = 1;
 let EXPERT_MODEL = 2;
+
 
 
 export async function callLLMByType(modelType, options, sessionData = null) {
@@ -206,79 +208,64 @@ preProcessMap["openai"]["qwen3"] = function (provider, options) {
  * @param out
  */
 postProcessMap["openai"]["qwen3"] = function (provider, options, out) {
-    // Ensure out.content is a string, default to empty string if not
-    let originalContent = (typeof out.content === 'string') ? out.content : "";
+    // ----- 1. normalise original text -----
+    const originalContent = (typeof out.content === "string") ? out.content : "";
+    let text = originalContent;           // will mutate to leave only plain text
 
-    let thinkContent = null;
-    let toolCallRawContent = null;
-    let textContent = originalContent;
-
-    // Regular expression to find <think>...</think> tags, capturing the content inside.
-    // The 's' flag allows '.' to match newline characters.
-    const thinkRegex = /<think>(.*?)<\/think>/s;
-    const thinkMatch = textContent.match(thinkRegex);
-
-    if (thinkMatch && thinkMatch[1] !== undefined) {
-        // Extract the content inside the <think> tags
-        thinkContent = thinkMatch[1].trim();
-        // Remove the entire matched <think>...</think> block from the textContent
-        textContent = textContent.replace(thinkMatch[0], "");
-        // console.log("Extracted think:", thinkContent); // Optional: for debugging
+    // ----- 2. <think> … </think> (stay consistent with old impl) -----
+    const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/);
+    if (thinkMatch) {
+        // you still have it if you ever need it:
+        // const thinkContent = thinkMatch[1].trim();
+        text = text.replace(thinkMatch[0], "");
     }
 
-    // Regular expression to find <tool_call>...</tool_call> tags, capturing the content inside.
-    const toolCallRegex = /<tool_call>(.*?)<\/tool_call>/s;
-    const toolCallMatch = textContent.match(toolCallRegex);
-
-    if (toolCallMatch && toolCallMatch[1] !== undefined) {
-        // Extract the raw content inside the <tool_call> tags
-        toolCallRawContent = toolCallMatch[1].trim();
-        // Remove the entire matched <tool_call>...</tool_call> block from the textContent
-        textContent = textContent.replace(toolCallMatch[0], "");
+    // ----- 3. collect **all** <tool_call> blocks -----
+    const toolBlocks = [];
+    const toolCallRegex = /<tool_call>([\s\S]*?)<\/tool_call>/g;  // global!
+    let m;
+    while ((m = toolCallRegex.exec(text)) !== null) {
+        // m[1] is the inside of this tool_call block
+        toolBlocks.push(m[1].trim());
     }
+    // strip every block from plain text
+    text = text.replace(toolCallRegex, "");
 
-    // Update out.content with the remaining text (outside the tags), trimmed
-    out.content = textContent.trim();
-
-    // If tool_call content was extracted, try to parse it as JSON
-    if (toolCallRawContent) {
+    // ----- 4. parse JSON lines from all blocks -----
+    const allToolCalls = [];
+    if (toolBlocks.length) {
         try {
-            // Qwen lists one JSON object per line inside <tool_call> … </tool_call>
-            // 1️⃣ split on new-lines, 2️⃣ trim, 3️⃣ discard empties
-            const toolLines = toolCallRawContent
-                .split(/\r?\n/)     // handle \n and \r\n
-                .map(l => l.trim())
-                .filter(Boolean);
-
-            let num = require('crypto').randomBytes(8).toString('hex');
-
-            // Parse every JSON line → build the tool_calls array
-            const parsed = toolLines.map((line, idx) => {
-                const obj = JSON.parse(line);
-                return {
-                    id: `tool-call-${num}`,          // whatever id scheme you like
-                    function: {
-                        name: obj.name,
-                        arguments: obj.arguments
-                    }
-                };
+            // explode each block into lines, keep non-empty, parse
+            toolBlocks.forEach(block => {
+                block.split(/\r?\n/)                   // handle both NL styles
+                    .map(l => l.trim())
+                    .filter(Boolean)
+                    .forEach(line => {
+                        const obj = JSON.parse(line);
+                        allToolCalls.push(obj);
+                    });
             });
 
-            if (parsed.length) {
-                out.tool_calls = parsed;                // ⬅️ multiple calls supported
+            if (allToolCalls.length) {
+                // wrap each parsed object into OpenAI-style envelope
+                const uid = crypto.randomBytes(8).toString("hex");
+                out.tool_calls = allToolCalls.map((o, i) => ({
+                    id: `tool-call-${uid}-${i}`,
+                    function: { name: o.name, arguments: o.arguments }
+                }));
             } else {
                 delete out.tool_calls;
             }
-        } catch (error) {
-            console.error("Failed to parse tool_call JSON content:", error);
-            console.error("Original tool_call content:", toolCallRawContent);
+        } catch (err) {
+            console.error("Failed to parse <tool_call> content:", err);
             delete out.tool_calls;
         }
     } else {
         delete out.tool_calls;
     }
 
-    // The 'thinkContent' variable holds the extracted think part but is not used further, as requested.
+    // ----- 5. update outbound text -----
+    out.content = text.trim();
 };
 
 function preProcess(provider, options) {
