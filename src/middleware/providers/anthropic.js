@@ -180,7 +180,7 @@ export default {
     async chat(options, providerOptions = {}) {
         const client = new Anthropic({
             apiKey: providerOptions.apiKey,
-            ...(providerOptions.apiUrl ? { baseURL: providerOptions.apiUrl } : {}),
+            ...(providerOptions.url ? { baseURL: providerOptions.url } : {}),
         });
 
         const body = processOptions(options);

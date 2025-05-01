@@ -117,8 +117,8 @@ export default {
      */
     async chat(options, providerOptions) {
         let init = { apiKey:  providerOptions.apiKey }
-        if(providerOptions.apiUrl) {
-            init.baseUrl = providerOptions.apiUrl;
+        if(providerOptions.url) {
+            init.baseURL = providerOptions.url;
         }
 
         let client = new OpenAI(init);

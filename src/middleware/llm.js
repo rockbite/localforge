@@ -36,7 +36,6 @@ function getProviderTypeByProviderName(providerName) {
 
 }
 
-
 /**
  * Central entry point.
  * @param {string} prompt
@@ -104,6 +103,8 @@ export async function callLLMProvider(providerName, options, sessionData = null)
             content: msg.content,
             tool_calls: msg.tool_calls ?? null,
         };
+
+        postProcess(provider, cleanOptions, out);
 
         // Track token usage if sessionId is provided
         if (sessionId) {
@@ -188,6 +189,98 @@ function preprocessMessageForLLM(message) {
 
     return processedMessage;
 }
+
+let postProcesMap = {"openai":{}};
+
+/**
+ * QWEN3 post processing to extract thinking and tool_calls (TODO, move this to separate patch files)
+ * @param out
+ */
+postProcesMap["openai"]["qwen3"] = function (provider, options, out) {
+    // Ensure out.content is a string, default to empty string if not
+    let originalContent = (typeof out.content === 'string') ? out.content : "";
+
+    let thinkContent = null;
+    let toolCallRawContent = null;
+    let textContent = originalContent;
+
+    // Regular expression to find <think>...</think> tags, capturing the content inside.
+    // The 's' flag allows '.' to match newline characters.
+    const thinkRegex = /<think>(.*?)<\/think>/s;
+    const thinkMatch = textContent.match(thinkRegex);
+
+    if (thinkMatch && thinkMatch[1] !== undefined) {
+        // Extract the content inside the <think> tags
+        thinkContent = thinkMatch[1].trim();
+        // Remove the entire matched <think>...</think> block from the textContent
+        textContent = textContent.replace(thinkMatch[0], "");
+        // console.log("Extracted think:", thinkContent); // Optional: for debugging
+    }
+
+    // Regular expression to find <tool_call>...</tool_call> tags, capturing the content inside.
+    const toolCallRegex = /<tool_call>(.*?)<\/tool_call>/s;
+    const toolCallMatch = textContent.match(toolCallRegex);
+
+    if (toolCallMatch && toolCallMatch[1] !== undefined) {
+        // Extract the raw content inside the <tool_call> tags
+        toolCallRawContent = toolCallMatch[1].trim();
+        // Remove the entire matched <tool_call>...</tool_call> block from the textContent
+        textContent = textContent.replace(toolCallMatch[0], "");
+    }
+
+    // Update out.content with the remaining text (outside the tags), trimmed
+    out.content = textContent.trim();
+
+    // If tool_call content was extracted, try to parse it as JSON
+    if (toolCallRawContent) {
+        try {
+            // Qwen lists one JSON object per line inside <tool_call> … </tool_call>
+            // 1️⃣ split on new-lines, 2️⃣ trim, 3️⃣ discard empties
+            const toolLines = toolCallRawContent
+                .split(/\r?\n/)     // handle \n and \r\n
+                .map(l => l.trim())
+                .filter(Boolean);
+
+            // Parse every JSON line → build the tool_calls array
+            const parsed = toolLines.map((line, idx) => {
+                const obj = JSON.parse(line);
+                return {
+                    id: `tool-call-${idx + 1}`,          // whatever id scheme you like
+                    function: {
+                        name: obj.name,
+                        arguments: obj.arguments
+                    }
+                };
+            });
+
+            if (parsed.length) {
+                out.tool_calls = parsed;                // ⬅️ multiple calls supported
+            } else {
+                delete out.tool_calls;
+            }
+        } catch (error) {
+            console.error("Failed to parse tool_call JSON content:", error);
+            console.error("Original tool_call content:", toolCallRawContent);
+            delete out.tool_calls;
+        }
+    } else {
+        delete out.tool_calls;
+    }
+
+    // The 'thinkContent' variable holds the extracted think part but is not used further, as requested.
+};
+
+function postProcess(provider, options, out) {
+    if(postProcesMap[provider.name]) {
+        for(let idx in postProcesMap[provider.name]) {
+            if(options.model.toLowerCase().includes(idx)) {
+                postProcesMap[provider.name][idx](provider, options, out);
+                return;
+            }
+        }
+    }
+}
+
 
 export {
     MAIN_MODEL,
