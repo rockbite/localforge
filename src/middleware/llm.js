@@ -250,11 +250,13 @@ postProcessMap["openai"]["qwen3"] = function (provider, options, out) {
                 .map(l => l.trim())
                 .filter(Boolean);
 
+            let num = require('crypto').randomBytes(8).toString('hex');
+
             // Parse every JSON line → build the tool_calls array
             const parsed = toolLines.map((line, idx) => {
                 const obj = JSON.parse(line);
                 return {
-                    id: `tool-call-${idx + 1}`,          // whatever id scheme you like
+                    id: `tool-call-${num}`,          // whatever id scheme you like
                     function: {
                         name: obj.name,
                         arguments: obj.arguments
