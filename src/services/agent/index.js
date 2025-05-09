@@ -752,13 +752,6 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
         // 3. Prepare system/context messages (common)
         const systemAndContextMessages = await getSystemAndContext(workingDirectory, sessionData);
 
-        // 4. Build the LLM user message for this turn
-        const userMessageForLLM = {
-            role: 'user',
-            content: userImageData
-                ? [ { type: 'text', text: userText }, { type: 'image_url', image_url: { url: userImageData } } ]
-                : userText
-        };
 
         // 5. Topic detection & gerund (use text only, before description)
         const topicInfo = await detectTopic(userText);

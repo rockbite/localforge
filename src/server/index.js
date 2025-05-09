@@ -22,7 +22,11 @@ const __dirname = path.dirname(__filename);
 // Initialize Express
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+// Set lower buffer size limit for Socket.IO to catch any future mistakes
+// and force proper uploads through the REST API
+const io = new Server(server, {
+    maxHttpBufferSize: 2 * 1024 * 1024 // 2MB limit
+});
 const port = 3001;
 
 
@@ -48,10 +52,10 @@ import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} 
 (async () => {
     const settingsRoutes = await import('../routes/settingsRoutes.js');
     app.use('/api/settings', settingsRoutes.default);
-    
+
     // Initialize update service
     updateService.initUpdateService();
-    
+
     // Register callbacks to refresh dependent components when settings change
     settingsRoutes.registerSettingsChangeCallback((changes) => {
         console.log('Settings changed:', Object.keys(changes).join(', '));
@@ -64,10 +68,17 @@ import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} 
 
     /** @type {import('express').Router} */
     app.use('/api/sessions', routerSessions);
-    
+
     // Import and use agents routes
     const agentsRoutes = await import('../routes/agentsRoutes.js');
     app.use('/api/agents', agentsRoutes.default);
+
+    // Import and use upload routes
+    const uploadRoutes = await import('../routes/uploadRoutes.js');
+    app.use('/api/upload', uploadRoutes.default);
+
+    // Serve uploaded files
+    app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 })();
 
 // Set EJS as the view engine
@@ -260,6 +271,38 @@ app.post('/agent/generate-gerund', async (req, res) => {
         res.status(500).json({ error: 'Error generating gerund.' });
     }
 });
+
+function processMessageForUploadedImage(message) {
+
+    for(let idx in message.content) {
+        let content = message.content[idx];
+        if(content.type === "image_url") {
+            if(content.image_url.url.startsWith('/uploads/')) {
+                let imageUrl = content.image_url.url;
+                const filePath = path.join(__dirname, '../../', imageUrl);
+                const imageBuffer = fs.readFileSync(filePath);
+                // Determine MIME type based on file extension
+                const ext = path.extname(imageUrl).toLowerCase();
+                let mimeType = 'image/png'; // Default to png
+
+                // Set correct MIME type based on extension
+                if (ext === '.jpg' || ext === '.jpeg') {
+                    mimeType = 'image/jpeg';
+                } else if (ext === '.gif') {
+                    mimeType = 'image/gif';
+                } else if (ext === '.webp') {
+                    mimeType = 'image/webp';
+                }
+                // Convert to base64 data URI
+                const base64Data = imageBuffer.toString('base64');
+                let userImageData = `data:${mimeType};base64,${base64Data}`;
+                message.content[idx].image_url.url = userImageData;
+            }
+        }
+    }
+
+    return message;
+}
 
 // Socket.IO connections
 io.on('connection', (socket) => {
@@ -483,6 +526,10 @@ io.on('connection', (socket) => {
                 role: 'user',
                 content: content
             };
+
+            // handle images
+            processMessageForUploadedImage(message);
+
             
             // IMMEDIATELY persist the user message before starting agent processing
             await projectSessionManager.appendUserMessageOnly(sessionId, message);

@@ -547,7 +547,7 @@ function addNewMessageAnimation(messageElement) {
 function handleFileSelection(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
-    
+
     // Only accept image files
     if (!file.type.startsWith('image/')) {
         alert('Please select an image file.');
@@ -555,31 +555,61 @@ function handleFileSelection(event) {
         return;
     }
 
-    // Update UI to show file is selected
+    // Update UI to show uploading state
     if (attachmentButton) {
-        attachmentButton.classList.add('attached');
+        attachmentButton.classList.add('uploading');
     }
-    
-    // Show the filename in the toolbar
+
+    // Show the filename in the toolbar with uploading indicator
     if (attachedFilename) {
-        attachedFilename.textContent = file.name;
+        attachedFilename.textContent = `${file.name} (uploading...)`;
     }
-    
-    // Convert to data URL (base64)
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-        pendingImageDataUrl = evt.target.result; // data:image/..;base64,...
-        console.log(`File ${file.name} converted to data URL (${formatFileSize(pendingImageDataUrl.length)})`);
-    };
-    reader.onerror = function() {
-        console.error('Error reading file');
-        alert('Error preparing file. Please try again.');
-        fileInput.value = ''; // Clear the file input
-        if (attachmentButton) attachmentButton.classList.remove('attached');
-        if (attachedFilename) attachedFilename.textContent = '';
+
+    // Create FormData and upload via fetch instead of socket
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Upload failed with status ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Store the image URL instead of base64 data
+        pendingImageDataUrl = data.imageUrl;
+        console.log(`File ${file.name} uploaded successfully. URL: ${pendingImageDataUrl}`);
+
+        // Update UI to show attached state
+        if (attachmentButton) {
+            attachmentButton.classList.remove('uploading');
+            attachmentButton.classList.add('attached');
+        }
+
+        // Update filename display
+        if (attachedFilename) {
+            attachedFilename.textContent = file.name;
+        }
+    })
+    .catch(error => {
+        console.error('Upload failed:', error);
+        alert('Upload failed. Please try again with a smaller image.');
+
+        // Reset UI
+        fileInput.value = '';
+        if (attachmentButton) {
+            attachmentButton.classList.remove('uploading');
+            attachmentButton.classList.remove('attached');
+        }
+        if (attachedFilename) {
+            attachedFilename.textContent = '';
+        }
         pendingImageDataUrl = null;
-    };
-    reader.readAsDataURL(file);
+    });
 }
 
 /**

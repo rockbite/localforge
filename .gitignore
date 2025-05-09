@@ -31,3 +31,4 @@ release-builds/
 packaged-apps/
 
 .secrets
+uploads/**

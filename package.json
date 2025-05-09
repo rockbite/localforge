@@ -44,6 +44,7 @@
     "level-read-stream": "^2.0.0",
     "lit": "^3.3.0",
     "micromatch": "^4.0.8",
+    "multer": "^1.4.5-lts.1",
     "openai": "^4.94.0",
     "puppeteer": "^22.15.0",
     "socket.io": "^4.8.1",
