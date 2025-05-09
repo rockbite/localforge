@@ -840,8 +840,11 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
         // 11. Update token counts (calculate from the final history - only for main agents)
         let updatedTokenCount = 0;
         if (!sessionId.startsWith('sub_')) {
-            const finalHistory = await projectSessionManager.getSession(sessionId).then(d => d.history || []);
-            updatedTokenCount = calculateCurrentTokensFromHistory(finalHistory);
+            let sess = await projectSessionManager.getSession(sessionId);
+            // this was depricated code, leaving for short term
+            //const finalHistory = sess?.history || [];
+            //updatedTokenCount = calculateCurrentTokensFromHistory(finalHistory);
+            updatedTokenCount = sess.accounting.input + sess.accounting.output;
             if (streamCallback) {
                 streamCallback({ type: 'token_count', current: updatedTokenCount, max: MAX_TOKENS });
             }

@@ -37,6 +37,8 @@ function addUsage(accountingObject, model, promptTokens, completionTokens) {
             return sum + v.input * p.in + v.output * p.out;
         }, 0);
 
+    accountingObject.input  = (accountingObject.input  ?? 0) + promptTokens;
+    accountingObject.output = (accountingObject.output ?? 0) + completionTokens;
     // NOTE: Event emission is now handled by ProjectSessionManager
     // The following is maintained for backward compatibility, but should
     // be removed when all code uses ProjectSessionManager

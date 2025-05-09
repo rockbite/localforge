@@ -182,6 +182,9 @@ function processResponse(res) {
                 prompt_tokens:     res.usage.input_tokens,
                 completion_tokens: res.usage.output_tokens,
                 total_tokens:      res.usage.input_tokens + res.usage.output_tokens,
+                prompt_tokens_details: {
+                    cached_tokens: res.usage.cache_creation_input_tokens + res.cache_read_input_tokens,
+                }
             }
             : undefined,
         system_fingerprint: null,
