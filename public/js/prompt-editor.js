@@ -250,10 +250,22 @@ class BlockEditor {
         }
 
         this.updateAllBlockLayouts();
-        
+
         // Initialize CodeMirror for this block
         this.initializeCodeMirror(id);
-        
+
+        // Focus the newly created block's CodeMirror instance
+        setTimeout(() => {
+            if (this.codeMirrors && this.codeMirrors[id]) {
+                const cm = this.codeMirrors[id];
+                cm.focus();
+                // Position cursor at the end of the content
+                const lastLine = cm.lastLine();
+                const lastChar = cm.getLine(lastLine).length;
+                cm.setCursor(lastLine, lastChar);
+            }
+        }, 50);
+
         return blockData;
     }
 
@@ -718,6 +730,11 @@ function promptEditorBoot(container, options = {}) {
     loadCodeMirror(() => {
         // Initialize the text editor with CodeMirror
         initializeTextEditor();
+
+        // Auto-focus the text editor as default tab
+        if (textEditor) {
+            textEditor.focus();
+        }
     });
     
     function initializeTextEditor() {
@@ -828,18 +845,43 @@ function promptEditorBoot(container, options = {}) {
 
     function syncTextEditorToBlockEditor() {
         if (!textEditor) return;
-        
+
         const text = textEditor.getValue();
         const pt = rawTextToPt(text);
         blockEditor.loadFromPTJson(pt);
+
+        // Focus the first block's CodeMirror instance if it exists
+        setTimeout(() => {
+            if (blockEditor.blocks && blockEditor.blocks.length > 0) {
+                const firstBlockId = blockEditor.blocks[0].id;
+                if (blockEditor.codeMirrors && blockEditor.codeMirrors[firstBlockId]) {
+                    const cm = blockEditor.codeMirrors[firstBlockId];
+                    cm.focus();
+                    // Position cursor at the end of the content
+                    const content = cm.getValue();
+                    const lastLine = cm.lastLine();
+                    const lastChar = cm.getLine(lastLine).length;
+                    cm.setCursor(lastLine, lastChar);
+                }
+            }
+        }, 50); // Short delay to ensure DOM is updated
     }
 
     function syncBlockEditorToTextEditor() {
         if (!textEditor) return;
-        
+
         const pt = blockEditor.getPTJson();
         const text = ptToRawText(pt);
         textEditor.setValue(text);
+
+        // Focus the text editor after switching to it
+        setTimeout(() => {
+            textEditor.focus();
+            // Position cursor at the end of the content
+            const lastLine = textEditor.lastLine();
+            const lastChar = textEditor.getLine(lastLine).length;
+            textEditor.setCursor(lastLine, lastChar);
+        }, 50); // Short delay to ensure DOM is updated
     }
     
     /**
@@ -851,17 +893,17 @@ function promptEditorBoot(container, options = {}) {
             textEditor.setValue('');
             textEditor.clearHistory();
         }
-        
+
         // Clear the block editor
-        const emptyJson = { 
-            blocks: [{ 
-                id: Math.random().toString(16).slice(2, 8), 
-                content: '', 
-                muted: false 
-            }] 
+        const emptyJson = {
+            blocks: [{
+                id: Math.random().toString(16).slice(2, 8),
+                content: '',
+                muted: false
+            }]
         };
         blockEditor.loadFromPTJson(emptyJson);
-        
+
         // Ensure all CodeMirror instances are cleared and refreshed
         if (blockEditor.codeMirrors) {
             Object.values(blockEditor.codeMirrors).forEach(cm => {
@@ -869,6 +911,27 @@ function promptEditorBoot(container, options = {}) {
                 cm.clearHistory();
                 cm.refresh();
             });
+
+            // Focus the first block if we're in the prompt editor tab
+            const activeTab = container.querySelector('.tab.active');
+            if (activeTab && activeTab.dataset.tab === 'prompt' && blockEditor.blocks.length > 0) {
+                const firstBlockId = blockEditor.blocks[0].id;
+                if (blockEditor.codeMirrors[firstBlockId]) {
+                    setTimeout(() => {
+                        const cm = blockEditor.codeMirrors[firstBlockId];
+                        cm.focus();
+                        // Position cursor at the end of the content
+                        const lastLine = cm.lastLine();
+                        const lastChar = cm.getLine(lastLine).length;
+                        cm.setCursor(lastLine, lastChar);
+                    }, 50);
+                }
+            } else if (activeTab && activeTab.dataset.tab === 'text' && textEditor) {
+                // If in text tab, focus the text editor
+                setTimeout(() => {
+                    textEditor.focus();
+                }, 50);
+            }
         }
     }
 
