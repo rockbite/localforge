@@ -117,7 +117,11 @@ async function initializeApp() {
         // Initialize chat context view
         const { initChatContextView } = await import('./ui/chat-context.js');
         initChatContextView();
-        
+
+        // Initialize compress button
+        const { initCompressButton } = await import('./ui/compress.js');
+        initCompressButton();
+
         // Initialize global ESC key handler for modals
         const { initGlobalModalEscHandler } = await import('./utils.js');
         initGlobalModalEscHandler();

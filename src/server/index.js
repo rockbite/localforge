@@ -147,6 +147,10 @@ import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} 
     const uploadRoutes = await import('../routes/uploadRoutes.js');
     app.use('/api/upload', uploadRoutes.default);
 
+    // Import and use compression routes
+    const compressionRoutes = await import('../routes/compressionRoutes.js');
+    app.use('/api/compression', compressionRoutes.default);
+
     // Serve uploaded files
     app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 })();
