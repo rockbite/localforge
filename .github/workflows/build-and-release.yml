@@ -103,7 +103,14 @@ jobs:
           xcrun stapler staple --verbose "$APP_PATH"
           
           echo "Creating DMG using script: ${{ matrix.create_dmg_script }}"
-          ${{ matrix.create_dmg_script }}        
+          ${{ matrix.create_dmg_script }}    
+
+      - name: Rename DMG so filenames are unique
+        if: runner.os == 'macOS'
+        run: |
+          DMG_DIR="dist/installers-${{ matrix.installer_dir_suffix }}"
+          mv "$DMG_DIR/Localforge.dmg" \
+          "$DMG_DIR/Localforge-${{ matrix.installer_dir_suffix }}.dmg"          
 
       # ---------- Windows portable build via electron-packager --------
       - name: Package Windows (portable)
@@ -190,7 +197,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist-artifacts/localforge-osx-arm64-installer/*.dmg
-            dist-artifacts/localforge-osx-intel-installer/*.dmg
-            dist-artifacts/localforge-windows-installer/*.zip
+                dist-artifacts/**/Localforge-*.dmg
+                dist-artifacts/localforge-windows-installer/*.zip
           draft: true
