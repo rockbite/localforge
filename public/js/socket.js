@@ -276,10 +276,23 @@ export function setupSocketEventHandlers(socket) {
 
             // --- 10. Update Token Count if provided on join --- (from legacy)
             const tokenCountSpan = document.getElementById('token-count');
-            if (tokenCountSpan && data.tokenInfo) {
+            if (tokenCountSpan) {
                 try {
-                    const formattedCurrent = data.tokenInfo.current.toLocaleString();
-                    const formattedMax = data.tokenInfo.max.toLocaleString();
+                    let currentTokens = 0;
+                    let maxTokens = 1000000; // Default max tokens
+
+                    if (data.tokenInfo) {
+                        // Legacy token info
+                        currentTokens = data.tokenInfo.current;
+                        maxTokens = data.tokenInfo.max;
+                    } else if (data.accounting) {
+                        // Use input+output from accounting object
+                        currentTokens = (data.accounting.input || 0) + (data.accounting.output || 0);
+                        maxTokens = 1000000; // Default max tokens
+                    }
+
+                    const formattedCurrent = currentTokens.toLocaleString();
+                    const formattedMax = maxTokens.toLocaleString();
                     tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax} tokens`;
                 } catch (e) {
                     console.error("Error formatting token count:", e);
@@ -442,11 +455,22 @@ export function setupSocketEventHandlers(socket) {
 
         // Update token count if included in the final response (from legacy)
         const tokenCountSpan = document.getElementById('token-count');
-        if (tokenCountSpan && response.tokenCount !== undefined && response.maxTokens !== undefined) {
+        if (tokenCountSpan) {
             try {
-                const formattedCurrent = response.tokenCount.toLocaleString();
-                const formattedMax = response.maxTokens.toLocaleString();
-                tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax}`;
+                // Check if we have direct token counts
+                if (response.tokenCount !== undefined && response.maxTokens !== undefined) {
+                    const formattedCurrent = response.tokenCount.toLocaleString();
+                    const formattedMax = response.maxTokens.toLocaleString();
+                    tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax} tokens`;
+                }
+                // Check if we have accounting data in the response
+                else if (response.accounting && (response.accounting.input !== undefined || response.accounting.output !== undefined)) {
+                    const currentTokens = (response.accounting.input || 0) + (response.accounting.output || 0);
+                    const maxTokens = response.maxTokens || 1000000; // Use provided max or default
+                    const formattedCurrent = currentTokens.toLocaleString();
+                    const formattedMax = maxTokens.toLocaleString();
+                    tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax} tokens`;
+                }
             } catch (e) {
                 console.error("Error formatting token count in agent_response:", e);
                 tokenCountSpan.textContent = `Error`;
@@ -642,11 +666,22 @@ export function setupSocketEventHandlers(socket) {
     socket.on('token_count', (data) => {
         // console.log("Token count update:", data); // Can be noisy
         const tokenCountSpan = document.getElementById('token-count');
-        if (tokenCountSpan && data.current !== undefined && data.max !== undefined) {
+        if (tokenCountSpan) {
             try {
-                const formattedCurrent = data.current.toLocaleString();
-                const formattedMax = data.max.toLocaleString();
-                tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax}`;
+                // Check if we have current and max directly
+                if (data.current !== undefined && data.max !== undefined) {
+                    const formattedCurrent = data.current.toLocaleString();
+                    const formattedMax = data.max.toLocaleString();
+                    tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax} tokens`;
+                }
+                // Check if we have accounting data
+                else if (data.accounting && (data.accounting.input !== undefined || data.accounting.output !== undefined)) {
+                    const currentTokens = (data.accounting.input || 0) + (data.accounting.output || 0);
+                    const maxTokens = 1000000; // Default max tokens
+                    const formattedCurrent = currentTokens.toLocaleString();
+                    const formattedMax = maxTokens.toLocaleString();
+                    tokenCountSpan.textContent = `${formattedCurrent}/${formattedMax} tokens`;
+                }
             } catch(e) {
                 console.error("Error formatting token count:", e);
                 tokenCountSpan.textContent = `Error`;
