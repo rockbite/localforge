@@ -96,7 +96,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
     maxHttpBufferSize: 2 * 1024 * 1024 // 2MB limit
 });
-const port = 3001;
+// this is passed from electron app
+const port = process.env.LOCALFORGE_PORT ? Number(process.env.LOCALFORGE_PORT) : 3826;
 
 
 import fixPath from "fix-path";

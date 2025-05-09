@@ -18,6 +18,25 @@ import semver from 'semver';
 import { readFileSync } from 'fs';
 import {exec} from "child_process";
 import {runUpdate} from "./updater.js";
+import net from 'net';
+
+function findPort(preferred) {
+  return new Promise((resolve) => {
+    const tester = net.createServer()
+      .once('error', () => {
+        const tmp = net.createServer()
+          .once('listening', () => {
+            const { port } = tmp.address();
+            tmp.close(() => resolve(port));
+          })
+          .listen(0);
+      })
+      .once('listening', () => {
+        tester.close(() => resolve(preferred));
+      })
+      .listen(preferred);
+  });
+}
 
 
 let serverProcess;
@@ -106,7 +125,7 @@ function checkForNpmUpdate() {
   });
 }
 
-export function createWindow() {
+export function createWindow(port) {
   // Create the browser window.
   win = new BrowserWindow({
     width: 1280,
@@ -119,7 +138,7 @@ export function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     },
   });
-  
+
   // Log preload path for debugging
   console.log('Preload script path:', path.join(__dirname, 'preload.js'));
 
@@ -130,14 +149,14 @@ export function createWindow() {
     console.log('Window ready to show, making visible.');
     win.show();
   });
-  
+
   win.webContents.on('did-finish-load', () => {
     console.log('Window finished loading');
     // Update checks are now handled by the server
   });
 
   const isDev = !app.isPackaged;
-  const serverUrl = 'http://localhost:3001';
+  const serverUrl = `http://localhost:${port}`;
   let retryCount = 0;
   const maxRetries = 10; // Try for 10 seconds
 
@@ -201,9 +220,18 @@ app.whenReady().then(async () => {
     app.dock.setIcon(iconPath);
   }
 
+  let port;
   try {
-    serverProcess = startServer(); // Start the server process
-    console.log('Server process spawn initiated.');
+    port = await findPort(3826);          // pick the port
+    process.env.LOCALFORGE_PORT = String(port);      // child uses it
+
+    serverProcess = startServer();        // unchanged API
+    console.log(`Server spawn OK (port ${port})`);
+
+    // Pass port to window if not waiting for stdout to do it
+    if (!serverProcess || !serverProcess.stdout) {
+      createWindow(port);
+    }
   } catch (error) {
     console.error("Error initiating server start:", error);
     dialog.showErrorBox('Fatal Error', `Could not initiate the server process. The application cannot start.\n\n${error.message}`);
@@ -214,7 +242,7 @@ app.whenReady().then(async () => {
   // Set up IPC handler for update dialog
   ipcMain.on('show-update-dialog', () => {
     // Send IPC to get update status from server via fetch request
-    fetch('http://localhost:3001/api/updates').then(res => res.json())
+    fetch(`http://localhost:${port}/api/updates`).then(res => res.json())
       .then(updateInfo => {
         if (updateInfo.updateAvailable) {
           downloadAndRelaunch(updateInfo.latestVersion);

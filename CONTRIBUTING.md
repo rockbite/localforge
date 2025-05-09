@@ -39,4 +39,4 @@ cd localforge
 npm install        
 
 # Run the dev build
-npm run server            # starts UI + API on localhost:3001
+npm run server            # starts UI + API on localhost:PORT (from env)

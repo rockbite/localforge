@@ -58,7 +58,7 @@ export function startServer() {
       const match = data.toString().match(/Agent backend server listening on port (\d+)/);
       if (match && match[1]) {
         global.serverPort = parseInt(match[1], 10);
-        createWindow();
+        createWindow(global.serverPort);
       }
     });
 
