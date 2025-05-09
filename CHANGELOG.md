@@ -3,8 +3,9 @@ All notable changes to **Localforge** will be documented in this file.
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
 
-## [1.0.23] – open date
+## [1.0.23] – TBD
 
+- ** Instead of hardcoded 3001 now runs on any available port (will try 3826 as default first as least common, then find other options if still busy)
 
 
 ## [1.0.22] – 2025-05-09
