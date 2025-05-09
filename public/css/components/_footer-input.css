@@ -214,5 +214,6 @@ footer {
 /* Disabled state for prompt container */
 .prompt-container.disabled {
     opacity: 0.7;
-    pointer-events: none; 
+    /* Allow interaction with input field but keep visual indicator */
+    /* pointer-events: none; */
 }

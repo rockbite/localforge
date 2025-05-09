@@ -602,18 +602,22 @@ function formatFileSize(bytes) {
  * @param {boolean} enable - True to enable, false to disable.
  */
 export function enableChatInput(enable) {
-    // No direct way to disable the prompt editor, but we can disable the form and send button
+    // Always disable the send button when appropriate
     if (sendButton) {
         sendButton.disabled = !enable;
     }
     if (stopButton) {
         stopButton.style.display = enable ? 'none' : 'inline-flex';
     }
-    // Add/remove disabled class to prompt container
+
+    // Add/remove disabled class to prompt container for visual indication only
+    // Input remains interactive but send button stays disabled
     const promptContainer = document.querySelector('.prompt-container');
     if (promptContainer) {
         promptContainer.classList.toggle('disabled', !enable);
     }
-    // Optionally change appearance when disabled
+
+    // Keep form enabled to allow typing even when agent is thinking
+    // Just add visual indication that agent is busy
     messageForm?.classList.toggle('disabled', !enable);
 }
