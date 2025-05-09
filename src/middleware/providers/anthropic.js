@@ -48,14 +48,32 @@ function openaiToAnthropicMessages(messages = []) {
                     content.push({ type: 'text', text: p.text });
                 }
                 if (p.type === 'image_url') {
-                    content.push({
-                        type: 'image',
-                        source: {
-                            type: 'base64',
-                            media_type: 'image/jpeg',
-                            data: p.image_url.url.replace(/^data:image\/[a-z]+;base64,/, ''),
-                        },
-                    });
+                    // assumes p.type === 'image_url'
+                    const url = p.image_url.url;
+
+                    // Try to parse data-URL:  data:<mime>;base64,<data>
+                    const m = url.match(/^data:(image\/[a-z0-9.+-]+);base64,(.+)$/i);
+
+                    if (m) {
+                        const [, mediaType, b64] = m;
+                        content.push({
+                            type: 'image',
+                            source: {
+                                type: 'base64',
+                                media_type: mediaType,     // ← png / jpeg / webp, whatever was there
+                                data: b64.replace(/\s+/g, '') // just in case there are spaces/newlines
+                            }
+                        });
+                    } else {
+                        // plain URL – let Claude fetch it
+                        content.push({
+                            type: 'image',
+                            source: {
+                                type: 'url',
+                                url
+                            }
+                        });
+                    }
                 }
             });
         }

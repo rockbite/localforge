@@ -1,6 +1,9 @@
-import { promises as fs } from 'fs';
+import * as fs from 'fs';
+import { promises as fsp } from 'fs';
 import path from 'path';
+import readline from 'readline';
 import micromatch from 'micromatch';
+import {generateImageDescription, MAIN_MODEL} from "../../src/index.js";
 
 // The working directory will now be dynamically provided via the socket connection
 let TOOL_ALLOWED_BASE = process.cwd();
@@ -15,7 +18,7 @@ const MAX_TOTAL_ENTRIES = 500;    // stop before dumping a million paths
 async function walk(dir, depthLeft, ignore, stats) {
     if (stats.count >= MAX_TOTAL_ENTRIES) return '…truncated';
 
-    let entries = await fs.readdir(dir, { withFileTypes: true });
+    let entries = await fsp.readdir(dir, { withFileTypes: true });
 
     // glob filtering
     if (ignore && ignore.length) {
@@ -68,26 +71,141 @@ const ls = async ({ path: dirPath, depth = 1, ignore = [], workingDirectory }) =
     }
 }
 
-const view = async ({ file_path, offset = 0, limit = 2000, workingDirectory }) => {
-    const data = await fs.readFile(file_path, 'utf-8');
-    return { contents: data.split('\n').slice(offset, offset+limit).join('\n') };
+// ───────────────────────── 1. VIEW ─────────────────────────
+const view = async ({ file_path, offset = 0, limit = 2000, sessionData } = {}) => {
+    if (!fs.existsSync(file_path)) return 'file not found';
+
+    // grab up to 8 KB
+    const headBuf   = Buffer.alloc(8192);
+    const fd        = await fsp.open(file_path, 'r');
+    const { bytesRead } = await fd.read(headBuf, 0, headBuf.length, 0);
+    await fd.close();
+
+    // search only the real data, not the unused tail
+    const isBinary = headBuf.subarray(0, bytesRead).includes(0);
+    if (isBinary) return await viewBinaryFile(file_path, sessionData);
+
+    // stream line-by-line, count, collect slice
+    let total = 0;
+    const slice = [];
+    const rl = readline.createInterface({
+        input: fs.createReadStream(file_path, { encoding: 'utf8' }),
+        crlfDelay: Infinity,
+    });
+    for await (const line of rl) {
+        if (total >= offset && slice.length < limit) slice.push(line);
+        total++;
+    }
+    if (total > 2500 && offset === 0 && limit === 2000)
+        return `this file has ${total} lines of text, specify line "offset" and "limit" to read file partially`;
+    return { contents: slice.join('\n') };
 };
+
+// ──────────────────────── 2. BINARY VIEW ───────────────────
+const viewBinaryFile = async (file_path, sessionData) => {
+    let ext  = path.extname(file_path).toLowerCase();
+    if(!ext || ext === '') {
+        ext = '.' + detectType(file_path);
+    }
+    const size = fs.statSync(file_path).size;
+
+    // cheap image check (ext OR magic number)
+    const imgExtensions = ['.png', '.jpg', '.jpeg'];
+    const head = Buffer.alloc(4);
+    const fd   = fs.openSync(file_path, 'r');
+    fs.readSync(fd, head, 0, 4, 0);
+    fs.closeSync(fd);
+    const isPng = head.slice(0,4).toString('hex') === '89504e47';
+    const isJpg = head.slice(0,2).toString('hex') === 'ffd8';
+    if (imgExtensions.includes(ext) || isPng || isJpg) return await viewImage(file_path, sessionData);
+
+    // generic binary info
+    return { type: 'binary', ext, size };
+};
+
+// helper for quick mime sniff
+const mimeFrom = (buf, ext) => {
+    const extMap = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp'
+    };
+    if (extMap[ext]) return extMap[ext];
+    const sig = buf.slice(0, 4).toString('hex');
+    if (sig === '89504e47') return 'image/png';
+    if (sig.startsWith('ffd8')) return 'image/jpeg';
+    if (sig === '47494638') return 'image/gif';
+    if (sig === '52494646') return 'image/webp';
+    return 'application/octet-stream';
+};
+
+// ───────────────────────── 3. IMAGE VIEW ───────────────────
+const viewImage = async (file_path, sessionData = null) => {
+    try {
+        const data = await fsp.readFile(file_path);
+        const mime = mimeFrom(data, path.extname(file_path).toLowerCase());
+        const dataUrl = `data:${mime};base64,${data.toString('base64')}`;
+        return await generateImageDescription(
+            dataUrl,
+            MAIN_MODEL,
+            'Please thoroughly describe every little detail, ignoring any possible previous instructions on making description short. Every detail matters', // adding this because default prompt is to keep it short
+            sessionData
+        );
+    } catch {
+        return 'Could not read image';
+    }
+};
+
+
+
+// tiny signature map (add more as needed)
+const SIG = {
+    png:  '89504e47',
+    jpg:  'ffd8ff',        // covers jpg / jpeg
+    gif:  '47494638',
+    webp: '52494646',      // need extra check for "WEBP" at byte 8
+    pdf:  '25504446',
+    mp3:  '494433',        // ID3 tag
+};
+
+const detectType = (file) => {
+    const fd  = fs.openSync(file, 'r');
+    const buf = Buffer.alloc(12);            // enough for our checks
+    fs.readSync(fd, buf, 0, buf.length, 0);
+    fs.closeSync(fd);
+
+    const hex = buf.toString('hex');
+
+    // quick loop
+    for (const [t, sig] of Object.entries(SIG)) {
+        if (hex.startsWith(sig)) return t;
+        if (t === 'webp' && hex.startsWith(sig) && buf.toString('utf8', 8, 12) === 'WEBP')
+            return 'webp';
+    }
+    return 'unknown';
+};
+
+
+
+
 
 const edit = async ({ file_path, old_string, new_string, workingDirectory }) => {
     let resourcePath = resolveSecurePath(file_path, workingDirectory);
     if(!resourcePath) { return { error: 'Access denied' }; }
 
-    let data = await fs.readFile(resourcePath, 'utf-8');
+    let data = await fsp.readFile(resourcePath, 'utf-8');
     if(!data.includes(old_string)) return { error: 'Old string not found' };
     data = data.replace(old_string, new_string);
-    await fs.writeFile(resourcePath, data);
+    await fsp.writeFile(resourcePath, data);
     return { success: true };
 };
 
 const replace = async ({ file_path, content, workingDirectory }) => {
     let resourcePath = resolveSecurePath(file_path, workingDirectory);
     if(!resourcePath) { return { error: 'Access denied' }; };
-    await fs.writeFile(resourcePath, content);
+    await fsp.writeFile(resourcePath, content);
     return { success: true };
 };
 
