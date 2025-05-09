@@ -1,4 +1,4 @@
-name: Build / Notarize macOS & Windows → Release
+name: Debug workflow
 
 on:
   # Manual trigger
