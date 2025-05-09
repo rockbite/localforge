@@ -60,7 +60,7 @@ async function initializePrompts(config = {}) {
         console.log(`Prompt templates loaded successfully for agent: ${agentName}`);
     } catch (error) {
         console.error('Failed to initialize prompts:', error);
-        process.exit(1);
+        process.exit(2);
     }
 }
 

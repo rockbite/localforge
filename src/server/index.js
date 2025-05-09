@@ -1,10 +1,79 @@
+// server.js -
+import fs from 'fs';
+import path from 'path';
+import os from 'os'; // Import the os module
+
+// Log directory in the user's home directory
+const logDir = path.join(os.homedir(), '.localforge-logs'); // Using a hidden folder for logs
+
+try {
+    if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+        console.log(`Log directory created at: ${logDir}`);
+    }
+} catch (error) {
+    console.error(`Error creating log directory ${logDir}:`, error);
+    // Fallback or decide how to handle if log directory creation fails
+}
+const serverLogPath = path.join(logDir, 'server-crash.log');
+console.log(`Server crash logs will be written to: ${serverLogPath}`); // Log the path for easy finding
+
+process.on('uncaughtException', (error, origin) => {
+    const errorMsg = `!!! SERVER UNCAUGHT EXCEPTION !!!\nTimestamp: ${new Date().toISOString()}\nOrigin: ${origin}\nError: ${error.stack || error}\n`;
+    console.error(errorMsg);
+    try {
+        fs.appendFileSync(serverLogPath, errorMsg + '\n');
+    } catch (e) {
+        console.error('Failed to write to server crash log (uncaughtException):', e);
+    }
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    const errorMsg = `!!! SERVER UNHANDLED REJECTION !!!\nTimestamp: ${new Date().toISOString()}\nPromise: ${promise}\nReason: ${reason?.stack || reason}\n`;
+    console.error(errorMsg);
+    try {
+        fs.appendFileSync(serverLogPath, errorMsg + '\n');
+    } catch (e) {
+        console.error('Failed to write to server crash log (unhandledRejection):', e);
+    }
+    // process.exit(1); // Optional: decide if unhandled rejections should also crash the server
+});
+
+// Redirect console.log and console.error to also go to a general server log file (optional but helpful)
+const generalLogPath = path.join(logDir, 'server-general.log');
+
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
+console.log = (...args) => {
+    const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ');
+    originalConsoleLog.apply(console, args); // Keep logging to stdout
+    try {
+        fs.appendFileSync(generalLogPath, `${new Date().toISOString()} [LOG] ${message}\n`);
+    } catch (e) {
+        originalConsoleError('Failed to write to general server log (console.log):', e);
+    }
+};
+
+console.error = (...args) => {
+    const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ');
+    originalConsoleError.apply(console, args); // Keep logging to stderr
+    try {
+        fs.appendFileSync(generalLogPath, `${new Date().toISOString()} [ERROR] ${message}\n`);
+        // Also log errors to the crash log if it's a significant one, or rely on uncaughtException
+    } catch (e) {
+        originalConsoleError('Failed to write to general server log (console.error):', e);
+    }
+};
+
+
+
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import { fileURLToPath } from 'url';
 import http from 'http';
 import { Server } from 'socket.io';
-import fs from 'fs';
 import * as agentLogic from '../services/agent/index.js';
 import { 
     projectSessionManager, 
