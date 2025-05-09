@@ -2,6 +2,20 @@
 All notable changes to **Localforge** will be documented in this file.  
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
+
+## [1.0.21] – 2025-05-09
+
+### Added
+- **Background typing:** The text editor stays responsive while the model is busy (submissions are still blocked until the model is ready).
+
+### Fixed
+- **Message Prompt Editor (Block tab):** Send button now responds as expected.
+- **`view` tool:** Detects large image binaries and avoids loading them as plain text.
+- **Token counter:** Reports token counts accurately.
+- **Socket uploads:** Large PNG attachments no longer crash the connection.
+- **macOS build:** Release is now a universal binary supporting both Intel and Apple Silicon.
+
+
 ## [1.0.14] – 2025-04-25
 * Chat messages context now show system prompt
 * Fixed bug with simultaneous tool call + content response
