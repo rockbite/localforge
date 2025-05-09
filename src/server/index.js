@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os'; // Import the os module
+import mcpService from '../services/mcp/index.js';
 
 // Log directory in the user's home directory
 const logDir = path.join(os.homedir(), '.localforge-logs'); // Using a hidden folder for logs
@@ -129,6 +130,14 @@ import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} 
     // Register callbacks to refresh dependent components when settings change
     settingsRoutes.registerSettingsChangeCallback((changes) => {
         console.log('Settings changed:', Object.keys(changes).join(', '));
+
+        // If MCP servers were changed, sync the MCP service
+        if (changes.mcpServers) {
+            console.log('MCP servers changed, syncing MCP service...');
+            mcpService.syncWithSettings().catch(error => {
+                console.error('Error syncing MCP service with settings:', error);
+            });
+        }
     });
 
     const { routerProjects, routerSessions } = await import('../routes/projectsRoutes.js');
@@ -780,8 +789,14 @@ app.get('/', (req, res) => {
 });
 
 // Start the server only if not already running
-const startExpressServer = () => {
+const startExpressServer = async () => {
     try {
+        // Initialize the MCP service before starting the server
+        console.log('Initializing MCP service...');
+        mcpService.initialize().then(() => {
+            console.log('MCP service initialized successfully');
+        }); // but we don't wait
+
         server.listen(port, () => {
             console.log(`Agent backend server listening on port ${port}`);
         });
@@ -847,4 +862,7 @@ io.on('connection', (socket) => {
     }
 });
 
-startExpressServer();
+// Start the server with async/await
+(async () => {
+    await startExpressServer();
+})();

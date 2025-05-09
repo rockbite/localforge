@@ -27,7 +27,8 @@
 // -----------------------------------------------------------------------------
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
+
 
 /**
  * Shape of the object you pass to `addClient()` / `editClient()`.
@@ -129,17 +130,17 @@ export class MCPLibrary {
     /** @private */
     async #connect(opts) {
         const {
+            url,
             command,
             args = [],
             name = 'mcplibrary',
             version = '0.0.0'
         } = opts;
 
-        const transport = new StdioClientTransport({ command, args });
+        let transport = new SSEClientTransport(new URL(url));
+
         const client = new Client({ name, version });
-
-        await client.connect(transport); // throws if handshake fails
-
+        await client.connect(transport);          // throws if handshake fails
         return { client, transport };
     }
 

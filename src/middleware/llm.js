@@ -3,7 +3,7 @@ import providers from './providers/index.js';
 import store from "../db/store.js";
 import agentStore from "../db/agentStore.js";
 import crypto from 'crypto';
-import {MCPClient} from "../logic/mcp.js";
+import mcpService from "../services/mcp/index.js";
 
 let MAIN_MODEL = 0;
 let AUX_MODEL = 1;
@@ -70,14 +70,11 @@ export async function callLLMProvider(providerName, options, sessionData = null)
         }
 
         // now lets add MCP tools if any (check by alias)
-        if(sessionData.mcpUrl) {
-            /*
-            const mcp   = new MCPClient(sessionData.mcpUrl, {timeout:10000, debug: true});
-            const tools = await mcp.listTools();
-            await mcp.close();
+        if(sessionData.mcpAlias) {
+            const tools = await mcpService.listTools(sessionData.mcpAlias);
             if(tools && tools.length > 0) {
                 options.tools.push(...tools);
-            }*/ // do this differently
+            }
         }
     }
 

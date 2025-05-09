@@ -6,3 +6,4 @@ export * from './services/accounting/index.js';
 export * from './services/image/index.js';
 export * from './services/tasks/index.js';
 export * from './config/pricing.js';
+export { default as mcpService } from './services/mcp/index.js';

@@ -1,0 +1,247 @@
+// MCP Service - provides global access to MCPLibrary instance
+// -------------------------------------------------------
+// Creates a singleton instance of MCPLibrary that can be used throughout the app
+// Initializes connections based on settings and provides methods to manage MCP clients
+
+import { MCPLibrary } from '../../logic/mcp.js';
+import store from '../../db/store.js';
+
+/**
+ * Singleton class that maintains a global MCPLibrary instance
+ */
+class MCPService {
+    constructor() {
+        // Initialize the MCPLibrary instance
+        this.mcpLibrary = new MCPLibrary();
+        this.initialized = false;
+    }
+
+    /**
+     * Initialize the MCP service with settings from the store
+     * This should be called once at server startup
+     */
+    async initialize() {
+        if (this.initialized) {
+            console.log('MCP Service already initialized, skipping');
+            return;
+        }
+
+        try {
+            // Get MCP servers from settings
+            const mcpServersJson = store.getSetting('mcpServers') || '[]';
+            const mcpServers = JSON.parse(mcpServersJson);
+            
+            if (mcpServers.length > 0) {
+                console.log(`Initializing ${mcpServers.length} MCP connections...`);
+                
+                // Add each MCP client to the library
+                for (const server of mcpServers) {
+                    try {
+                        await this.addClient(server.alias, server.url);
+                        console.log(`Connected to MCP server: ${server.alias}`);
+                    } catch (error) {
+                        console.error(`Failed to connect to MCP server ${server.alias}:`, error);
+                    }
+                }
+            } else {
+                console.log('No MCP servers configured in settings');
+            }
+            
+            this.initialized = true;
+        } catch (error) {
+            console.error('Error initializing MCP service:', error);
+            throw error; // Re-throw to allow caller to handle
+        }
+    }
+
+    /**
+     * Add a new MCP client with the specified alias and URL
+     * @param {string} alias - The unique identifier for this MCP client
+     * @param {string} url - The URL or command to connect to the MCP server
+     * @returns {Promise<void>}
+     */
+    async addClient(alias, url) {
+        // Simple URL-based MCP connection
+        // In a real implementation, this would properly parse the URL and set up appropriate
+        // command and args based on the protocol and path
+        
+        // For demonstration purposes, we'll convert the URL to a command + args setup
+        // In a real implementation, this would need to be more sophisticated
+        const urlObj = new URL(url);
+        const command = 'node'; // Assuming it's a Node.js MCP server
+        const args = [urlObj.pathname]; // Using the path as a script file to run
+        
+        // Add the client to the MCPLibrary
+        await this.mcpLibrary.addClient(alias, {
+            url,
+            command,
+            args,
+            name: 'localforge', // Client name sent in handshake
+            version: '1.0.0'    // Client version sent in handshake
+        });
+    }
+
+    /**
+     * Update an existing MCP client with new URL
+     * @param {string} alias - The alias of the MCP client to edit
+     * @param {string} url - The new URL for the MCP server
+     * @returns {Promise<void>}
+     */
+    async editClient(alias, url) {
+        // Convert URL to command + args as in addClient
+        const urlObj = new URL(url);
+        const command = 'node';
+        const args = [urlObj.pathname];
+        
+        // Edit the client in the MCPLibrary
+        await this.mcpLibrary.editClient(alias, {
+            url,
+            command,
+            args,
+            name: 'localforge',
+            version: '1.0.0'
+        });
+    }
+
+    /**
+     * Remove an MCP client
+     * @param {string} alias - The alias of the MCP client to remove
+     * @returns {Promise<void>}
+     */
+    async removeClient(alias) {
+        await this.mcpLibrary.removeClient(alias);
+    }
+
+    /**
+     * Sync the MCPLibrary with the current settings
+     * This will add, edit, or remove clients as needed
+     * @returns {Promise<void>}
+     */
+    async syncWithSettings() {
+        try {
+            // Get the current MCP servers from settings
+            const mcpServersJson = store.getSetting('mcpServers') || '[]';
+            const mcpServers = JSON.parse(mcpServersJson);
+            
+            // Get the current list of aliases in the library
+            const currentAliases = this.getClientAliases();
+            
+            // Track which aliases should remain
+            const newAliases = new Set(mcpServers.map(server => server.alias));
+            
+            // Remove clients that are no longer in settings
+            for (const alias of currentAliases) {
+                if (!newAliases.has(alias)) {
+                    console.log(`Removing MCP client: ${alias}`);
+                    await this.removeClient(alias);
+                }
+            }
+            
+            // Add or update clients from settings
+            for (const server of mcpServers) {
+                if (currentAliases.includes(server.alias)) {
+                    // Client exists, update it
+                    console.log(`Updating MCP client: ${server.alias}`);
+                    await this.editClient(server.alias, server.url);
+                } else {
+                    // New client, add it
+                    console.log(`Adding new MCP client: ${server.alias}`);
+                    await this.addClient(server.alias, server.url);
+                }
+            }
+            
+            console.log('MCP library successfully synced with settings');
+        } catch (error) {
+            console.error('Error syncing MCP library with settings:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get a list of all client aliases currently in the library
+     * @returns {string[]} - Array of client aliases
+     */
+    getClientAliases() {
+        // Since MCPLibrary doesn't expose a method to get all registry entries,
+        // we'll track aliases during initialization and modification
+
+        // For now, let's get the current MCP servers from settings
+        // This assumes the MCPLibrary's state matches the settings
+        try {
+            const mcpServersJson = store.getSetting('mcpServers') || '[]';
+            const mcpServers = JSON.parse(mcpServersJson);
+            return mcpServers.map(server => server.alias);
+        } catch (error) {
+            console.error('Error getting client aliases:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Get the MCPLibrary instance for direct access
+     * @returns {MCPLibrary}
+     */
+    getMCPLibrary() {
+        return this.mcpLibrary;
+    }
+
+    /**
+     * Get an MCP client by alias
+     * @param {string} alias - The alias of the MCP client to get
+     * @returns {Client} - The MCP Client instance
+     */
+    getClient(alias) {
+        return this.mcpLibrary.getClient(alias);
+    }
+
+    /**
+     * Call a tool on an MCP client
+     * @param {string} alias - The alias of the MCP client to use
+     * @param {Object} callObj - The tool call object
+     * @returns {Promise<any>} - The result of the tool call
+     */
+    async callTool(alias, callObj) {
+        return this.mcpLibrary.callTool(alias, callObj);
+    }
+
+    /**
+     * List available tools for an MCP client
+     * @param {string} alias - The alias of the MCP client to use
+     * @returns {Promise<any>} - The list of available tools
+     */
+    async listTools(alias) {
+        // 1. Pull the raw list from the live client
+        //    (SDK returns { tools: […] } – if your MCPLibrary returns plain
+        //     array instead, delete the de-structuring.)
+        const { tools } = await this.mcpLibrary.listTools(alias);
+
+        // 2. Map to OpenAI format
+        return tools.map(t => ({
+            type: 'function',
+            function: {
+                name:        t.name,
+                description: t.description ?? '',
+                parameters:  normaliseSchema(t.inputSchema)
+            }
+        }));
+    }
+
+
+}
+
+function normaliseSchema(schema = {}) {
+    if (!schema.type) {
+        schema.type       = 'object';
+        schema.properties = schema.properties ?? {};
+        schema.required   = schema.required   ?? [];
+    }
+
+    if (typeof schema.additionalProperties !== 'boolean') {
+        schema.additionalProperties = false;
+    }
+    return schema;
+}
+
+// Export a singleton instance
+const mcpService = new MCPService();
+export default mcpService;
