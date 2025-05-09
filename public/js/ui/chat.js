@@ -187,15 +187,19 @@ function handleFormSubmit(event) {
                 messageText = textarea.value.trim();
             }
         } else {
-            // Get text from blocks editor
-            const json = promptEditor.getPTJson();
-            if (json && json.blocks) {
-                // Get text from all non-muted blocks
-                messageText = json.blocks
-                    .filter(block => !block.muted)
-                    .map(block => block.content)
-                    .join('\n\n')
-                    .trim();
+            // Get text from blocks editor - access the blockEditor property which has getPTJson method
+            if (promptEditor && promptEditor.blockEditor && typeof promptEditor.blockEditor.getPTJson === 'function') {
+                const json = promptEditor.blockEditor.getPTJson();
+                if (json && json.blocks) {
+                    // Get text from all non-muted blocks
+                    messageText = json.blocks
+                        .filter(block => !block.muted)
+                        .map(block => block.content)
+                        .join('\n\n')
+                        .trim();
+                }
+            } else {
+                console.warn("Block editor not properly initialized or getPTJson not available");
             }
         }
     }
