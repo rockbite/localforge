@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+// DEBUG: trace any explicit exit
+const _exit = process.exit;
+process.exit = function (code = 0) {
+  console.trace(`process.exit(${code}) called`);
+  _exit(code);
+};
+
 import { app, BrowserWindow, dialog, shell, ipcMain } from 'electron';
 app.setName('Localforge'); // has to be as early as possible
 import path from 'path';
