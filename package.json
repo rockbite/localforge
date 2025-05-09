@@ -30,6 +30,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@google-cloud/vertexai": "^1.10.0",
     "@google/genai": "^0.8.0",
+    "@modelcontextprotocol/sdk": "^1.11.1",
     "@mozilla/readability": "^0.6.0",
     "@shoelace-style/shoelace": "^2.12.0",
     "axios": "^1.8.4",
