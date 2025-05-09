@@ -17,7 +17,28 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-14, windows-latest]          # add linux-latest if you need it
+        include:
+          - os: macos-14
+            arch: arm64
+            readable_arch: ARM64
+            package_script: npm run package:mac-arm64
+            app_dir_suffix: arm64
+            installer_dir_suffix: arm64
+            artifact_name_prefix: localforge-osx-arm64
+          - os: macos-14
+            arch: x64 # electron-packager uses x64 for Intel
+            readable_arch: Intel
+            package_script: npm run package:mac-intel
+            app_dir_suffix: x64
+            installer_dir_suffix: intel
+            artifact_name_prefix: localforge-osx-intel
+          - os: windows-latest
+            arch: x64 # Assuming x64 for Windows
+            readable_arch: Windows
+            package_script: npm run package:win
+            app_dir_suffix: win32-x64 # from your original script
+            installer_dir_suffix: win # For consistency, though not used for DMG
+            artifact_name_prefix: localforge-windows
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -44,19 +65,19 @@ jobs:
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
 
       # ---------- build / package ----------
-      - name: Package Electron OSX App
+      - name: Package Electron OSX App (${{ matrix.readable_arch }})
         if: runner.os == 'macOS'
         env:
           MACOS_SIGNING_IDENTITY_FROM_ACTION: ${{ steps.import_cert.outputs.signing-identity }}
         run: |
           echo "Packaging for Mac..."
-          npm run package:mac
+          ${{ matrix.package_script }}
 
       - name: Package Electron Windows App
         if: runner.os == 'Windows'
         run: |
-            echo "Packaging for Windows..."
-            npm run package:win
+          echo "Packaging for Windows..."
+          ${{ matrix.package_script }}
 
       # ---------- macOS-only : notarize, staple, dmg ----------
       - name: Notarise & staple (macOS)
@@ -66,8 +87,8 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID:               ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          APP_PATH="dist/Localforge-darwin-arm64/Localforge.app"
-          ZIP_PATH="dist/Localforge-mac.zip"
+          APP_PATH="dist/Localforge-darwin-${{ matrix.app_dir_suffix }}/Localforge.app"
+          ZIP_PATH="dist/Localforge-mac-${{ matrix.arch }}.zip" # Arch specific zip for notarization
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
           
           echo "Submitting to notarisation…"
@@ -87,7 +108,7 @@ jobs:
       # ---------- Windows portable build via electron-packager --------
       - name: Package Windows (portable)
         if: runner.os == 'Windows'
-        run: npm run package:win
+        run: ${{ matrix.package_script }}
 
       # Optional signing ------------------------------------------------- (120$, maybe later)
 #      - name: Sign main executable
@@ -110,15 +131,15 @@ jobs:
       - name: Zip portable build
         if: runner.os == 'Windows'
         run: |
-          7z a -r dist/Localforge-win32-x64.zip dist/Localforge-win32-x64\*          
+          7z a -r dist/Localforge-win32-x64.zip dist/Localforge-${{ matrix.app_dir_suffix }}\*          
 
       # ───────────── macOS artifact (.dmg) ─────────────
-      - name: Upload macOS artifact
+      - name: Upload macOS artifact (${{ matrix.readable_arch }})
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: localforge-osx-installer            # <- release job will grab *-installer
-          path: dist/installers/*.dmg
+          name: ${{ matrix.artifact_name_prefix }}-installer
+          path: dist/installers-${{ matrix.installer_dir_suffix }}/*.dmg
           if-no-files-found: error
 
       # ───────────── Windows artifact (portable .zip or installer) ─────────────
@@ -126,7 +147,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: localforge-windows-installer          # <- release job will grab *-installer
+          name: ${{ matrix.artifact_name_prefix }}-installer
           path: dist/Localforge-win32-x64.zip
           if-no-files-found: error
 
@@ -162,13 +183,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: '*-installer'     # grabs macOS-installer & Windows-installer
-          path: .
+          path: dist-artifacts
 
       # publish / update the release
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            localforge-osx-installer/*.dmg
-            localforge-windows-installer/*.zip
+            dist-artifacts/localforge-osx-arm64-installer/*.dmg
+            dist-artifacts/localforge-osx-intel-installer/*.dmg
+            dist-artifacts/localforge-windows-installer/*.zip
           draft: true
