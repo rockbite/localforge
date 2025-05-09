@@ -472,7 +472,9 @@ export function addAgentMessage(message) {
     messagesContainer.appendChild(messageDiv);
 
     // Trigger Prism highlighting *after* appending and adding copy buttons
-    Prism.highlightAllUnder(messageContent);
+    try {
+        Prism.highlightAllUnder(messageContent);
+    } catch (e){}
     
     // Apply data-lang attributes after Prism has processed the code blocks
     messageContent.querySelectorAll('pre[class*="language-"]').forEach((pre) => {
@@ -655,3 +657,26 @@ export function enableChatInput(enable) {
     // Just add visual indication that agent is busy
     messageForm?.classList.toggle('disabled', !enable);
 }
+
+// Add history changed event listener when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add listener for history-changed event to reload chat content
+    window.addEventListener('history-changed', (event) => {
+        console.log('History changed event received, reloading chat content');
+        if (event.detail?.sessionId === appState.currentSessionId) {
+            // Reload the conversation history through socket
+            if (appState.socket && appState.socket.connected) {
+                // Clear current messages and show loading state
+                clearMessages();
+                setStatus('connecting', 'Reloading conversation...');
+
+                // Request session rejoin to get updated history
+                appState.socket.emit('join_session', {
+                    projectId: appState.currentProjectId,
+                    sessionId: appState.currentSessionId,
+                    reloadOnly: true  // Flag to indicate just reloading history, not full join
+                });
+            }
+        }
+    });
+});

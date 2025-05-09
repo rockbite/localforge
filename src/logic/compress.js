@@ -3,9 +3,13 @@ import path from "path";
 import fs from "fs";
 import {getPromptOverride} from "../utils.js";
 import ejs from "ejs";
+import {fileURLToPath} from "url";
+
+// Get __dirname equivalent in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function compressConversationHistory(history, sessionData) {
-    const conversation = history.slice(1);
     let historyString = JSON.stringify(history);
 
     const templatePath = path.join(__dirname, '..', '..', 'prompts', 'compressor.ejs');
@@ -31,7 +35,7 @@ async function compressConversationHistory(history, sessionData) {
     modified.push(JSON.parse(JSON.stringify(history[0])));
     modified.push({
         role: 'assistant',
-        content: response,
+        content: response.content,
     });
 
     return modified;

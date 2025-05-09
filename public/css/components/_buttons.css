@@ -26,6 +26,30 @@
     font-size: 16px; /* Reduced icon size */
 }
 
+.secondary-button:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-disabled);
+    border-color: var(--border-primary);
+    opacity: 0.8;
+    cursor: wait;
+}
+
+/* Compressing State */
+.secondary-button.compressing {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    cursor: progress;
+}
+
+.secondary-button.compressing .material-icons.spin {
+    animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .danger-button {
     background-color: #9e3636;
     color: white;

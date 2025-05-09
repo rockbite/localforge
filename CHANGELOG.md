@@ -5,8 +5,8 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) co
 
 ## [1.0.23] – TBD
 
-- ** Instead of hardcoded 3001 now runs on any available port (will try 3826 as default first as least common, then find other options if still busy)
-
+* Instead of hardcoded 3001 now runs on any available port (will try 3826 as default first as least common, then find other options if still busy)
+* Added "Compress" button on top of each chat, that will use Expert model in order to summarize a long conversation history, to save up tokens as it blows up.
 
 ## [1.0.22] – 2025-05-09
 

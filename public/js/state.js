@@ -21,5 +21,10 @@ export const appState = {
         activeToolCallId: null // ID of the tool call currently executing (if status is tool_running)
     },
     // No need for reconnectedDuringProcessing flag - server handles broadcasting to all clients
-    historicalToolLogs: [] // Stores logs fetched during session join for context
+    historicalToolLogs: [], // Stores logs fetched during session join for context
+    compressionState: {
+        isCompressing: false, // Whether a session is currently being compressed
+        sessionId: null,      // The ID of the session being compressed
+        startTime: null       // When the compression started
+    }
 };
