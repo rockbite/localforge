@@ -195,14 +195,51 @@ class MCPService {
     }
 
     /**
-     * Call a tool on an MCP client
-     * @param {string} alias - The alias of the MCP client to use
-     * @param {Object} callObj - The tool call object
-     * @returns {Promise<any>} - The result of the tool call
+     * Execute a tool call that came straight out of OpenAI
+     *     – supports the new 2024-04 `tool_calls` array
+     *     – supports the legacy single `function_call`
+     *
+     * @param {string} alias               – MCP client alias
+     * @param {object} openAIToolCall      – one element of message.tool_calls, or
+     *                                       message.function_call
+     * @returns {Promise<unknown>}         – whatever the MCP tool returns
      */
-    async callTool(alias, callObj) {
-        return this.mcpLibrary.callTool(alias, callObj);
+    async callTool(alias, openAIToolCall) {
+        let name, rawArgs;
+
+        // new format:  {id, type:"function", function:{name, arguments}}
+        if (openAIToolCall?.type === 'function') {
+            name    = openAIToolCall.function?.name;
+            rawArgs = openAIToolCall.function?.arguments;
+
+            // old format:  {name, arguments} hanging off message.function_call
+        } else if (openAIToolCall?.name) {
+            name    = openAIToolCall.name;
+            rawArgs = openAIToolCall.arguments;
+
+        } else {
+            throw new Error('Unrecognised OpenAI tool-call shape');
+        }
+
+        // arguments can be stringified JSON or already an object
+        let args;
+        if (typeof rawArgs === 'string') {
+            try {
+                args = rawArgs.trim() ? JSON.parse(rawArgs) : {};
+            } catch (e) {
+                throw new Error(`Malformed arguments JSON for tool "${name}": ${e.message}`);
+            }
+        } else if (typeof rawArgs === 'object' && rawArgs !== null) {
+            args = rawArgs;
+        } else {
+            args = {};
+        }
+
+        const result = await this.mcpLibrary.callTool(alias, {name: name, arguments: args});
+
+        return result;
     }
+
 
     /**
      * List available tools for an MCP client

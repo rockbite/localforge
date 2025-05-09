@@ -22,6 +22,7 @@ import os from "os";
 import agentStore from "../../db/agentStore.js";
 import {getPromptOverride} from "../../utils.js";
 import {generateImageDescription} from "../image/index.js";
+import mcpService from "../mcp/index.js";
 
 // Token count constants
 const MAX_TOKENS = 1000000; // 1 million tokens maximum

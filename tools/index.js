@@ -16,6 +16,7 @@ import BrowserClaim from "./list/browser/BrowserClaim.js";
 import BrowserNavigate from "./list/browser/BrowserNavigate.js";
 import BrowserInteract from "./list/browser/BrowserInteract.js";
 import BrowserScreenshot from "./list/browser/BrowserScreenshot.js";
+import mcpService from "../src/services/mcp/index.js";
 
 // Explicit list of all tools
 const tools = [
@@ -83,8 +84,26 @@ function createToolRegistry(allowedToolNames) {
     async run(call, sessionData, signal = null) {
       let workingDirectory = sessionData.workingDirectory;
       const toolName = call.function.name;
+
+
+      let mcpToolList = [];
+      let mcpMap = {};
+      // check for MCP tool list
+      if(sessionData.mcpAlias) {
+        const mcpToolList = await mcpService.listTools(sessionData.mcpAlias);
+        mcpToolList.forEach(tool => {
+          mcpMap[tool.function.name] = tool;
+        });
+      }
+
       if (!allowedToolNames.includes(toolName)) {
-        return { error: `Tool \"${toolName}\" is not available.` };
+        // maybe its mcp?
+        if(mcpMap[toolName]) {
+          // executing MCP tool!
+          return await mcpService.callTool(sessionData.mcpAlias, call);
+        } else {
+          return {error: `Tool \"${toolName}\" is not available.`};
+        }
       }
       const args = typeof call.function.arguments === 'string'
         ? JSON.parse(call.function.arguments)
