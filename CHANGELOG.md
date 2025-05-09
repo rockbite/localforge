@@ -3,7 +3,11 @@ All notable changes to **Localforge** will be documented in this file.
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
 
-## [1.0.21] – 2025-05-09
+## [1.0.23] – open date
+
+
+
+## [1.0.22] – 2025-05-09
 
 ### Added
 - **Background typing:** The text editor stays responsive while the model is busy (submissions are still blocked until the model is ready).
