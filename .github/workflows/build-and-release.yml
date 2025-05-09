@@ -25,6 +25,7 @@ jobs:
             app_dir_suffix: arm64
             installer_dir_suffix: arm64
             artifact_name_prefix: localforge-osx-arm64
+            create_dmg_script: npm run create-dmg:arm64
           - os: macos-14
             arch: x64 # electron-packager uses x64 for Intel
             readable_arch: Intel
@@ -32,6 +33,7 @@ jobs:
             app_dir_suffix: x64
             installer_dir_suffix: intel
             artifact_name_prefix: localforge-osx-intel
+            create_dmg_script: npm run create-dmg:intel
           - os: windows-latest
             arch: x64 # Assuming x64 for Windows
             readable_arch: Windows
@@ -100,10 +102,8 @@ jobs:
           
           xcrun stapler staple --verbose "$APP_PATH"
           
-          npx electron-installer-dmg "$APP_PATH" "Localforge" \
-            --out="dist/installers" \
-            --icon="build/icons/mac/icon.icns" \
-            --overwrite
+          echo "Creating DMG using script: ${{ matrix.create_dmg_script }}"
+          ${{ matrix.create_dmg_script }}        
 
       # ---------- Windows portable build via electron-packager --------
       - name: Package Windows (portable)
