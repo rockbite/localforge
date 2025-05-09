@@ -452,12 +452,14 @@ io.on('connection', (socket) => {
                 accounting: sessionData.accounting || { models: {}, totalUSD: 0 },
                 workingDirectory: sessionData.workingDirectory,
                 agentId: sessionData.agentId,
+                mcpAlias: sessionData.mcpAlias,
+                mcpUrl: sessionData.mcpUrl,
                 toolLogs: sessionData.toolLogs || [],
-                agentState: sessionData.agentState || { 
-                    status: 'idle', 
-                    statusText: null, 
-                    startTime: null, 
-                    activeToolCallId: null 
+                agentState: sessionData.agentState || {
+                    status: 'idle',
+                    statusText: null,
+                    startTime: null,
+                    activeToolCallId: null
                 },
                 reconnectedDuringProcessing: isProcessing
             });
@@ -688,19 +690,40 @@ io.on('connection', (socket) => {
         try {
             const { agentId } = data;
             const sessionId = socket.userData.currentSessionId;
-            
+
             if (!sessionId) {
                 console.warn('Attempted to set agent with no active session');
                 return;
             }
-            
+
             // Update the agent ID in the session
             await projectSessionManager.setAgentId(sessionId, agentId);
-            
+
             console.log(`Set agent ID for session ${sessionId}: ${agentId || 'none'}`);
-            
+
         } catch (error) {
             console.error('Error setting agent:', error);
+        }
+    });
+
+    // Handle MCP selection
+    socket.on('set_mcp', async (data) => {
+        try {
+            const { mcpAlias, mcpUrl } = data;
+            const sessionId = socket.userData.currentSessionId;
+
+            if (!sessionId) {
+                console.warn('Attempted to set MCP with no active session');
+                return;
+            }
+
+            // Update the MCP data in the session
+            await projectSessionManager.setMcpData(sessionId, mcpAlias, mcpUrl);
+
+            console.log(`Set MCP for session ${sessionId}: ${mcpAlias || 'none'}`);
+
+        } catch (error) {
+            console.error('Error setting MCP:', error);
         }
     });
     

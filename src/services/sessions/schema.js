@@ -6,6 +6,8 @@ export const FIELD_NAMES = Object.freeze({
     // Core fields
     WORKING_DIRECTORY: 'workingDirectory', // Canonical name for the project's working directory
     AGENT_ID: 'agentId',                  // Canonical name for the selected agent ID
+    MCP_ALIAS: 'mcpAlias',                // Canonical name for the selected MCP alias
+    MCP_URL: 'mcpUrl',                    // Canonical name for the selected MCP URL
     HISTORY: 'history',                   // Canonical name for chat message history (replaces 'conversation')
     ACCOUNTING: 'accounting',             // Canonical name for usage/cost tracking (replaces 'accountingData')
     TASKS: 'tasks',                       // Canonical name for the list of tasks
@@ -26,6 +28,8 @@ export const FIELD_NAMES = Object.freeze({
 export const DEFAULT_SESSION_DATA = Object.freeze({
     [FIELD_NAMES.WORKING_DIRECTORY]: null,
     [FIELD_NAMES.AGENT_ID]: null,
+    [FIELD_NAMES.MCP_ALIAS]: null,
+    [FIELD_NAMES.MCP_URL]: null,
     [FIELD_NAMES.HISTORY]: [],
     [FIELD_NAMES.ACCOUNTING]: { models: {}, totalUSD: 0 },
     [FIELD_NAMES.TASKS]: [],

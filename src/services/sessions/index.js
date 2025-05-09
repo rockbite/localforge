@@ -73,6 +73,10 @@ class ProjectSessionManager {
         // 1.1 Preserve Agent ID if it exists
         normalized[FIELD_NAMES.AGENT_ID] = rawData[FIELD_NAMES.AGENT_ID] || null;
 
+        // 1.2 Preserve MCP data if it exists
+        normalized[FIELD_NAMES.MCP_ALIAS] = rawData[FIELD_NAMES.MCP_ALIAS] || null;
+        normalized[FIELD_NAMES.MCP_URL] = rawData[FIELD_NAMES.MCP_URL] || null;
+
         // 2. Preserve History (Handle legacy 'conversation')
         const history = rawData[FIELD_NAMES.HISTORY] || rawData[FIELD_NAMES.LEGACY_CONVERSATION];
         normalized[FIELD_NAMES.HISTORY] = Array.isArray(history) ? history : [];
@@ -535,6 +539,32 @@ class ProjectSessionManager {
     async getAgentId(sessionId) {
         const sessionData = await this.getSession(sessionId);
         return sessionData[FIELD_NAMES.AGENT_ID];
+    }
+
+    /**
+     * Set the MCP data for a session
+     * @param {string} sessionId
+     * @param {string} mcpAlias
+     * @param {string} mcpUrl
+     */
+    async setMcpData(sessionId, mcpAlias, mcpUrl) {
+        const sessionData = await this.getSession(sessionId);
+        sessionData[FIELD_NAMES.MCP_ALIAS] = mcpAlias;
+        sessionData[FIELD_NAMES.MCP_URL] = mcpUrl;
+        await this.saveSession(sessionId);
+    }
+
+    /**
+     * Get the MCP data for a session
+     * @param {string} sessionId
+     * @returns {Promise<object>} Object with mcpAlias and mcpUrl
+     */
+    async getMcpData(sessionId) {
+        const sessionData = await this.getSession(sessionId);
+        return {
+            mcpAlias: sessionData[FIELD_NAMES.MCP_ALIAS] || null,
+            mcpUrl: sessionData[FIELD_NAMES.MCP_URL] || null
+        };
     }
 
     /**

@@ -210,6 +210,22 @@ export function setupSocketEventHandlers(socket) {
                 agentSelector.value = appState.agentId || '';
             }
 
+            // --- 6.2. Update MCP Data ---
+            appState.mcpAlias = data.mcpAlias || '';
+            appState.mcpUrl = data.mcpUrl || '';
+            const mcpSelector = document.getElementById('mcp-selector');
+            if (mcpSelector) {
+                // Check if the selected MCP still exists in the dropdown
+                const mcpExists = Array.from(mcpSelector.options).some(option => option.value === appState.mcpAlias);
+
+                // Only set the value if the MCP exists in the options
+                if (mcpExists) {
+                    mcpSelector.value = appState.mcpAlias || '';
+                } else {
+                    mcpSelector.value = ''; // Reset to default if not found
+                }
+            }
+
             // --- 7. Store and Render Historical Tool Logs ---
             if (data.toolLogs && Array.isArray(data.toolLogs)) {
                 appState.historicalToolLogs = data.toolLogs; // Store logs first
