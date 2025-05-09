@@ -55,7 +55,7 @@ function runDownloadCommand() {
         let downloadUrl;
 
         const owner = 'rockbite';
-        const repo = 'Localforge';
+        const repo = 'Localforge-arm64';
 
         // Determine the asset name and construct the download URL based on the OS
         if (platform === 'win32') {
