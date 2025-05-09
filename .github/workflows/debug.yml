@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-14, windows-latest]          # add linux-latest if you need it
+        os: [macos-14]          # add linux-latest if you need it
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -48,7 +48,7 @@ jobs:
           MACOS_SIGNING_IDENTITY_FROM_ACTION: ${{ steps.import_cert.outputs.signing-identity }}
         run: |
           echo "Packaging for Mac..."
-          npm run package:mac
+          npm run package:mac-arm64
 
       - name: Package Electron Windows App
         if: runner.os == 'Windows'
