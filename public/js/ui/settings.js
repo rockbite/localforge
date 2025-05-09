@@ -9,12 +9,15 @@ class SettingsUI {
 
         // Theme and appearance elements
         this.themeSelect = document.getElementById('theme-select');
-        
+
         // Theme is now applied by theme-loader.js on page load
         // No need to apply default theme here
-        
+
         this.setupEventListeners();
         this.loadSettings();
+
+        // Initialize MCP edit modal
+        this.initMcpEditModal();
     }
 
     setupEventListeners() {
@@ -92,7 +95,7 @@ class SettingsUI {
             this.populateWebSettings(settings);
             this.populateSecuritySettings(settings);
             this.populateThemeSettings(settings);
-            
+
             // Parse models data
             if (settings.models && typeof settings.models === 'string') {
                 try {
@@ -100,6 +103,16 @@ class SettingsUI {
                     this.populateProvidersData(modelsData);
                 } catch (error) {
                     console.error('Error parsing models data:', error);
+                }
+            }
+
+            // Parse MCP servers data
+            if (settings.mcpServers && typeof settings.mcpServers === 'string') {
+                try {
+                    const mcpServers = JSON.parse(settings.mcpServers);
+                    this.populateMcpServersData(mcpServers);
+                } catch (error) {
+                    console.error('Error parsing MCP servers data:', error);
                 }
             }
         }).catch(error => {
@@ -316,13 +329,13 @@ class SettingsUI {
             apiKey: document.getElementById('api-key-input')?.value,
             baseUrl: document.getElementById('base-url-input')?.value,
             model: document.getElementById('model-name-input')?.value,
-            
+
             // Web access settings
             webAccess: document.getElementById('web-access-toggle')?.checked,
             usePuppeteer: document.getElementById('usePuppeteer')?.checked,
             googleCseId: document.getElementById('googleCseId')?.value,
             googleApiKey: document.getElementById('googleApiKey')?.value,
-            
+
             // Security settings
             allowUnsafe: document.getElementById('allow-unsafe-toggle')?.checked,
             disableExecutables: document.getElementById('disable-executables-toggle')?.checked,
@@ -333,7 +346,7 @@ class SettingsUI {
         if (this.themeSelect) {
             settings.theme = this.themeSelect.value;
         }
-        
+
         // Update LLM configuration in global models data
         if (this.globalModelsData) {
             this.globalModelsData.llmConfig = {
@@ -350,7 +363,7 @@ class SettingsUI {
                     model: document.getElementById('expertModelName')?.value || ''
                 }
             };
-            
+
             // Add models data as a string
             settings.models = JSON.stringify(this.globalModelsData);
         } else {
@@ -372,7 +385,7 @@ class SettingsUI {
                     }
                 }
             };
-            
+
             // Collect providers from the list
             const providerItems = document.querySelectorAll('.provider-item');
             providerItems.forEach(item => {
@@ -382,9 +395,29 @@ class SettingsUI {
                     options: {} // This is a fallback, should never be needed since we're tracking options
                 });
             });
-            
+
             // Add models data as a string
             settings.models = JSON.stringify(modelsData);
+        }
+
+        // Save MCP servers data
+        if (this.mcpServers) {
+            settings.mcpServers = JSON.stringify(this.mcpServers);
+        } else {
+            // Create empty MCP servers array if none exists
+            const mcpServers = [];
+
+            // Collect MCP servers from the list
+            const mcpItems = document.querySelectorAll('.mcp-item');
+            mcpItems.forEach(item => {
+                mcpServers.push({
+                    alias: item.dataset.alias,
+                    url: item.dataset.url
+                });
+            });
+
+            // Add MCP servers data as a string
+            settings.mcpServers = JSON.stringify(mcpServers);
         }
 
         // Save settings via API
@@ -452,10 +485,236 @@ class SettingsUI {
     
 }
 
+// Add the MCP functionality
+SettingsUI.prototype.populateMcpServersData = function(mcpServers) {
+    // Store global MCP servers data
+    this.mcpServers = mcpServers;
+
+    // Populate MCP servers list
+    if (Array.isArray(mcpServers)) {
+        const mcpListElement = document.querySelector('.mcp-list');
+        if (mcpListElement) {
+            mcpListElement.innerHTML = '';
+
+            mcpServers.forEach(server => {
+                const mcpItem = document.createElement('div');
+                mcpItem.className = 'mcp-item';
+                mcpItem.dataset.alias = server.alias;
+                mcpItem.dataset.url = server.url;
+
+                // Truncate and mask URL for display
+                const truncatedUrl = this.truncateAndMaskUrl(server.url);
+
+                mcpItem.innerHTML = `
+                    <div class="provider-header">
+                        <span class="provider-name">${server.alias}</span>
+                        <div class="provider-info">
+                            <span class="provider-type-label" title="${server.url}">${truncatedUrl}</span>
+                        </div>
+                        <div class="provider-actions">
+                            <button class="mini-button edit-mcp" title="Edit"><span class="material-icons">edit</span></button>
+                            <button class="mini-button delete-mcp" title="Delete"><span class="material-icons">delete</span></button>
+                        </div>
+                    </div>
+                `;
+
+                mcpListElement.appendChild(mcpItem);
+            });
+
+            // Add event listeners for edit and delete buttons
+            mcpListElement.querySelectorAll('.edit-mcp').forEach(button => {
+                button.addEventListener('click', () => {
+                    const mcpItem = button.closest('.mcp-item');
+                    const alias = mcpItem.dataset.alias;
+                    const url = mcpItem.dataset.url;
+
+                    this.showMcpEditModal({
+                        alias: alias,
+                        url: url
+                    });
+                });
+            });
+
+            mcpListElement.querySelectorAll('.delete-mcp').forEach(button => {
+                button.addEventListener('click', () => {
+                    const mcpItem = button.closest('.mcp-item');
+                    const alias = mcpItem.dataset.alias;
+
+                    // Remove from global data
+                    if (this.mcpServers) {
+                        this.mcpServers = this.mcpServers.filter(s => s.alias !== alias);
+
+                        // Update the UI
+                        this.populateMcpServersData(this.mcpServers);
+                    } else {
+                        mcpItem.remove();
+                    }
+                });
+            });
+
+            // Add event handler for the add MCP button
+            const addMcpButton = document.querySelector('.add-mcp-btn');
+            if (addMcpButton) {
+                addMcpButton.removeEventListener('click', this.showMcpEditModal);
+                addMcpButton.addEventListener('click', () => {
+                    this.showMcpEditModal();
+                });
+            }
+        }
+    }
+};
+
+SettingsUI.prototype.initMcpEditModal = function() {
+    // Get MCP edit modal elements
+    this.mcpEditModal = document.getElementById('mcp-edit-modal');
+    this.mcpEditTitle = document.getElementById('mcp-edit-title');
+    this.mcpAliasInput = document.getElementById('mcpAlias');
+    this.mcpUrlInput = document.getElementById('mcpUrl');
+    this.mcpEditCancelButton = document.getElementById('mcp-edit-cancel');
+    this.mcpEditSaveButton = document.getElementById('mcp-edit-save');
+
+    // Add MCP button functionality
+    const addMcpButton = document.querySelector('.add-mcp-btn');
+    if (addMcpButton) {
+        addMcpButton.addEventListener('click', () => {
+            this.showMcpEditModal();
+        });
+    }
+
+    // MCP edit modal cancel button
+    if (this.mcpEditCancelButton) {
+        this.mcpEditCancelButton.addEventListener('click', () => {
+            this.closeMcpEditModal();
+        });
+    }
+
+    // MCP edit modal save button
+    if (this.mcpEditSaveButton) {
+        this.mcpEditSaveButton.addEventListener('click', () => {
+            this.saveMcpData();
+        });
+    }
+};
+
+SettingsUI.prototype.showMcpEditModal = function(mcpData = null) {
+    if (!this.mcpEditModal) return;
+
+    const isEditMode = !!mcpData;
+
+    // Update modal title based on mode
+    if (this.mcpEditTitle) {
+        this.mcpEditTitle.textContent = isEditMode ? 'Edit MCP Server' : 'Add MCP Server';
+    }
+
+    // Update save button text
+    if (this.mcpEditSaveButton) {
+        this.mcpEditSaveButton.textContent = isEditMode ? 'Save' : 'Add';
+    }
+
+    // Clear or pre-fill form fields
+    if (this.mcpAliasInput) {
+        this.mcpAliasInput.value = mcpData ? mcpData.alias : '';
+        // Store the original alias for edit mode
+        this.mcpAliasInput.dataset.originalAlias = mcpData ? mcpData.alias : '';
+    }
+
+    if (this.mcpUrlInput) {
+        this.mcpUrlInput.value = mcpData ? mcpData.url : '';
+    }
+
+    // Show the modal with active class for animation
+    this.mcpEditModal.classList.add('active');
+};
+
+SettingsUI.prototype.closeMcpEditModal = function() {
+    if (!this.mcpEditModal) return;
+    this.mcpEditModal.classList.remove('active');
+};
+
+SettingsUI.prototype.truncateAndMaskUrl = function(url) {
+    if (!url) return '';
+
+    // Remove protocol if present
+    let displayUrl = url;
+    if (displayUrl.startsWith('http://')) {
+        displayUrl = 'http://' + displayUrl.substring(7);
+    } else if (displayUrl.startsWith('https://')) {
+        displayUrl = 'https://' + displayUrl.substring(8);
+    }
+
+    // Find first slash after domain (or port)
+    const slashIndex = displayUrl.indexOf('/', displayUrl.indexOf('//') + 2);
+
+    if (slashIndex !== -1) {
+        // If there's a path, truncate it
+        displayUrl = displayUrl.substring(0, slashIndex) + '/...';
+    }
+
+    // If still too long, add ellipsis
+    if (displayUrl.length > 30) {
+        displayUrl = displayUrl.substring(0, 27) + '...';
+    }
+
+    return displayUrl;
+};
+
+SettingsUI.prototype.saveMcpData = function() {
+    if (!this.mcpAliasInput || !this.mcpUrlInput) return;
+
+    const alias = this.mcpAliasInput.value.trim();
+    const url = this.mcpUrlInput.value.trim();
+    const originalAlias = this.mcpAliasInput.dataset.originalAlias || '';
+
+    // Validate inputs
+    if (!alias) {
+        alert('MCP alias is required');
+        return;
+    }
+
+    if (!url) {
+        alert('MCP URL is required');
+        return;
+    }
+
+    // Ensure global MCP servers data exists
+    if (!this.mcpServers) {
+        this.mcpServers = [];
+    }
+
+    // Check if alias already exists (unless it's the same server being edited)
+    if (alias !== originalAlias && this.mcpServers.some(s => s.alias === alias)) {
+        alert('An MCP server with this alias already exists');
+        return;
+    }
+
+    // Create MCP server object
+    const server = {
+        alias,
+        url
+    };
+
+    // Update or add server
+    if (originalAlias) {
+        // Edit existing server
+        this.mcpServers = this.mcpServers.map(s =>
+            s.alias === originalAlias ? server : s
+        );
+    } else {
+        // Add new server
+        this.mcpServers.push(server);
+    }
+
+    // Update UI
+    this.populateMcpServersData(this.mcpServers);
+
+    // Close modal
+    this.closeMcpEditModal();
+};
+
 // Initialize settings UI when document is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.settingsUI = new SettingsUI();
-    
+
     // Load settings schema and provider data
     fetch('/api/settings/schema').then(response => {
         if (!response.ok) {
@@ -475,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     providerTypesList.appendChild(badge);
                 });
             }
-            
+
             // Update provider type select
             const providerTypeSelect = document.getElementById('providerType');
             if (providerTypeSelect) {

@@ -1,0 +1,46 @@
+<div class="settings-tab-content" id="mcp-tab">
+    <div class="content-scroll-area">
+        <!-- MCP Servers Configuration Section -->
+        <div class="settings-section compact">
+            <div class="section-header">
+                <div class="model-row-label section-title">MCP Servers</div>
+                <button class="btn secondary add-mcp-btn">
+                    <span class="material-icons">add</span> Add
+                </button>
+            </div>
+            
+            <div class="mcp-list-wrapper">
+                <div class="mcp-list">
+                    <!-- MCP servers will be dynamically populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MCP Edit Modal (hidden initially, would be shown when editing an MCP server) -->
+<div id="mcp-edit-modal" class="modal">
+    <div class="modal-content mcp-edit-modal-content">
+        <h3>
+            <span class="material-icons">settings</span>
+            <span id="mcp-edit-title">Edit MCP Server</span>
+        </h3>
+        
+        <div class="mcp-edit-form">
+            <div class="settings-form-group">
+                <label for="mcpAlias">Alias</label>
+                <input type="text" id="mcpAlias" placeholder="e.g. My MCP Server" />
+            </div>
+            
+            <div class="settings-form-group">
+                <label for="mcpUrl">URL</label>
+                <input type="text" id="mcpUrl" placeholder="e.g. https://mcp.example.com" />
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" id="mcp-edit-cancel" class="btn secondary">Cancel</button>
+            <button type="button" id="mcp-edit-save" class="btn primary">Save</button>
+        </div>
+    </div>
+</div>

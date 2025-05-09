@@ -12,13 +12,15 @@
             <button class="settings-tab-button" data-tab="web">Web Integration</button>
             <button class="settings-tab-button" data-tab="ui">Appearance</button>
             <button class="settings-tab-button" data-tab="agents">Agents</button>
+            <button class="settings-tab-button" data-tab="mcp">MCP</button>
         </div>
-        
+
         <%- include('settings/models-tab') %>
         <%- include('settings/security-tab') %>
         <%- include('settings/web-tab') %>
         <%- include('settings/ui-tab') %>
         <%- include('settings/agents-tab') %>
+        <%- include('settings/mcp-tab') %>
         
         <div class="modal-footer">
             <button type="button" id="settings-cancel" class="btn secondary">Cancel</button>

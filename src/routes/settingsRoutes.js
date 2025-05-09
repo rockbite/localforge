@@ -54,10 +54,13 @@ export const SETTINGS_SCHEMA = {
   enableCommandExecution: { type: 'boolean', default: true },
   restrictFilesystem:     { type: 'boolean', default: false },
   enableWebAccess:        { type: 'boolean', default: true },
-  
+
   // ---------- UI tab ----------
   theme:                { type: 'string',  default: 'dark-coffee' },
-  codeFontSize:         { type: 'string',  default: 'medium' }
+  codeFontSize:         { type: 'string',  default: 'medium' },
+
+  // ---------- MCP tab ----------
+  mcpServers:           { type: 'string',  default: '[]' }
 };
 
 // Bootstrap defaults on first run ----------------------------------
