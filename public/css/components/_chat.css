@@ -50,12 +50,12 @@
     height: 28px; /* Ensure consistent height */
 }
 
-/* Agent selector dropdown */
-.agent-selector {
+/* Agent and MCP selector dropdowns */
+.agent-selector,
+.mcp-selector {
     height: 28px;
     border-radius: 4px;
     padding: 0 8px;
-    margin-right: 10px;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-primary);
     color: var(--text-primary);

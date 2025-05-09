@@ -111,8 +111,9 @@ async function initializeApp() {
         workspaceUI.initWorkspaceSetup();   // Setup WD display click/modal form
         
         // Load agents list for the agent selector dropdown
-        const { loadAgentsList } = await import('./utils.js');
+        const { loadAgentsList, loadMcpServersList } = await import('./utils.js');
         loadAgentsList();
+        loadMcpServersList();
         
         // Initialize chat context view
         const { initChatContextView } = await import('./ui/chat-context.js');

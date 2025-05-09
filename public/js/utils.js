@@ -264,13 +264,97 @@ export function initGlobalModalEscHandler() {
  * @param {boolean} [preserveSelection=true] - Whether to preserve the current selection
  * @returns {Promise<Array>} - The list of agents
  */
+/**
+ * Load the list of MCP servers and populate the MCP selector dropdown
+ * @param {boolean} [preserveSelection=true] - Whether to preserve the current selection
+ * @returns {Promise<Array>} - The list of MCP servers
+ */
+export function loadMcpServersList(preserveSelection = true) {
+    const mcpSelector = document.getElementById('mcp-selector');
+    if (!mcpSelector) return Promise.resolve([]);
+
+    // Store current selection if preserving
+    const currentSelection = preserveSelection ? mcpSelector.value : null;
+
+    return fetch('/api/settings')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to load settings: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(settings => {
+            // Parse MCP servers data
+            let mcpServers = [];
+            if (settings.mcpServers && typeof settings.mcpServers === 'string') {
+                try {
+                    mcpServers = JSON.parse(settings.mcpServers);
+                    if (!Array.isArray(mcpServers)) {
+                        mcpServers = [];
+                    }
+                } catch (error) {
+                    console.error('Error parsing MCP servers data:', error);
+                }
+            }
+
+            // Clear existing options except the first one
+            while (mcpSelector.options.length > 1) {
+                mcpSelector.remove(1);
+            }
+
+            // Add MCP server options
+            mcpServers.forEach(server => {
+                const option = document.createElement('option');
+                option.value = server.alias;
+                option.textContent = server.alias;
+                option.dataset.url = server.url;
+                mcpSelector.appendChild(option);
+            });
+
+            // If not already set up, add change event listener for saving MCP selection
+            if (!mcpSelector.dataset.hasChangeListener) {
+                mcpSelector.addEventListener('change', handleMcpSelection);
+                mcpSelector.dataset.hasChangeListener = 'true';
+            }
+
+            // Restore previous selection if applicable
+            if (preserveSelection && currentSelection) {
+                // Check if the previously selected MCP still exists
+                const mcpExists = Array.from(mcpSelector.options).some(option => option.value === currentSelection);
+                if (mcpExists) {
+                    mcpSelector.value = currentSelection;
+                } else {
+                    // If MCP was deleted, reset to default
+                    mcpSelector.value = '';
+                    // Update backend with empty MCP alias
+                    import('./state.js').then(({ appState }) => {
+                        if (appState?.currentSessionId) {
+                            import('./api.js').then(api => {
+                                api.saveMcpAlias(appState.currentSessionId, '');
+                            });
+                        }
+                    });
+                }
+            } else {
+                // Load current MCP from session if not preserving selection
+                loadCurrentMcpSelection();
+            }
+
+            return mcpServers;
+        })
+        .catch(error => {
+            console.error('Error loading MCP servers:', error);
+            return [];
+        });
+}
+
 export function loadAgentsList(preserveSelection = true) {
     const agentSelector = document.getElementById('agent-selector');
     if (!agentSelector) return Promise.resolve([]);
-    
+
     // Store current selection if preserving
     const currentSelection = preserveSelection ? agentSelector.value : null;
-    
+
     return fetch('/api/agents')
         .then(response => {
             if (!response.ok) {
@@ -378,6 +462,91 @@ function handleAgentSelection(event) {
             .catch(error => {
                 console.error('Error saving agent selection:', error);
             });
+    });
+}
+
+/**
+ * Handle MCP server selection change event
+ * @param {Event} event - The change event
+ */
+function handleMcpSelection(event) {
+    const mcpAlias = event.target.value;
+    let mcpUrl = '';
+
+    // Get the URL from the selected option
+    if (mcpAlias) {
+        const selectedOption = event.target.options[event.target.selectedIndex];
+        mcpUrl = selectedOption.dataset.url || '';
+    }
+
+    // Import modules dynamically to avoid circular dependencies
+    Promise.all([
+        import('./api.js'),
+        import('./socket.js'),
+        import('./state.js')
+    ]).then(([api, socket, state]) => {
+        const { appState } = state;
+
+        if (!appState || !appState.currentSessionId) {
+            console.warn("Cannot save MCP selection: no active session.");
+            return;
+        }
+
+        // First save the MCP alias and URL to the session data
+        api.saveMcpData(appState.currentSessionId, mcpAlias, mcpUrl)
+            .then(() => {
+                console.log(`MCP ${mcpAlias || 'none'} selected for session ${appState.currentSessionId}`);
+
+                // Then emit the MCP selection via socket
+                if (appState.socket) {
+                    socket.emitSetMcp(appState.socket, mcpAlias, mcpUrl);
+                } else {
+                    console.warn("Socket not available to emit set_mcp.");
+                }
+            })
+            .catch(error => {
+                console.error('Error saving MCP selection:', error);
+            });
+    });
+}
+
+/**
+ * Load the current MCP selection from the session data
+ */
+function loadCurrentMcpSelection() {
+    const mcpSelector = document.getElementById('mcp-selector');
+    if (!mcpSelector) return;
+
+    // Import state to get the current session
+    import('./state.js').then(({ appState }) => {
+        if (!appState || !appState.currentSessionId) {
+            console.log("No active session to load MCP selection for.");
+            return;
+        }
+
+        // Import API to get session data
+        import('./api.js').then(api => {
+            api.getSessionData(appState.currentSessionId)
+                .then(sessionData => {
+                    if (sessionData && sessionData.mcpAlias) {
+                        // Find this MCP in the selector
+                        const options = Array.from(mcpSelector.options);
+                        const mcpOption = options.find(option => option.value === sessionData.mcpAlias);
+
+                        if (mcpOption) {
+                            mcpSelector.value = sessionData.mcpAlias;
+                        } else {
+                            console.warn(`Selected MCP ${sessionData.mcpAlias} not found in list.`);
+                            mcpSelector.value = '';
+                        }
+                    } else {
+                        mcpSelector.value = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading session data for MCP selection:', error);
+                });
+        });
     });
 }
 

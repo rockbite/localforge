@@ -748,3 +748,13 @@ export function emitSetAgent(socket, agentId) {
         console.error("Cannot emit set_agent: socket not connected.");
     }
 }
+
+/** Emits 'set_mcp' */
+export function emitSetMcp(socket, mcpAlias, mcpUrl) {
+    if (socket?.connected) {
+        console.log(`Emitting set_mcp: ${mcpAlias || 'None'}`);
+        socket.emit('set_mcp', { mcpAlias, mcpUrl });
+    } else {
+        console.error("Cannot emit set_mcp: socket not connected.");
+    }
+}

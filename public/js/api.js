@@ -302,6 +302,34 @@ export async function saveAgentId(sessionId, agentId) {
 }
 
 /**
+ * Saves the MCP data preference for a specific session.
+ * @param {string} sessionId - The ID of the session.
+ * @param {string} mcpAlias - The MCP alias or empty string to unset.
+ * @param {string} mcpUrl - The MCP URL or empty string to unset.
+ * @returns {Promise<object>} The response data.
+ */
+export async function saveMcpData(sessionId, mcpAlias, mcpUrl) {
+    if (!sessionId) {
+        console.warn("Attempted to save MCP data without a session ID.");
+        return Promise.resolve({ message: "No session ID, skipping save." });
+    }
+    try {
+        const response = await fetch(`/api/sessions/${sessionId}/data`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: { mcpAlias, mcpUrl } })
+        });
+        if (!response.ok) {
+            throw new Error('Failed to save MCP data to session');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error saving MCP data:', error);
+        throw error;
+    }
+}
+
+/**
  * Loads application settings from the server.
  * @returns {Promise<object>} The settings object.
  */
