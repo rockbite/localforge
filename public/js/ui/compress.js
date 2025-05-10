@@ -12,7 +12,7 @@ const compressButton = document.getElementById('compress-button');
  * helpers                                            *
  * -------------------------------------------------- */
 // true ⟺ **any** session is currently compressing
-function anySessionCompressing() {
+export function anySessionCompressing() {
   return Object.values(appState.compressionStates)
                .some(s => s.isCompressing);
 }
@@ -99,8 +99,8 @@ export function updateCompressionUI() {
   }
   
   /* ---------- chat input ---------- */
-  // lock the input if *anything* is compressing, or the agent is busy
-  enableChatInput(!(isAnyCompression || isAgentBusy));
+  // lock the input if current session is compressing, or the agent is busy
+  enableChatInput(!(isCurrentSessionCompressing || isAgentBusy));
 }
 
 /**

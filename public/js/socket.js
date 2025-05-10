@@ -14,6 +14,7 @@ import { addAgentMessage, addUserMessage, clearMessages, enableChatInput, scroll
 import { setStatus } from './ui/status.js'; // Assuming ui/status.js exports setStatus
 import { clearLogs as clearToolLogs, renderOrUpdateToolWidget, showThinkingWidget, removeThinkingWidget } from './ui/toolLog.js';
 import { setWorkingDirectoryDisplay, showDirectoryModal } from './ui/workspace.js';
+import { updateCompressionUI } from './ui/compress.js'; // For ensuring button state respects compression
 import { populateSettingsForm, showSettingsModal } from './ui/settings.js'; // Assuming settings.js exports showSettingsModal
 
 /**
@@ -317,6 +318,9 @@ export function setupSocketEventHandlers(socket) {
             }
 
             console.log("session_joined processing complete.");
+
+            // Make sure the Send button still respects compression status
+            updateCompressionUI();
 
         } catch (error) {
             console.error("Error processing session_joined data:", error);
