@@ -54,7 +54,7 @@ function addUsage(accountingObject, model, promptTokens, completionTokens) {
         });
 
         // Also emit token count update
-        accountingEvents.emit('token_update', {
+        accountingEvents.emit('token_count', {
             sessionId: accountingObject.__id,
             current: totalTokens,
             max: 1000000,

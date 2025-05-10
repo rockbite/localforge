@@ -839,6 +839,17 @@ sessionAccountingEvents.on('updated', (data) => {
     }
 });
 
+// Listen for token count updates and forward to clients
+sessionAccountingEvents.on('token_count', (data) => {
+    const sockets = sessionSocketMap.get(data.sessionId);
+    if (sockets) {
+        sockets.forEach(socket => {
+            // data already contains sessionId so no need to add it
+            socket.emit('token_count', data);
+        });
+    }
+});
+
 // Listen for tool log appends and forward to clients
 sessionToolLogEvents.on('append', ({ sessionId, logEntry }) => {
     const sockets = sessionSocketMap.get(sessionId);
