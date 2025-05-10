@@ -1,4 +1,4 @@
-// src/ui/projects.js
+// public/js/ui/projects.js
 // Purpose: Handle the UI related to projects and sessions list in the sidebar.
 
 import { appState } from '../state.js';

@@ -1,4 +1,4 @@
-// src/state.js
+// public/js/state.js
 // Purpose: Defines and exports the global application state.
 
 // Global state object for the application

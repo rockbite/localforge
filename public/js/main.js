@@ -1,4 +1,4 @@
-// src/main.js
+// public/js/ui/main.js
 // Purpose: Main entry point for the frontend application. Orchestrates initialization.
 
 import { appState } from './state.js';

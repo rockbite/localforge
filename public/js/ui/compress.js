@@ -1,5 +1,4 @@
-// src/ui/compress.js
-// Purpose: Handle the compress button functionality and API interaction
+// public/js/ui/compress.js
 
 import { appState } from '../state.js';
 import { setStatus } from './status.js';

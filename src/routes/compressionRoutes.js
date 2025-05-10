@@ -1,3 +1,4 @@
+// src/routes/compressionRoutes.js
 // Compression Routes
 import express from 'express';
 import { projectSessionManager } from '../services/sessions/index.js';
