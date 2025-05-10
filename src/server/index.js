@@ -791,15 +791,24 @@ app.get('/', (req, res) => {
 // Start the server only if not already running
 const startExpressServer = async () => {
     try {
-        // Initialize the MCP service before starting the server
-        console.log('Initializing MCP service...');
-        mcpService.initialize().then(() => {
-            console.log('MCP service initialized successfully');
-        }); // but we don't wait
-
+        // Start listening IMMEDIATELY - this ensures Electron gets the "ready" message
+        // without waiting for MCP connections
         server.listen(port, () => {
             console.log(`Agent backend server listening on port ${port}`);
         });
+
+        // Initialize MCP service AFTER server is already listening
+        // This way, MCP connection issues won't block the app startup
+        (async () => {
+            console.log('Initializing MCP service...');
+            try {
+                await mcpService.initialize();
+                console.log('MCP service initialized successfully');
+            } catch (error) {
+                console.error('MCP service initialization error (non-blocking):', error);
+                // Server continues running even if MCP initialization fails
+            }
+        })(); // Fire-and-forget
     } catch (error) {
         if (error.code === 'EADDRINUSE') {
             console.log(`Port ${port} is already in use. Server may already be running.`);
