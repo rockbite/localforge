@@ -1,5 +1,5 @@
 /**
- * accounting.js - Token and cost accounting for LLM interactions
+ * src/services/accounting/index.js - Token and cost accounting for LLM interactions
  * Refactored to work with the ProjectSessionManager
  */
 
@@ -39,6 +39,10 @@ function addUsage(accountingObject, model, promptTokens, completionTokens) {
 
     accountingObject.input  = (accountingObject.input  ?? 0) + promptTokens;
     accountingObject.output = (accountingObject.output ?? 0) + completionTokens;
+
+    // Calculate total tokens
+    const totalTokens = accountingObject.input + accountingObject.output;
+
     // NOTE: Event emission is now handled by ProjectSessionManager
     // The following is maintained for backward compatibility, but should
     // be removed when all code uses ProjectSessionManager
@@ -47,6 +51,17 @@ function addUsage(accountingObject, model, promptTokens, completionTokens) {
             sessionId: accountingObject.__id,
             totalUSD: accountingObject.totalUSD.toFixed(4),
             breakdown: accountingObject.models
+        });
+
+        // Also emit token count update
+        accountingEvents.emit('token_update', {
+            sessionId: accountingObject.__id,
+            current: totalTokens,
+            max: 1000000,
+            accounting: {
+                input: accountingObject.input,
+                output: accountingObject.output
+            }
         });
     }
 }

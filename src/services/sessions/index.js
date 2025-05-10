@@ -1,5 +1,5 @@
 /**
- * ProjectSessionManager.js - Centralized manager for project sessions
+ * src/services/sessions/index.js - Centralized manager for project sessions
  * Loads, caches, and persists session data from/to the database
  */
 
@@ -339,6 +339,17 @@ class ProjectSessionManager {
             sessionId: sessionId,
             totalUSD: sessionData[FIELD_NAMES.ACCOUNTING].totalUSD.toFixed(4),
             breakdown: sessionData[FIELD_NAMES.ACCOUNTING].models
+        });
+
+        // Also emit token count update in real-time
+        sessionAccountingEvents.emit('token_count', {
+            sessionId: sessionId,
+            current: (sessionData[FIELD_NAMES.ACCOUNTING].input || 0) + (sessionData[FIELD_NAMES.ACCOUNTING].output || 0),
+            max: 1000000,
+            accounting: {
+                input: sessionData[FIELD_NAMES.ACCOUNTING].input || 0,
+                output: sessionData[FIELD_NAMES.ACCOUNTING].output || 0
+            }
         });
 
         await this.saveSession(sessionId);

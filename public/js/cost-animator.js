@@ -1,4 +1,5 @@
 /**
+ * public/js/cost-animator.js
  * Cost display animator
  * Animates transitions between numeric values with smooth digit-by-digit animations
  */

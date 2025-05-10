@@ -1,4 +1,4 @@
-// src/socket.js
+// public/js/socket.js
 // Purpose: Manages the Socket.IO connection and handles incoming/outgoing events.
 
 import { io } from "https://cdn.socket.io/4.7.4/socket.io.esm.min.js"; // Using CDN ESM import
