@@ -16,7 +16,7 @@
     max-height: 44px;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 24px;
+    padding: 4px 5px;
     border-bottom: 1px solid var(--border-primary);
     background-color: var(--bg-primary);
 }

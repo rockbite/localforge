@@ -1,0 +1,39 @@
+/* Tooltip styles for Tippy.js */
+.tippy-box[data-theme~='localforge'] {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 12px;
+  padding: 2px;
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.tippy-box[data-theme~='localforge'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: var(--bg-tertiary);
+}
+
+.tippy-box[data-theme~='localforge'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: var(--bg-tertiary);
+}
+
+.tippy-box[data-theme~='localforge'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: var(--bg-tertiary);
+}
+
+.tippy-box[data-theme~='localforge'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: var(--bg-tertiary);
+}
+
+.tippy-box[data-animation='scale'] {
+  transform-origin: bottom;
+  transition: all 0.1s ease-out;
+}
+
+/* Border color for the arrow */
+.tippy-box[data-theme~='localforge'] .tippy-arrow:after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-color: var(--border-primary);
+}

@@ -124,8 +124,11 @@ async function initializeApp() {
         initCompressButton();
 
         // Initialize global ESC key handler for modals
-        const { initGlobalModalEscHandler } = await import('./utils.js');
+        const { initGlobalModalEscHandler, initTooltips } = await import('./utils.js');
         initGlobalModalEscHandler();
+
+        // Initialize tooltips for buttons
+        initTooltips('.secondary-button.icon-button');
         console.log("UI components initialized.");
 
         // 4. Initialize WebSocket connection

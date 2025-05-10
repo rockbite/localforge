@@ -32,3 +32,4 @@ packaged-apps/
 
 .secrets
 uploads/**
+**/.claude/settings.local.json

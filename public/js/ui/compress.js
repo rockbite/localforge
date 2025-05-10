@@ -38,24 +38,35 @@ function updateCompressionUI() {
     compressButton.classList.toggle('compressing', isCompressing);
     
     if (isCompressing) {
-        // Add spinner icon to button
-        const originalText = compressButton.textContent || "Compress";
-        compressButton.innerHTML = '<span class="material-icons spin">sync</span> Compressing...';
-        compressButton.dataset.originalText = originalText;
-        
+        // Save original HTML content and replace with spinner icon
+        compressButton.dataset.originalHtml = compressButton.innerHTML;
+        compressButton.innerHTML = '<span class="material-icons spin">sync</span>';
+        compressButton.title = "Compressing...";
+
+        // Update tippy tooltip if it exists
+        if (compressButton._tippy) {
+            compressButton._tippy.setContent("Compressing...");
+        }
+
         // Disable chat input if compression is happening in current session
         if (sessionId === appState.currentSessionId) {
             enableChatInput(false);
         }
     } else {
-        // Restore original button text
-        if (compressButton.dataset.originalText) {
-            compressButton.textContent = compressButton.dataset.originalText;
-            delete compressButton.dataset.originalText;
+        // Restore original button content
+        if (compressButton.dataset.originalHtml) {
+            compressButton.innerHTML = compressButton.dataset.originalHtml;
+            delete compressButton.dataset.originalHtml;
         } else {
-            compressButton.textContent = "Compress";
+            compressButton.innerHTML = '<span class="material-icons">compress</span>';
         }
-        
+        compressButton.title = "Compress";
+
+        // Update tippy tooltip if it exists
+        if (compressButton._tippy) {
+            compressButton._tippy.setContent("Compress");
+        }
+
         // Enable chat input if we're in the current session
         if (sessionId === appState.currentSessionId) {
             enableChatInput(true);

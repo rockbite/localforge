@@ -220,6 +220,47 @@ export function showConfirmationModal({
 // }
 
 /**
+ * Initialize tooltips for elements using Tippy.js
+ * @param {string} selector - CSS selector for elements that should have tooltips
+ * @param {object} options - Options to pass to tippy
+ */
+export function initTooltips(selector = '[title]', options = {}) {
+    // Dynamically import tippy.js
+    import('tippy.js').then(tippyModule => {
+        const tippy = tippyModule.default;
+
+        // Default options
+        const defaultOptions = {
+            arrow: true,
+            animation: 'scale',
+            theme: 'localforge',
+            placement: 'bottom',
+            delay: [50, 0],  // 50ms delay before showing, 0ms before hiding
+        };
+
+        // Merge default options with provided options
+        const mergedOptions = { ...defaultOptions, ...options };
+
+        // Initialize tooltips on elements with title attribute
+        const elements = document.querySelectorAll(selector);
+        if (elements.length > 0) {
+            tippy(elements, {
+                ...mergedOptions,
+                // Use the title attribute as content and remove it to avoid the default browser tooltip
+                content: reference => {
+                    const title = reference.getAttribute('title') || '';
+                    reference.removeAttribute('title');
+                    return title;
+                }
+            });
+            console.log(`Initialized tooltips for ${elements.length} elements`);
+        }
+    }).catch(error => {
+        console.error('Error initializing tooltips:', error);
+    });
+}
+
+/**
  * Checks if the application is running in Electron environment
  * @returns {boolean} - True if running in Electron, false otherwise
  */
