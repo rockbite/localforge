@@ -203,8 +203,10 @@ routerSessions.post('/:id/clear', async (req, res) => {
 
     let existingWorkingDirectory = null;
     let existingAgentId = null;
+    let existingMcpAlias = null;
+    let existingMcpUrl = null;
 
-    // 1. Try to get the *current* working directory and agentId (handle potential legacy fields)
+    // 1. Try to get the *current* working directory, agentId, and MCP data (handle potential legacy fields)
     try {
       const existingRawData = await store.getSessionData(sessionId);
       // Use the same logic as normalization to find the correct working directory
@@ -212,9 +214,13 @@ routerSessions.post('/:id/clear', async (req, res) => {
                               || existingRawData?.[FIELD_NAMES.LEGACY_DIRECTORY]
                               || null;
       existingAgentId = existingRawData?.[FIELD_NAMES.AGENT_ID] || null;
-      
+      existingMcpAlias = existingRawData?.[FIELD_NAMES.MCP_ALIAS] || null;
+      existingMcpUrl = existingRawData?.[FIELD_NAMES.MCP_URL] || null;
+
       console.log(`Found existing working directory for session ${sessionId}: ${existingWorkingDirectory}`);
       console.log(`Found existing agent ID for session ${sessionId}: ${existingAgentId}`);
+      console.log(`Found existing MCP alias for session ${sessionId}: ${existingMcpAlias}`);
+      console.log(`Found existing MCP URL for session ${sessionId}: ${existingMcpUrl}`);
     } catch (err) {
       // If session data doesn't exist (e.g., corrupted/partially deleted), log but proceed with null values.
        if (err.status === 404 || err.code === 'LEVEL_NOT_FOUND') {
@@ -230,13 +236,15 @@ routerSessions.post('/:id/clear', async (req, res) => {
       ...DEFAULT_SESSION_DATA, // Start with defaults
       [FIELD_NAMES.WORKING_DIRECTORY]: existingWorkingDirectory, // Preserve the found WD
       [FIELD_NAMES.AGENT_ID]: existingAgentId, // Preserve the found agent ID
+      [FIELD_NAMES.MCP_ALIAS]: existingMcpAlias, // Preserve the found MCP alias
+      [FIELD_NAMES.MCP_URL]: existingMcpUrl, // Preserve the found MCP URL
       // updatedAt will be added by setSessionData/saveSession
     };
 
     // 3. Use setSessionData to replace the existing data completely
     // Add updatedAt timestamp here or rely on setSessionData to do it
     const savedData = await store.setSessionData(sessionId, { ...clearedData, [FIELD_NAMES.UPDATED_AT]: Date.now() });
-    console.log(`Session ${sessionId} cleared. Preserved WD: ${savedData[FIELD_NAMES.WORKING_DIRECTORY]}, Agent ID: ${savedData[FIELD_NAMES.AGENT_ID]}`);
+    console.log(`Session ${sessionId} cleared. Preserved WD: ${savedData[FIELD_NAMES.WORKING_DIRECTORY]}, Agent ID: ${savedData[FIELD_NAMES.AGENT_ID]}, MCP Alias: ${savedData[FIELD_NAMES.MCP_ALIAS]}, MCP URL: ${savedData[FIELD_NAMES.MCP_URL]}`);
 
     // 4. Reset the in-memory session in ProjectSessionManager IMMEDIATELY
     // Pass the definitively cleared and saved data.
