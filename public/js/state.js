@@ -22,9 +22,5 @@ export const appState = {
     },
     // No need for reconnectedDuringProcessing flag - server handles broadcasting to all clients
     historicalToolLogs: [], // Stores logs fetched during session join for context
-    compressionState: {
-        isCompressing: false, // Whether a session is currently being compressed
-        sessionId: null,      // The ID of the session being compressed
-        startTime: null       // When the compression started
-    }
+    compressionStates: {}, // Map of sessionId -> {isCompressing: boolean, startTime: number}
 };

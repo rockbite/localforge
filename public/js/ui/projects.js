@@ -607,6 +607,9 @@ export async function switchToSession(projectId, sessionId) {
             console.warn("Socket not connected during session switch. Connection handler will join.");
         }
 
+        // Dispatch session-changed event to notify other components
+        window.dispatchEvent(new Event('session-changed'));
+
     } catch (error) {
         console.error('Error switching session:', error);
         alert('Error switching session: ' + error.message);
