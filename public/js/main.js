@@ -124,11 +124,9 @@ async function initializeApp() {
         initCompressButton();
 
         // Initialize global ESC key handler for modals
-        const { initGlobalModalEscHandler, initTooltips } = await import('./utils.js');
+        const { initGlobalModalEscHandler } = await import('./utils.js');
         initGlobalModalEscHandler();
-
-        // Initialize tooltips for buttons
-        initTooltips('.secondary-button.icon-button');
+        
         console.log("UI components initialized.");
 
         // 4. Initialize WebSocket connection
@@ -171,5 +169,33 @@ async function initializeApp() {
     }
 }
 
+// Function to set up tooltips
+function setupTooltips() {
+    if (typeof tippy === 'undefined') {
+        console.error('Tippy.js not loaded for tooltip setup');
+        return;
+    }
+
+    console.log('Setting up tooltips...');
+    tippy('.secondary-button.icon-button', {
+        delay: [0, 0],
+        duration: [100, 0],
+        animation: 'fade',
+        theme: 'light',
+        // Use the title attribute as content and remove it to prevent showing the browser's tooltip
+        content: (reference) => {
+            const title = reference.getAttribute('title') || '';
+            // Don't remove the title as we use it elsewhere
+            return title;
+        }
+    });
+}
+
 // Start the application once the DOM is ready
-document.addEventListener('DOMContentLoaded', initializeApp);
+document.addEventListener('DOMContentLoaded', () => {
+    // Set up tooltips
+    setupTooltips();
+    
+    // Initialize the app
+    initializeApp();
+});

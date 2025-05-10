@@ -41,9 +41,9 @@ function updateCompressionUI() {
         // Save original HTML content and replace with spinner icon
         compressButton.dataset.originalHtml = compressButton.innerHTML;
         compressButton.innerHTML = '<span class="material-icons spin">sync</span>';
-        compressButton.title = "Compressing...";
 
-        // Update tippy tooltip if it exists
+        // Update tooltip content
+        compressButton.title = "Compressing...";
         if (compressButton._tippy) {
             compressButton._tippy.setContent("Compressing...");
         }
@@ -60,9 +60,9 @@ function updateCompressionUI() {
         } else {
             compressButton.innerHTML = '<span class="material-icons">compress</span>';
         }
-        compressButton.title = "Compress";
 
-        // Update tippy tooltip if it exists
+        // Update tooltip content
+        compressButton.title = "Compress";
         if (compressButton._tippy) {
             compressButton._tippy.setContent("Compress");
         }
