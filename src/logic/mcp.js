@@ -1,3 +1,4 @@
+// src/logic/mcp.js (the library)
 /**
  * Class MCPLibrary
  *

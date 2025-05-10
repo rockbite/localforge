@@ -1,3 +1,4 @@
+// service/mcp/index.js
 // MCP Service - provides global access to MCPLibrary instance
 // -------------------------------------------------------
 // Creates a singleton instance of MCPLibrary that can be used throughout the app
