@@ -565,7 +565,7 @@ export function setupSocketEventHandlers(socket) {
         if (stopButton) {
             stopButton.disabled = false;
             stopButton.classList.remove('stopping');
-            stopButton.innerHTML = '<span class="material-icons">stop</span> Stop';
+            stopButton.innerHTML = '<span class="material-icons">stop</span>';
         }
     });
     
@@ -578,7 +578,7 @@ export function setupSocketEventHandlers(socket) {
         if (stopButton) {
             stopButton.disabled = false;
             stopButton.classList.remove('stopping');
-            stopButton.innerHTML = '<span class="material-icons">stop</span> Stop';
+            stopButton.innerHTML = '<span class="material-icons">stop</span>';
         }
     });
 

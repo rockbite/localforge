@@ -137,16 +137,16 @@ export function initChatForm() {
     if (stopButton) {
         stopButton.addEventListener('click', () => {
             console.log('Stop button clicked, interrupting session');
-            
+
             // Provide visual feedback - disable button and show spinner
             stopButton.disabled = true;
             stopButton.classList.add('stopping');
             const originalContent = stopButton.innerHTML;
-            stopButton.innerHTML = '<span class="material-icons spin">sync</span> Stopping...';
-            
+            stopButton.innerHTML = '<span class="material-icons spin">sync</span>';
+
             if (appState.socket?.connected && appState.currentSessionId) {
                 appState.socket.emit('interrupt_session', { sessionId: appState.currentSessionId });
-                
+
                 // If no response comes in 5 seconds, reset the button anyway
                 setTimeout(() => {
                     if (stopButton.disabled) {
