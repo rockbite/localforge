@@ -140,10 +140,12 @@ export function renderOrUpdateToolWidget(toolCallId, allLogs, currentAgentState)
     const compactContentHtml = `
         <span class="tool-execution-timer ${isCompleted ? 'final-time' : ''}">${displayTime}</span>
         <span class="tool-name">
-            <span class="material-icons" ${iconColorStyle}>${toolIconName}</span>${toolStartLog.toolName || 'Unknown Tool'}
+            ${isActive ?
+              `<span class="material-icons tool-icon-spinner">sync</span>` :
+              `<span class="material-icons" ${iconColorStyle}>${toolIconName}</span>`
+            }${toolStartLog.toolName || 'Unknown Tool'}
         </span>
-        <span class="tool-status-text">${statusText}</span>
-        ${statusIconHtml}
+        ${isCompleted ? '' : `<span class="tool-status-text">${statusText}</span>`}
         <span class="info-icon"><span class="material-icons">info</span></span>
     `;
 
