@@ -8,6 +8,15 @@ import { enableChatInput, clearMessages } from './chat.js';
 // DOM Element for the compress button
 const compressButton = document.getElementById('compress-button');
 
+/* -------------------------------------------------- *
+ * helpers                                            *
+ * -------------------------------------------------- */
+// true ⟺ **any** session is currently compressing
+function anySessionCompressing() {
+  return Object.values(appState.compressionStates)
+               .some(s => s.isCompressing);
+}
+
 /**
  * Sets the compression state for a specific session
  * @param {string} sessionId - The session ID being compressed
@@ -24,9 +33,9 @@ export function setSessionCompressionState(sessionId, isCompressing) {
     // Remove compression state for this session
     delete appState.compressionStates[sessionId];
   }
-  
-  // Update UI based on new state
-  updateCompressionUI();
+
+  // Broadcast change so every tab / component can react
+  window.dispatchEvent(new Event('compression-state-changed'));
 }
 
 /**
@@ -42,21 +51,23 @@ export function isSessionCompressing(sessionId) {
  * Updates the compression button UI state and controls input availability
  * Shows spinner only for the current session if it's compressing
  */
-function updateCompressionUI() {
+export function updateCompressionUI() {
   if (!compressButton) return;
-  
+
   const currentSessionId = appState.currentSessionId;
-  
+
   // Check if current session is compressing
   const isCurrentSessionCompressing = isSessionCompressing(currentSessionId);
-  
+  const isAnyCompression            = anySessionCompressing();
+
   // Check if the agent is busy (agent state is separate from compression)
-  const isAgentBusy = appState.isAgentResponding || 
-                     (appState.currentAgentState?.status !== 'idle' && 
+  const isAgentBusy = appState.isAgentResponding ||
+                     (appState.currentAgentState?.status !== 'idle' &&
                       appState.currentAgentState?.status !== undefined);
-  
-  // Update button state based on current session compression and agent state
+
+  /* ---------- button ---------- */
   compressButton.disabled = isCurrentSessionCompressing || isAgentBusy;
+  compressButton.classList.toggle('disabled', compressButton.disabled);
   compressButton.classList.toggle('compressing', isCurrentSessionCompressing);
   
   // Update button appearance
@@ -87,8 +98,9 @@ function updateCompressionUI() {
     }
   }
   
-  // Disable chat input only if current session is compressing or agent is busy
-  enableChatInput(!(isCurrentSessionCompressing || isAgentBusy));
+  /* ---------- chat input ---------- */
+  // lock the input if *anything* is compressing, or the agent is busy
+  enableChatInput(!(isAnyCompression || isAgentBusy));
 }
 
 /**
@@ -208,10 +220,12 @@ export async function initCompressButton() {
   
   // Initialize the button state
   updateCompressionUI();
-  
-  // Add listener for session changes to update button state
-  window.addEventListener('session-changed', updateCompressionUI);
-  
+
+  // React to *all* state-change events that matter
+  window.addEventListener('session-changed',           updateCompressionUI);
+  window.addEventListener('compression-state-changed', updateCompressionUI);
+  window.addEventListener('agent-status-changed',      updateCompressionUI);
+
   console.log("Compress button initialized.");
 }
 

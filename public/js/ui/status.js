@@ -66,6 +66,9 @@ export function setStatus(status, customText = null) {
     // Update appState's view of agent responsiveness (used by old code, maybe remove later)
     appState.isAgentResponding = !isIdle;
 
+    // Dispatch event to notify other components of the status change
+    window.dispatchEvent(new Event('agent-status-changed'));
+
     // Enable/disable chat based on whether the status implies the agent is busy
     enableChatInput(isIdle);
 
