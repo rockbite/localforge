@@ -535,15 +535,20 @@ function loadCurrentMcpSelection() {
         import('./api.js').then(api => {
             api.getSessionData(appState.currentSessionId)
                 .then(sessionData => {
-                    if (sessionData && sessionData.mcpAlias) {
-                        // Find this MCP in the selector
-                        const options = Array.from(mcpSelector.options);
-                        const mcpOption = options.find(option => option.value === sessionData.mcpAlias);
+                    if (sessionData) {
+                        const alias = sessionData.data?.mcpAlias || sessionData.mcpAlias || '';
+                        if (alias) {
+                            // Find this MCP in the selector
+                            const options = Array.from(mcpSelector.options);
+                            const mcpOption = options.find(option => option.value === alias);
 
-                        if (mcpOption) {
-                            mcpSelector.value = sessionData.mcpAlias;
+                            if (mcpOption) {
+                                mcpSelector.value = alias;
+                            } else {
+                                console.warn(`Selected MCP ${alias} not found in list.`);
+                                mcpSelector.value = '';
+                            }
                         } else {
-                            console.warn(`Selected MCP ${sessionData.mcpAlias} not found in list.`);
                             mcpSelector.value = '';
                         }
                     } else {
