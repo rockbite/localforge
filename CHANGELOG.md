@@ -2,8 +2,10 @@
 All notable changes to **Localforge** will be documented in this file.  
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
-
 ## [1.0.23] – TBD
+
+
+## [1.0.23] – 025-05-10
 
 * Instead of hardcoded 3001 now runs on any available port (will try 3826 as default first as least common, then find other options if still busy)
 * Added "Compress" button on top of each chat, that will use Expert model in order to summarize a long conversation history, to save up tokens as it blows up.
