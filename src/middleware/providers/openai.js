@@ -124,7 +124,7 @@ export default {
         let client = new OpenAI(init);
 
         // this needs this weird api change for whoever knows why
-        if (options.model === 'o4-mini') {
+        if (options.model === 'o4-mini' || options.model === 'o3') {
             options.max_completion_tokens = options.max_tokens;
             delete options.max_tokens;
             delete options.temperature;
