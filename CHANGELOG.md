@@ -3,7 +3,8 @@ All notable changes to **Localforge** will be documented in this file.
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
 ## [1.0.23] – TBD
-
+* BatchTool was failing to pass data to some other tools
+* Tool calling now shows its description text even after it finished running
 
 ## [1.0.23] – 025-05-10
 
