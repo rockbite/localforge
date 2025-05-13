@@ -102,6 +102,11 @@ export function renderOrUpdateToolWidget(toolCallId, allLogs, currentAgentState)
 
     // Determine icon, time, status based on state
     if (isCompleted) {
+        // Preserve original statusText for final display if none provided by TOOL_END
+        if (!toolEndLog.descriptiveText && toolStartLog.descriptiveText) {
+            statusText = toolStartLog.descriptiveText;
+        }
+
         const startTime = toolStartLog.timestamp;
         const endTime = toolEndLog.timestamp;
         const durationMs = Math.max(0, endTime - startTime); // Ensure non-negative
@@ -145,7 +150,7 @@ export function renderOrUpdateToolWidget(toolCallId, allLogs, currentAgentState)
               `<span class="material-icons" ${iconColorStyle}>${toolIconName}</span>`
             }${toolStartLog.toolName || 'Unknown Tool'}
         </span>
-        ${isCompleted ? '' : `<span class="tool-status-text">${statusText}</span>`}
+        <span class="tool-status-text">${statusText}</span>
         <span class="info-icon"><span class="material-icons">info</span></span>
     `;
 
