@@ -4,7 +4,7 @@
  * @param {Function} runTool - Function to execute individual tools
  */
 async function executeBatch(args, toolRegistry) {
-  const { description, invocations, sessionId } = args;
+  const { description, invocations, sessionId, sessionData, signal } = args;
   const runTool = typeof toolRegistry.run === 'function' ? toolRegistry.run.bind(toolRegistry) : toolRegistry;
 
   if (!Array.isArray(invocations) || invocations.length === 0) {
@@ -27,7 +27,7 @@ async function executeBatch(args, toolRegistry) {
             };
 
             // Execute the tool
-            return await runTool(call);
+            return await runTool(call, sessionData, signal);
           } catch (error) {
             return {
               error: `Error executing tool ${invocation.tool_name}: ${error.message}`,
