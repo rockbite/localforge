@@ -272,7 +272,7 @@ async function getSystemAndContext(workDir, sessionData = null) {
 /**
  * Detects if a message indicates a new topic
  */
-async function detectTopic(message) {
+async function detectTopic(message, signal) {
     try {
         const messages = [
             {
@@ -288,7 +288,8 @@ async function detectTopic(message) {
         const response = await callLLMByType(AUX_MODEL, {
             messages,
             temperature: 0,
-            max_tokens: 128
+            max_tokens: 128,
+            signal
         });
         
         try {
@@ -309,7 +310,7 @@ async function detectTopic(message) {
 /**
  * Generates a whimsical gerund related to a word
  */
-async function generateGerund(word) {
+async function generateGerund(word, signal) {
     try {
         const messages = [
             {
@@ -325,7 +326,8 @@ async function generateGerund(word) {
         const response = await callLLMByType(AUX_MODEL, {
             messages,
             temperature: 1.0,
-            max_tokens: 32
+            max_tokens: 32,
+            signal
         });
         
         return response.content.trim();
@@ -664,25 +666,10 @@ function cleanupLoopHistoryFromImageMessage(loopMessages) {
  * @param {Function} streamCallback - Optional callback function for streaming updates
  * @returns {Object} - Response object
  */
-async function handleRequest(projectId, sessionId, message, streamCallback = null) {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-
+async function handleRequest(projectId, sessionId, message, streamCallback = null, signal) {
     console.log(streamCallback);
 
     // Listener to abort if interruption is requested via the manager
-    const checkInterruption = () => {
-        if (projectSessionManager.isInterruptionRequested(sessionId)) {
-            console.log(`[${sessionId}] AbortController triggered by interruption flag.`);
-            abortController.abort();
-            // No need to constantly check after aborting
-        } else {
-            // Re-schedule check if not aborted yet
-            setTimeout(checkInterruption, 250); // Check every 250ms
-        }
-    };
-    // Start checking
-    const checkIntervalId = setTimeout(checkInterruption, 250);
 
     try {
         // 0. Load session data using the manager
@@ -755,13 +742,13 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
 
 
         // 5. Topic detection & gerund (use text only, before description)
-        const topicInfo = await detectTopic(userText);
+        const topicInfo = await detectTopic(userText, signal);
         if (streamCallback) {
             streamCallback({ type: 'topic_detection', topic: topicInfo });
         }
 
         const firstWord = (userText.trim().split(/\s+/)[0]) || 'Processing';
-        const gerund = await generateGerund(firstWord);
+        const gerund = await generateGerund(firstWord, signal);
         if (streamCallback) {
             streamCallback({ type: 'gerund_generation', gerund });
         }
@@ -884,11 +871,6 @@ async function handleRequest(projectId, sessionId, message, streamCallback = nul
             }
             throw error;
         }
-    } finally {
-        // Clean up the interruption check interval
-        clearTimeout(checkIntervalId);
-        // Ensure the interruption flag is cleared if handleRequest exits for any reason
-        projectSessionManager.clearInterruption(sessionId);
     }
 }
 

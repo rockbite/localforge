@@ -93,7 +93,7 @@ export async function callLLMProvider(providerName, options, sessionData = null)
     const cleanOptions = {...options};
     
     // Remove properties not expected by LLM providers
-    delete cleanOptions.signal;
+    // delete cleanOptions.signal; // todo this is wrong to remove here, some of them DO accept it
     delete cleanOptions.sessionId;
     delete cleanOptions.responseCallback;
 

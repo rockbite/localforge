@@ -129,7 +129,7 @@ function createToolRegistry(allowedToolNames) {
         }
         
         if (toolName === 'dispatch_agent') {
-          return await TOOL_IMPLEMENTATIONS[toolName]({...args, sessionData, workingDirectory, toolContext});
+          return await TOOL_IMPLEMENTATIONS[toolName]({...args, sessionData, workingDirectory, toolContext, signal});
         }
         // Handle Bash command special cases
         if (toolName === 'Bash') {
@@ -167,7 +167,7 @@ function createToolRegistry(allowedToolNames) {
           return result;
         }
         // Pass registry for tools that need nested calls (e.g. BatchTool)
-        return await TOOL_IMPLEMENTATIONS[toolName]({...args, sessionData}, this);
+        return await TOOL_IMPLEMENTATIONS[toolName]({...args, sessionData, signal}, this);
       } catch (err) {
         return { error: err.message };
       }

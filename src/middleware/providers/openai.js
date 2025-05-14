@@ -130,7 +130,14 @@ export default {
             delete options.temperature;
         }
 
-        const res = await client.chat.completions.create(options);
+        let signal = options.signal;
+        delete options.signal;
+
+        const res = await client.chat.completions.create(options, {
+            signal: signal
+        });
+
+        options.signal = signal;
 
         return res;
     },

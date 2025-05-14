@@ -39,13 +39,14 @@ function isValidHttpUrl(string) {
  * @param {string} prompt - The prompt for processing
  * @param {boolean} returnRaw - Whether to return raw HTML
  */
-async function fetchWithHeaders(url, prompt, returnRaw = false) {
+async function fetchWithHeaders(url, prompt, returnRaw = false, signal) {
   console.log(`Fetching (Headers Mode): ${url}`);
   try {
     const headers = getRealisticHeaders();
     const response = await axios.get(url, {
       headers,
       timeout: 15000, // 15 second timeout
+      signal: signal,
       responseType: 'text', // Ensure raw text/html is received
       maxContentLength: 1024 * 1024, // 1MB limit
       validateStatus: function (status) {
@@ -85,7 +86,7 @@ async function fetchWithHeaders(url, prompt, returnRaw = false) {
     // Cache the result
     cache.set(url, { content, timestamp: Date.now() });
 
-    return await processWithLLM(content, prompt, url);
+    return await processWithLLM(content, prompt, url, signal);
 
   } catch (error) {
     console.error(`Error fetching ${url} with headers:`, error.message);
@@ -106,17 +107,60 @@ async function fetchWithHeaders(url, prompt, returnRaw = false) {
  * @param {string} prompt - The prompt for processing
  * @param {boolean} returnRaw - Whether to return raw HTML
  */
-async function fetchWithPuppeteer(url, prompt, returnRaw = false) {
+async function fetchWithPuppeteer(url, prompt, returnRaw = false, signal) {
   console.log(`Fetching (Puppeteer Mode): ${url}`);
   let browser = null;
+
+  // Helper promise that rejects when the signal is aborted
+  const abortPromise = new Promise((resolve, reject) => {
+    if (signal) {
+      if (signal.aborted) {
+        reject(new DOMException('Aborted', 'AbortError'));
+        return;
+      }
+      signal.addEventListener('abort', () => {
+        reject(new DOMException('Aborted', 'AbortError'));
+      });
+    }
+  });
+
   try {
+    // Check if already aborted before launching
+    if (signal?.aborted) {
+      console.log('Operation aborted before launching browser.');
+      throw new DOMException('Aborted', 'AbortError');
+    }
+
     browser = await puppeteer.launch({ headless: true }); // Use true for server environments
     const page = await browser.newPage();
+
+    // It's good practice to check the signal before any significant operation
+    if (signal?.aborted) {
+      throw new DOMException('Aborted', 'AbortError');
+    }
+
     await page.setUserAgent(getRandomUserAgent()); // Set realistic UA
     await page.setViewport({ width: 1920, height: 1080 }); // Standard viewport
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 }); // Wait until network is mostly idle, 30s timeout
 
-    const htmlContent = await page.content();
+
+    // Race page.goto against the abort signal
+    await Promise.race([
+      page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 }), // 30s timeout for goto
+      abortPromise
+    ]);
+
+    if (signal?.aborted) {
+      throw new DOMException('Aborted', 'AbortError');
+    }
+
+    const htmlContent = await Promise.race([
+      page.content(),
+      abortPromise
+    ]);
+
+    if (signal?.aborted) {
+      throw new DOMException('Aborted', 'AbortError');
+    }
 
     // --- Add Readability Step ---
     let mainContentHtml = '';
@@ -168,9 +212,17 @@ async function fetchWithPuppeteer(url, prompt, returnRaw = false) {
     // Cache the result
     cache.set(url, { content, timestamp: Date.now() });
 
-    return await processWithLLM(content, prompt, url);
+    return await processWithLLM(content, prompt, url, signal);
 
   } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log(`Puppeteer operation for ${url} aborted: ${error.message}`);
+      return {
+        error: `Operation for ${url} was aborted.`,
+        aborted: true
+      };
+    }
+
     console.error(`Error fetching ${url} with Puppeteer:`, error.message);
     return {
       error: `Failed to fetch content from ${url} using Puppeteer. Reason: ${error.message}`
@@ -186,7 +238,7 @@ async function fetchWithPuppeteer(url, prompt, returnRaw = false) {
  * Performs a Google search using the Custom Search JSON API
  * @param {string} query - The search query
  */
-async function performGoogleSearch(query) {
+async function performGoogleSearch(query, signal) {
   console.log(`Performing Google Search for: ${query}`);
   const apiKey = store.getSetting('googleApiKey');
   const cseId = store.getSetting('googleCseId');
@@ -201,7 +253,7 @@ async function performGoogleSearch(query) {
   const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cseId}&q=${encodeURIComponent(query)}`;
 
   try {
-    const response = await axios.get(url, { timeout: 10000 }); // 10s timeout for search
+    const response = await axios.get(url, { timeout: 10000, signal: signal }); // 10s timeout for search
     const results = response.data.items;
 
     if (!results || results.length === 0) {
@@ -241,7 +293,7 @@ async function performGoogleSearch(query) {
  * @param {string} prompt - The prompt to use
  * @param {string} url - The URL that was fetched
  */
-async function processWithLLM(content, prompt, url) {
+async function processWithLLM(content, prompt, url, signal) {
   try {
     const messages = [
       {
@@ -257,7 +309,8 @@ async function processWithLLM(content, prompt, url) {
     const llmResponse = await callLLMByType(MAIN_MODEL, {
       messages,
       temperature: 0.3,
-      max_tokens: 2048
+      max_tokens: 2048,
+      signal
     });
 
     return {
@@ -275,6 +328,8 @@ async function processWithLLM(content, prompt, url) {
  */
 async function webFetchUtils(args) {
   const { url: urlOrQuery, prompt, returnRaw = false } = args;
+
+  let signal = args.signal;
   
   cleanCache(); // Clean expired cache entries
   
@@ -305,7 +360,7 @@ async function webFetchUtils(args) {
         if (returnRaw) {
           return { url, content };
         }
-        return await processWithLLM(content, prompt, url);
+        return await processWithLLM(content, prompt, url, signal);
       }
     }
 
@@ -313,13 +368,13 @@ async function webFetchUtils(args) {
     const usePuppeteer = store.getSetting('usePuppeteer') === true;
 
     if (usePuppeteer) {
-      return await fetchWithPuppeteer(url, prompt, returnRaw);
+      return await fetchWithPuppeteer(url, prompt, returnRaw, signal);
     } else {
-      return await fetchWithHeaders(url, prompt, returnRaw);
+      return await fetchWithHeaders(url, prompt, returnRaw, signal);
     }
   } else {
     // It's a search query
-    return await performGoogleSearch(urlOrQuery);
+    return await performGoogleSearch(urlOrQuery, signal);
   }
 }
 

@@ -5,6 +5,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) co
 ## [1.0.23] – TBD
 * BatchTool was failing to pass data to some other tools
 * Tool calling now shows its description text even after it finished running
+* Fixed various scenarios where AbortSignal was not working to stop an operation
 
 ## [1.0.23] – 025-05-10
 

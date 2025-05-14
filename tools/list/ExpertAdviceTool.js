@@ -40,9 +40,12 @@ export default {
     execute: async (args) => {
         const { files = [], prompt: userPrompt, sessionId, sessionData } = args || {};
 
+
         if (!userPrompt || typeof userPrompt !== 'string') {
             throw new Error('ExpertAdviceTool.execute: "prompt" argument is required');
         }
+
+        let signal = args.signal;
 
         // --- Utility helpers -------------------------------------------------
 
@@ -105,7 +108,7 @@ export default {
         // Call the chosen LLM and return its response
         let answer;
         try {
-            answer = await callModel(finalPrompt, sessionData);
+            answer = await callModel(finalPrompt, sessionData, signal);
             
             // Track token usage if sessionId is provided
             if (sessionId) {
@@ -133,7 +136,7 @@ export default {
     }
 };
 
-async function callModel(prompt, sessionData) {
+async function callModel(prompt, sessionData, signal) {
 
     const response = await callLLMByType(EXPERT_MODEL, {
         messages: [
@@ -142,7 +145,8 @@ async function callModel(prompt, sessionData) {
                 content: prompt,
             },
         ],
-        max_completion_tokens: 8192
+        max_completion_tokens: 8192,
+        signal
     }, sessionData);
 
     return response.content;

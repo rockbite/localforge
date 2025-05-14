@@ -7,6 +7,7 @@ import mcpService from '../services/mcp/index.js';
 // Log directory in the user's home directory
 const logDir = path.join(os.homedir(), '.localforge-logs'); // Using a hidden folder for logs
 
+
 try {
     if (!fs.existsSync(logDir)) {
         fs.mkdirSync(logDir, { recursive: true });
@@ -168,7 +169,9 @@ import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../../views'));
 
+/*
 // Main chat endpoint
+@deprecated needs deleting
 app.post('/agent/chat', async (req, res) => {
     try {
         //todo: is this even ever used?
@@ -249,7 +252,8 @@ app.post('/agent/chat', async (req, res) => {
         console.error('Error processing agent request:', error);
         res.status(500).json({ error: 'Internal server error processing request.' });
     }
-});
+});*/
+
 
 // Auxiliary endpoints for special functions
 
@@ -284,6 +288,7 @@ app.post('/api/updates/check', async (req, res) => {
     }
 });
 
+/*
 // Topic detection endpoint for UI
 app.post('/agent/detect-topic', async (req, res) => {
     try {
@@ -320,8 +325,9 @@ app.post('/agent/detect-topic', async (req, res) => {
         console.error('Error detecting topic:', error);
         res.status(500).json({ error: 'Error detecting topic.' });
     }
-});
+});*/
 
+/*
 // Whimsical gerund generation for UI status indicators
 app.post('/agent/generate-gerund', async (req, res) => {
     try {
@@ -353,7 +359,7 @@ app.post('/agent/generate-gerund', async (req, res) => {
         console.error('Error generating gerund:', error);
         res.status(500).json({ error: 'Error generating gerund.' });
     }
-});
+});*/
 
 function processMessageForUploadedImage(message) {
 
@@ -550,21 +556,38 @@ io.on('connection', (socket) => {
     
     // Handle chat messages from client
     socket.on('chat_message', async (messageData) => {
-        try {
-            const { content } = messageData;
-            const sessionId = socket.userData.currentSessionId;
-            const projectId = socket.userData.currentProjectId;
-            
-            if (!sessionId || !projectId) {
-                socket.emit('error', { message: 'No active session joined. Cannot send message.' });
-                return;
-            }
 
-            if (!content) {
-                socket.emit('error', { message: 'Message content is required' });
-                return;
+        const abortController = new AbortController();
+
+        const { content } = messageData;
+        const sessionId = socket.userData.currentSessionId;
+        const projectId = socket.userData.currentProjectId;
+
+        if (!sessionId || !projectId) {
+            socket.emit('error', { message: 'No active session joined. Cannot send message.' });
+            return;
+        }
+
+        if (!content) {
+            socket.emit('error', { message: 'Message content is required' });
+            return;
+        }
+
+        const signal = abortController.signal;
+        const checkInterruption = () => {
+            if (projectSessionManager.isInterruptionRequested(sessionId)) {
+                console.log(`[${sessionId}] AbortController triggered by interruption flag.`);
+                abortController.abort();
+                // No need to constantly check after aborting
+            } else {
+                // Re-schedule check if not aborted yet
+                setTimeout(checkInterruption, 250); // Check every 250ms
             }
-            
+        };
+        // Start checking
+        const checkIntervalId = setTimeout(checkInterruption, 250);
+
+        try {
             // Send acknowledgment to client
             socket.emit('message_received', { status: 'processing' });
             
@@ -594,7 +617,8 @@ io.on('connection', (socket) => {
                 const gerundResponse = await callLLMByType(AUX_MODEL, {
                     messages,
                     temperature: 1.0,
-                    max_tokens: 32
+                    max_tokens: 32,
+                    signal
                 });
                 
                 socket.emit('agent_update', {
@@ -629,7 +653,8 @@ io.on('connection', (socket) => {
                 projectId,
                 sessionId,
                 message,
-                streamCallback
+                streamCallback,
+                signal
             );
             
             // Check if the response indicates an interruption occurred
@@ -679,6 +704,11 @@ io.on('connection', (socket) => {
                     sessionId: socket.userData.currentSessionId 
                 });
             }
+        } finally {
+            // Clean up the interruption check interval
+            clearTimeout(checkIntervalId);
+            // Ensure the interruption flag is cleared if handleRequest exits for any reason
+            projectSessionManager.clearInterruption(sessionId);
         }
     });
     

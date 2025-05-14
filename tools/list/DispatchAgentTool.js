@@ -14,6 +14,8 @@ const SUB_AGENT_SYSTEM_PROMPT = `You are a specialized sub-agent focused on sear
  */
 async function dispatchAgent(args, workingDirectory, parentSessionId = 'unknown_parent') {
   // Handle different input formats
+  let signal = args.signal;
+
   let prompt;
   
   // Parse arguments if they're a string
@@ -78,7 +80,8 @@ async function dispatchAgent(args, workingDirectory, parentSessionId = 'unknown_
       initialMessages,    // currentMessages (Argument 2)
       subAgentTools,      // agentTools (Argument 3)
       workingDirectory,   // workingDirectory (Argument 4)
-      null                // streamCallback (Argument 5)
+      null,               // streamCallback (Argument 5)
+        signal,
     );
 
     // 6. Return the sub-agent's response
