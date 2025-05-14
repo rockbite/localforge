@@ -39,6 +39,7 @@ function getProviderTypeByProviderName(providerName) {
 
 }
 
+
 /**
  * Central entry point.
  * @param {string} prompt
@@ -72,6 +73,7 @@ export async function callLLMProvider(providerName, options, sessionData = null)
         // now lets add MCP tools if any (check by alias)
         if(sessionData.mcpAlias) {
             const tools = await mcpService.listTools(sessionData.mcpAlias);
+            patchBrokenTools(tools);
             if(tools && tools.length > 0) {
                 options.tools.push(...tools);
             }
@@ -294,6 +296,19 @@ function postProcess(provider, options, out) {
             if(options.model.toLowerCase().includes(idx)) {
                 postProcessMap[provider.name][idx](provider, options, out);
                 return;
+            }
+        }
+    }
+}
+
+
+function patchBrokenTools(tools) {
+    // Ensure tools is an array before trying to map over it
+    for(let idx in tools) {
+        let tool = tools[idx];
+        if(tool?.function?.parameters?.type === 'object') {
+            if(!tool.function.parameters.properties) {
+                tool.function.parameters.properties = {};
             }
         }
     }

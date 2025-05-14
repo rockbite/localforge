@@ -29,6 +29,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
 
 /**
@@ -138,7 +139,19 @@ export class MCPLibrary {
             version = '0.0.0'
         } = opts;
 
-        let transport = new SSEClientTransport(new URL(url));
+        let transport;
+        if (url) { // Existing SSE logic
+            transport = new SSEClientTransport(new URL(url));
+        } else if (command) { // New Stdio logic
+            console.log(`MCPLibrary: Connecting via Stdio to command: ${command} ${args.join(' ')}`);
+            // You might need to adjust how command and args are passed if StdioClientTransport
+            // expects them differently, e.g., combined or within an options object.
+            // Check the SDK documentation for StdioClientTransport constructor/options.
+            // Assuming it takes { command, args } or similar:
+            transport = new StdioClientTransport({ command, args });
+        } else {
+            throw new Error("MCPConnectionOptions must include 'url' (for SSE) or 'command' (for Stdio)");
+        }
 
         const client = new Client({ name, version });
         await client.connect(transport);          // throws if handshake fails

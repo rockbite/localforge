@@ -55,6 +55,35 @@ class MCPService {
         }
     }
 
+    async makeOptsFromUrl(inputUrl) {
+
+        let url;
+        let command;
+        let args = [];
+
+        if (inputUrl.startsWith('http://') || inputUrl.startsWith('https://')) {
+            url = inputUrl;
+            const urlObj = new URL(url);
+            command = 'node'; // Assuming it's a Node.js MCP server
+            args = [urlObj.pathname]; // Using the path as a script file to run
+        } else {
+            // This is likely a command
+            const parts = inputUrl.split(' ');
+            command = parts[0];
+            args = parts.slice(1);
+        }
+
+        let ops = {
+            url,
+            command,
+            args,
+            name: 'localforge', // Client name sent in handshake
+            version: '1.0.0'    // Client version sent in handshake
+        };
+
+        return ops;
+    }
+
     /**
      * Add a new MCP client with the specified alias and URL
      * @param {string} alias - The unique identifier for this MCP client
@@ -63,23 +92,11 @@ class MCPService {
      */
     async addClient(alias, url) {
         // Simple URL-based MCP connection
-        // In a real implementation, this would properly parse the URL and set up appropriate
-        // command and args based on the protocol and path
-        
-        // For demonstration purposes, we'll convert the URL to a command + args setup
-        // In a real implementation, this would need to be more sophisticated
-        const urlObj = new URL(url);
-        const command = 'node'; // Assuming it's a Node.js MCP server
-        const args = [urlObj.pathname]; // Using the path as a script file to run
+
+        let opts = await this.makeOptsFromUrl(url);
         
         // Add the client to the MCPLibrary
-        await this.mcpLibrary.addClient(alias, {
-            url,
-            command,
-            args,
-            name: 'localforge', // Client name sent in handshake
-            version: '1.0.0'    // Client version sent in handshake
-        });
+        await this.mcpLibrary.addClient(alias, opts);
     }
 
     /**
@@ -89,19 +106,10 @@ class MCPService {
      * @returns {Promise<void>}
      */
     async editClient(alias, url) {
-        // Convert URL to command + args as in addClient
-        const urlObj = new URL(url);
-        const command = 'node';
-        const args = [urlObj.pathname];
+        let opts = this.makeOptsFromUrl(url);
         
         // Edit the client in the MCPLibrary
-        await this.mcpLibrary.editClient(alias, {
-            url,
-            command,
-            args,
-            name: 'localforge',
-            version: '1.0.0'
-        });
+        await this.mcpLibrary.editClient(alias, opts);
     }
 
     /**
