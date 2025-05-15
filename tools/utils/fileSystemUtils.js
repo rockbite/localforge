@@ -52,8 +52,10 @@ async function walk(dir, depthLeft, ignore, stats) {
 
 
 const ls = async ({ path: dirPath, depth = 1, ignore = [], workingDirectory }) => {
-    const abs = path.resolve(dirPath);
+    // Always ignore node_modules (even if caller forgets)
+    if (!ignore.includes('node_modules')) ignore.push('node_modules');
 
+    const abs = path.resolve(dirPath);
     const depthInt = Math.min(+depth || 1, MAX_DEPTH);
     const stats = { count: 0 };
 
@@ -69,7 +71,8 @@ const ls = async ({ path: dirPath, depth = 1, ignore = [], workingDirectory }) =
     } catch (err) {
         return { error: err.message };
     }
-}
+};
+
 
 // ───────────────────────── 1. VIEW ─────────────────────────
 const view = async ({ file_path, offset = 0, limit = 2000, sessionData } = {}) => {
