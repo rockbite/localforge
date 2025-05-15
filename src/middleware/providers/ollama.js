@@ -113,7 +113,7 @@ export default {
             method : 'POST',
             headers: { 'Content-Type': 'application/json' },
             body   : JSON.stringify(body),
-            signal : providerOptions.signal,
+            signal : options.signal,
         });
 
         if (!res.ok) {
