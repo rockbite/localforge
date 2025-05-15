@@ -173,7 +173,9 @@ export async function initCompressButton() {
         // Set compression state for this session
         setSessionCompressionState(sessionId, true);
         setStatus('thinking', `Compressing session ${sessionName}...`);
-        
+
+        console.log('Compress action confirmed, sending to backend');
+
         // Call the compression API endpoint
         const response = await fetch(`/api/compression/${sessionId}`, {
           method: 'POST',

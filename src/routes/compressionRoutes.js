@@ -15,6 +15,10 @@ const router = express.Router();
 router.post('/:sessionId', async (req, res) => {
   const { sessionId } = req.params;
 
+  // todo: no abortion here, need to be able to abort later on
+
+  console.log("Starting to compress message history on backend");
+
   // Check if this session is already being compressed
   if (!compressionTracker.startCompression(sessionId)) {
     return res.status(409).json({
@@ -41,6 +45,8 @@ router.post('/:sessionId', async (req, res) => {
         sessionData[FIELD_NAMES.HISTORY] = modifiedHistory;
         await projectSessionManager.saveSession(sessionId);
 
+        console.log('Session history compressed successfully')
+
         // Send success response with reload flag
         res.json({
           success: true,
@@ -58,6 +64,8 @@ router.post('/:sessionId', async (req, res) => {
         });
       }
     } else {
+      console.error('Not enough conversation history to compress');
+
       // Not enough history to compress
       res.json({
         success: false,

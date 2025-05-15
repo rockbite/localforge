@@ -139,6 +139,15 @@ export function createWindow(port) {
     },
   });
 
+  // ⬇️  Anything the front-end logs will show up here
+  win.webContents.on('console-message',
+      (_event, level, message, line, sourceId) => {
+        // Chromium gives the log level as 0-3 (0 = log, 1 = warn, 2 = error, 3 = info)
+        const lvl = ['log', 'warn', 'error', 'info'][level] || 'log';
+        console[lvl](`[renderer] ${sourceId}:${line}  ${message}`);
+      });
+
+
   // Log preload path for debugging
   console.log('Preload script path:', path.join(__dirname, 'preload.js'));
 
