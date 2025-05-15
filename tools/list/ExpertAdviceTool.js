@@ -1,5 +1,3 @@
-import { SETTINGS_SCHEMA } from '../../src/routes/settingsRoutes.js';
-import store from '../../src/db/store.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

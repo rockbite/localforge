@@ -6,6 +6,8 @@ import { FIELD_NAMES } from '../services/sessions/schema.js';
 import { compressConversationHistory } from "../logic/compress.js";
 import { compressionTracker } from '../services/compressionTracker.js';
 
+console.log("compressionRoutes.js imported, setting up router");
+
 const router = express.Router();
 
 /**

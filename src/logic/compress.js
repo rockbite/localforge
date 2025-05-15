@@ -2,16 +2,19 @@
 import {callLLMByType, EXPERT_MODEL} from "../middleware/llm.js";
 import path from "path";
 import fs from "fs";
-import {getPromptOverride} from "../utils.js";
 import ejs from "ejs";
 import {fileURLToPath} from "url";
 
-// Get __dirname equivalent in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+console.log("compress.js imported");
 
 async function compressConversationHistory(history, sessionData) {
     let historyString = JSON.stringify(history);
+
+    // Get __dirname equivalent in ESM
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    console.log("loading template: " + path.join(__dirname, '..', '..', 'prompts', 'compressor.ejs'));
 
     const templatePath = path.join(__dirname, '..', '..', 'prompts', 'compressor.ejs');
     let templateString = fs.readFileSync(templatePath, 'utf8');
