@@ -100,7 +100,7 @@ function createToolRegistry(allowedToolNames) {
         // maybe its mcp?
         if(mcpMap[toolName]) {
           // executing MCP tool!
-          return await mcpService.callTool(sessionData.mcpAlias, call);
+          return await mcpService.callTool(sessionData.mcpAlias, call, signal);
         } else {
           return {error: `Tool \"${toolName}\" is not available.`};
         }

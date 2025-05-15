@@ -213,7 +213,7 @@ class MCPService {
      *                                       message.function_call
      * @returns {Promise<unknown>}         – whatever the MCP tool returns
      */
-    async callTool(alias, openAIToolCall) {
+    async callTool(alias, openAIToolCall, signal) {
         let name, rawArgs;
 
         // new format:  {id, type:"function", function:{name, arguments}}
@@ -244,9 +244,41 @@ class MCPService {
             args = {};
         }
 
-        const result = await this.mcpLibrary.callTool(alias, {name: name, arguments: args});
+        if (signal.aborted) {
+            // You need to decide how to handle this. Throwing an error is common.
+            return "Operation was aborted";
+        }
 
-        return result;
+        let abortListener;
+
+        try {
+            return await Promise.race([
+                // Your original operation
+                this.mcpLibrary.callTool(alias, {name: name, arguments: args}),
+
+                // A promise that rejects when the signal is aborted
+                new Promise((_, reject) => {
+                    abortListener = () => {
+                        // When 'abort' is signaled, reject this promise
+                        reject(new DOMException('Operation aborted by signal.', 'AbortError'));
+                    };
+                    signal.addEventListener('abort', abortListener);
+                })
+            ]);
+        } catch (error) {
+            // This will catch errors from callTool OR the AbortError if it was aborted.
+            if (error.name === 'AbortError') {
+                 return 'Operation was aborted:' + error.message;
+                // Handle abortion specifically
+            } else {
+                 return 'Operation failed with an error:' +  error;
+                // Handle other errors from callTool
+            }
+        } finally {
+            if (abortListener) {
+                signal.removeEventListener('abort', abortListener);
+            }
+        }
     }
 
 
