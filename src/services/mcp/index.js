@@ -106,7 +106,7 @@ class MCPService {
      * @returns {Promise<void>}
      */
     async editClient(alias, url) {
-        let opts = this.makeOptsFromUrl(url);
+        let opts = await this.makeOptsFromUrl(url);
         
         // Edit the client in the MCPLibrary
         await this.mcpLibrary.editClient(alias, opts);

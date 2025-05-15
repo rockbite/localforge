@@ -3,6 +3,7 @@ All notable changes to **Localforge** will be documented in this file.
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
 ## [1.0.23] – TBD
+* Added support for MCP commands via std. For example for Intelij MCP Server 
 * BatchTool was failing to pass data to some other tools
 * Tool calling now shows its description text even after it finished running
 * Fixed various scenarios where AbortSignal was not working to stop an operation
