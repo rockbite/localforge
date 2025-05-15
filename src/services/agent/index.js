@@ -49,6 +49,8 @@ let MAIN_SYSTEM_PROMPT = '';
 let TOPIC_DETECTION_PROMPT = '';
 let WHIMSICAL_GERUND_PROMPT = '';
 
+let COMPRESS_PROMPT = '';
+
 // Initialize prompts - called when module is loaded
 async function initializePrompts(config = {}) {
     try {
@@ -59,6 +61,10 @@ async function initializePrompts(config = {}) {
         TOPIC_DETECTION_PROMPT = await loadPrompt('topic-detection');
         WHIMSICAL_GERUND_PROMPT = await loadPrompt('whimsical-gerund');
         console.log(`Prompt templates loaded successfully for agent: ${agentName}`);
+
+        COMPRESS_PROMPT = await loadPrompt('compressor');
+
+        console.log(`Compressor template loaded`);
     } catch (error) {
         console.error('Failed to initialize prompts:', error);
         process.exit(2);
@@ -884,5 +890,6 @@ export {
     calculateCurrentTokensFromHistory,
     detectTopic,
     generateGerund,
-    getSystemAndContext
+    getSystemAndContext,
+    COMPRESS_PROMPT
 };

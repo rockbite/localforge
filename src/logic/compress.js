@@ -4,8 +4,8 @@ import path from "path";
 import fs from "fs";
 import ejs from "ejs";
 import {fileURLToPath} from "url";
+import {COMPRESS_PROMPT} from "../services/agent/index.js";
 
-console.log("compress.js imported");
 
 async function compressConversationHistory(history, sessionData) {
     let historyString = JSON.stringify(history);
@@ -14,10 +14,14 @@ async function compressConversationHistory(history, sessionData) {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
 
-    console.log("loading template: " + path.join(__dirname, '..', '..', 'prompts', 'compressor.ejs'));
+    console.log("loading old way of template: " + path.join(__dirname, '..', '..', 'prompts', 'compressor.ejs'));
 
-    const templatePath = path.join(__dirname, '..', '..', 'prompts', 'compressor.ejs');
-    let templateString = fs.readFileSync(templatePath, 'utf8');
+    //const templatePath = path.join(__dirname, '..', '..', 'prompts', 'compressor.ejs');
+    //let templateString = fs.readFileSync(templatePath, 'utf8');
+
+    let templateString = COMPRESS_PROMPT;
+
+    console.log("compress string ready");
 
     const systemPrompt = ejs.render(templateString);
 
