@@ -48,6 +48,17 @@ class AgentModal {
         this.initEventListeners();
         this.fetchAvailableTools();
         this.fetchProvidersList();
+
+        // Listen for provider updates coming from settings dialog
+        window.addEventListener('providersUpdated', (e) => {
+            if (Array.isArray(e.detail)) {
+                this.availableProviders = e.detail;
+                this.populateProviderDropdowns();
+            } else {
+                // Fallback: re-fetch if detail missing
+                this.fetchProvidersList();
+            }
+        });
     }
     
     loadCodeMirror() {
@@ -114,14 +125,17 @@ class AgentModal {
     
     openModal(agentId) {
         if (!this.modal) return;
-        
-        this.currentAgentId = agentId;
-        
-        // Show the modal first
-        this.modal.classList.add('active');
 
-        this.initializePromptEditor();
-        this.loadAgentData(agentId);
+        this.currentAgentId = agentId;
+
+        // Always refresh providers *before* showing data to ensure dropdowns are up-to-date
+        this.fetchProvidersList().finally(() => {
+            // Show the modal only after providers are refreshed to avoid flicker
+            this.modal.classList.add('active');
+
+            this.initializePromptEditor();
+            this.loadAgentData(agentId);
+        });
     }
     
     closeModal() {
@@ -139,22 +153,44 @@ class AgentModal {
         this.currentTabId = null;
     }
     
+    // Fetch the latest providers list from the server.
+    // Returns a promise that resolves when the dropdowns are populated.
     fetchProvidersList() {
-        fetch('/api/settings')
+        return fetch('/api/settings')
             .then(response => {
-                let json = response.json();
+                const json = response.json();
                 if (!response.ok) {
                     throw new Error(`Failed to load settings data: ${response.statusText}`);
                 }
                 return json;
             })
             .then(data => {
-                data.models = JSON.parse(data.models); // what the fuck? o_O
-                if (data.models && data.models.providers && Array.isArray(data.models.providers)) {
-                    this.availableProviders = data.models.providers;
-                    // Populate provider dropdowns
-                    this.populateProviderDropdowns();
+                // Ensure models are parsed (api stores JSON string)
+                if (typeof data.models === 'string') {
+                    try {
+                        data.models = JSON.parse(data.models);
+                    } catch (_) {
+                        data.models = {};
+                    }
                 }
+
+                let providersFromServer = Array.isArray(data.models?.providers) ? data.models.providers : [];
+
+                // Merge with in-memory providers that may not be saved yet (settings dialog still open)
+                if (window.settingsUI?.globalModelsData?.providers) {
+                    const memProviders = window.settingsUI.globalModelsData.providers;
+                    // Combine and deduplicate by name
+                    const map = new Map();
+                    [...providersFromServer, ...memProviders].forEach(p => {
+                        map.set(p.name, p);
+                    });
+                    providersFromServer = Array.from(map.values());
+                }
+
+                this.availableProviders = providersFromServer;
+
+                // Populate provider dropdowns with the fresh list
+                this.populateProviderDropdowns();
             })
             .catch(error => {
                 console.error('Error loading providers:', error);

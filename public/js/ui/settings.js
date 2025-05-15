@@ -199,6 +199,11 @@ class SettingsUI {
                 }
             }
         }
+
+        // Broadcast provider change so other components can react (e.g., agent modal)
+        window.dispatchEvent(new CustomEvent('providersUpdated', {
+            detail: modelsData.providers || []
+        }));
         
         // Populate model selectors
         if (modelsData.llmConfig) {
@@ -931,6 +936,11 @@ SettingsUI.prototype.saveProviderData = function() {
     
     // Update UI
     this.populateProvidersData(this.globalModelsData);
+
+    // Notify other components that providers list changed
+    window.dispatchEvent(new CustomEvent('providersUpdated', {
+        detail: this.globalModelsData.providers
+    }));
     
     // Close modal
     this.closeProviderEditModal();
