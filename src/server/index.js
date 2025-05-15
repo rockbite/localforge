@@ -160,9 +160,6 @@ import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} 
     // Import and use compression routes
     const compressionRoutes = await import('../routes/compressionRoutes.js');
     app.use('/api/compression', compressionRoutes.default);
-
-    // Serve uploaded files
-    app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 })();
 
 // Set EJS as the view engine
@@ -368,7 +365,8 @@ function processMessageForUploadedImage(message) {
         if(content.type === "image_url") {
             if(content.image_url.url.startsWith('/uploads/')) {
                 let imageUrl = content.image_url.url;
-                const filePath = path.join(__dirname, '../../', imageUrl);
+                imageUrl = imageUrl.replace(/^\/uploads\//, '');
+                const filePath = path.join(os.tmpdir(), 'localforge_uploads', imageUrl);
                 const imageBuffer = fs.readFileSync(filePath);
                 // Determine MIME type based on file extension
                 const ext = path.extname(imageUrl).toLowerCase();
