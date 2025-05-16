@@ -616,7 +616,7 @@ export function setupSocketEventHandlers(socket) {
             const tracker = document.getElementById('tracker');
             if (!tracker || !data || !data.type) return;
 
-            //console.log('Received task diff:', data); // Can be noisy
+            console.log('Received task diff:', data); // Can be noisy
             //console.log(appState);
 
             switch (data.type) {
@@ -631,6 +631,7 @@ export function setupSocketEventHandlers(socket) {
                     break;
 
                 case 'update':
+                    console.log(data.task);
                     if (data.task.title !== undefined || data.task.description !== undefined) {
                         if (typeof tracker.renameTask === 'function') {
                             tracker.renameTask(

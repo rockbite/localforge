@@ -775,7 +775,8 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       list-style: none;
       margin: 0 0 0 0;
       padding: 0;
-      width: 100%;
+      /* Use auto width so indentation doesn't overflow */
+      width: auto;
     }
     
     .ai-task-children {
