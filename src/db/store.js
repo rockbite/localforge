@@ -244,7 +244,9 @@ export class Store {
     }
 
     async getSessionMeta(id) { await this.dbReady; return this.db.get(`session:${id}:meta`); }
-    async getSessionData(id) { await this.dbReady; return this.db.get(`session:${id}:data`); }
+    async getSessionData(id) {
+        await this.dbReady; return this.db.get(`session:${id}:data`);
+    }
 
     async listSessionsForProject(projectId) {
         await this.dbReady;

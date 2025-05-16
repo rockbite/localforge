@@ -20,6 +20,34 @@
     max-height: 270px; /* Add max height to enable scrolling */
 }
 
+.ai-task-list .ai-task-item {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+}
+
+.ai-task-chevron {
+    cursor: pointer;
+    user-select: none;
+    margin-right: 2px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--accent-primary);
+    transition: transform 0.15s;
+    flex-shrink: 0;
+}
+
+.ai-task-chevron svg {
+    display: inline-block;
+}
+
+/* Styling for the hierarchical tree structure */
+.ai-task-children {
+    width: 100%;
+    margin-top: 6px; /* Add spacing between parent and children */
+}
+
 /* Task panel header */
 #tasks-panel .ai-section-title {
     margin: 0;

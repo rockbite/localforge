@@ -164,14 +164,20 @@ export function setupSocketEventHandlers(socket) {
 
             // --- 4. Populate Tasks --- (using setTasks for initial load without animations)
             if (tracker && data.tasks && Array.isArray(data.tasks)) {
+
                 console.log(`Populating ${data.tasks.length} initial tasks...`);
 
                 // Format all tasks at once for the setTasks method
-                const formattedTasks = data.tasks.map(t => ({
-                    id: t.id,
-                    text: t.title || t.description || 'Untitled Task',
-                    status: t.status || 'pending'
-                }));
+                const formatTasksRecursively = (tasks) => {
+                    return tasks.map(t => ({
+                        id: t.id,
+                        text: t.title || t.description || 'Untitled Task',
+                        status: t.status || 'pending',
+                        ...(t.children && Array.isArray(t.children) && { children: formatTasksRecursively(t.children) })
+                    }));
+                };
+
+                const formattedTasks = formatTasksRecursively(data.tasks);
                 // Use setTasks for bulk loading without animations
 
                 // a bit of disclaimer,
@@ -610,44 +616,35 @@ export function setupSocketEventHandlers(socket) {
             const tracker = document.getElementById('tracker');
             if (!tracker || !data || !data.type) return;
 
-            // console.log('Received task diff:', data); // Can be noisy
+            //console.log('Received task diff:', data); // Can be noisy
+            //console.log(appState);
 
             switch (data.type) {
                 case 'add':
-                    if (data.task && typeof tracker.addTask === 'function') {
-                        tracker.addTask({
-                            id: data.task.id,
-                            text: data.task.title || data.task.description || 'Untitled Task',
-                            status: data.task.status || 'pending'
-                        });
+                    if (data.task) {
+                        tracker.addTask(data.task);
                     }
                     break;
 
                 case 'remove':
-                    if (data.taskId && typeof tracker.removeTask === 'function') {
-                        tracker.removeTask(data.taskId);
-                    }
+                    tracker.removeTask(data.taskId);
                     break;
 
                 case 'update':
-                    if (data.task && data.task.id) {
-                        // Update text if available and function exists
-                        if (data.task.title !== undefined || data.task.description !== undefined) {
-                            if (typeof tracker.renameTask === 'function') {
-                                tracker.renameTask(
-                                    data.task.id,
-                                    data.task.title || data.task.description || 'Untitled Task'
-                                );
-                            }
+                    if (data.task.title !== undefined || data.task.description !== undefined) {
+                        if (typeof tracker.renameTask === 'function') {
+                            tracker.renameTask(
+                                data.task.id,
+                                data.task.title || data.task.description || 'Untitled Task'
+                            );
                         }
-                        // Update status if available and function exists
-                        if (data.task.status !== undefined) {
-                            if (typeof tracker.setStatus === 'function') {
-                                tracker.setStatus(
-                                    data.task.id,
-                                    data.task.status || 'pending'
-                                );
-                            }
+                    }
+                    if (data.task.status !== undefined) {
+                        if (typeof tracker.setStatus === 'function') {
+                            tracker.setStatus(
+                                data.task.id,
+                                data.task.status || 'pending'
+                            );
                         }
                     }
                     break;

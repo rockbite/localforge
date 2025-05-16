@@ -768,12 +768,26 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       gap: 6px;
       font-family: 'Roboto Mono', monospace;
       font-size: 14px;
+      width: 100%;
+    }
+    
+    .ai-task-tree-item {
+      list-style: none;
+      margin: 0 0 0 0;
+      padding: 0;
+      width: 100%;
+    }
+    
+    .ai-task-children {
+      list-style: none;
+      margin: 6px 0 0 0;
+      padding: 0;
+      width: 100%;
     }
 
     .ai-task-item {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
+      align-items: center;
       padding: 6px 14px;
       border-radius: 6px;
       border: 1px solid var(--border-color);
@@ -783,6 +797,13 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       transition: background-color 0.3s ease, opacity 0.4s ease, transform 0.4s ease;
       position: relative;
       overflow: hidden;
+    }
+      
+    .task-item-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
     }
 
     .ai-task-item::before {
@@ -815,6 +836,12 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       justify-content: center;
       color: var(--secondary-text);
       margin-top: 1px;
+      margin-left: 0;
+    }
+    
+    .ai-task-text {
+      flex-grow: 1;
+      word-break: break-word;
     }
 
     /* completed */
@@ -855,7 +882,12 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
   `;
     // ------------------ state ------------------
     tasks = [];
-    /** Keeps the insertion order for stability when statuses share same weight */
+    /**
+     * For hierarchical mode: tasks is an array of root tasks, each may have children:[] recursively.
+     * We keep a flat map for FLIP animation and direct id lookups (for add/remove/edit).
+     */
+    _taskMap = new Map(); // id -> task
+    _collapsedMap = new Map(); // id -> collapsed bool
     _orderMap = /* @__PURE__ */ new Map();
     _orderCounter = 0;
     // ------------------ internal animation / operation queue ------------------
@@ -920,19 +952,43 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
             this._orderCounter = currentOrder.length;
         }
     }
+    /**
+     * Add a task to the widget. If the task object contains a `parentId`
+     * property, the new task is inserted as a child of that parent instead of
+     * being appended to the root list.  The parent **must** already be known to
+     * the widget (added previously or part of `setTasks`).
+     */
     addTask(t5) {
-        if (this.tasks.some((task) => task.id === t5.id)) {
-            console.warn(`TaskTrackerWidget: Task with ID ${t5.id} already exists. Ignoring add operation.`);
-            return this._enqueue(async () => {
-                await this._wait(10);
-            });
-        }
         return this._enqueue(async () => {
+            if (this._taskMap.has(t5.id)) {
+                console.warn(`TaskTrackerWidget: Task with ID ${t5.id} already exists. Ignoring add operation.`);
+                await this._wait(10);
+                return;
+            }
             this._renormalizeOrderMapIfNeeded();
             const order = this._orderCounter++;
             this._orderMap.set(t5.id, order);
-            this.tasks = [...this.tasks, t5];
-            this._sortTasks();
+            // -------------------------------------------------------------
+            // Decide where to place the task: root list vs. parent's children
+            // -------------------------------------------------------------
+            let isRootInsertion = true;
+            if (t5.parentId) {
+                const parent = this._taskMap.get(t5.parentId);
+                if (parent) {
+                    parent.children ??= [];
+                    parent.children.push(t5);
+                    isRootInsertion = false;
+                } else {
+                    console.warn(`TaskTrackerWidget: parentId ${t5.parentId} not found. Adding ${t5.id} as root task.`);
+                }
+            }
+            if (isRootInsertion) {
+                this.tasks = [...this.tasks, t5];
+                // Only sort the *root* list; children keep their order.
+                this._sortTasks();
+            }
+            // Register in lookup map so that future subtasks can find it.
+            this._taskMap.set(t5.id, t5);
             this.requestUpdate();
             await this.updateComplete;
             const newItem = this.renderRoot.querySelector(`#${CSS.escape(t5.id)}`);
@@ -947,22 +1003,58 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
      * Removes the task with the given id with a fade‑out animation to keep
      * parity with the add animation.
      */
+    // --- enhanced removal: deletes entire subtree and cleans maps ---
+    _removeSubtree(arr, targetId) {
+      for (let i = 0; i < arr.length; i++) {
+        const node = arr[i];
+        if (node.id === targetId) {
+          return arr.splice(i, 1)[0];
+        }
+        if (node.children?.length) {
+          const removed = this._removeSubtree(node.children, targetId);
+          if (removed) {
+            if (node.children.length === 0) delete node.children;
+            return removed;
+          }
+        }
+      }
+      return null;
+    }
+    _gatherIds(task, out) {
+      out.push(task.id);
+      task.children?.forEach(c => this._gatherIds(c, out));
+    }
     removeTask(id) {
-        return this._enqueue(async () => {
-            await this.updateComplete;
-            const li = this.renderRoot.querySelector(`li[id="${id}"]`);
-            if (li) {
-                li.classList.remove("show");
-                await this._nextFrame();
-                await this._waitForTransition(li);
-            } else {
-                await this._wait(_TaskTrackerWidget._ANIMATION_MS);
-            }
-            this.tasks = this.tasks.filter((x2) => x2.id !== id);
-            this._orderMap.delete(id);
-            this.requestUpdate();
-            await this.updateComplete;
+      return this._enqueue(async () => {
+        await this.updateComplete;
+        const removed = this._removeSubtree(this.tasks, id);
+        if (!removed) {
+          console.warn(`TaskTrackerWidget: removeTask – id ${id} not found.`);
+          return;
+        }
+        const ids = [];
+        this._gatherIds(removed, ids);
+        ids.forEach(tid => {
+          this._taskMap.delete(tid);
+          this._orderMap.delete(tid);
         });
+        // fade-out root of removed subtree if present
+        const li = this.renderRoot.querySelector(`li[id="${id}"]`);
+        if (li) {
+          const taskItem = li.querySelector('.ai-task-item');
+          if (taskItem) {
+            taskItem.classList.remove("show");
+            await this._nextFrame();
+            await this._waitForTransition(taskItem);
+          } else {
+            await this._wait(_TaskTrackerWidget._ANIMATION_MS);
+          }
+        } else {
+          await this._wait(_TaskTrackerWidget._ANIMATION_MS);
+        }
+        this.requestUpdate();
+        await this.updateComplete;
+      });
     }
     /** Renames a task. Visual change is instant but still queued for ordering. */
     renameTask(id, text) {
@@ -1022,52 +1114,31 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
      * Each task object should have at least `id`, `text`, and `status` properties.
      * Example: [{ id: 't1', text: 'Do stuff', status: 'pending' }]
      */
+    /**
+     * Set the entire (possibly nested) task list.
+     * @param {Array} newTasks Roots.
+     */
     setTasks(newTasks) {
-        // Basic validation: Ensure input is an array
         if (!Array.isArray(newTasks)) {
             console.error('TaskTrackerWidget.setTasks: Input must be an array.');
-            return; // Stop processing if input is invalid
+            return;
         }
-
-        // 1. Clear the existing order map and reset the counter.
-        //    This is crucial because the new list replaces the old one entirely,
-        //    and the existing insertion order map becomes invalid.
         this._orderMap.clear();
         this._orderCounter = 0;
-
-        // 2. Rebuild the order map based *only* on the input array's order.
-        //    This establishes the new baseline insertion order for stability in sorting.
-        newTasks.forEach((task, index) => {
-            // Check if the task object is valid and has an id before adding to the map
-            if (task && typeof task.id !== 'undefined') {
-                this._orderMap.set(task.id, index);
-            } else {
-                // Warn if a task seems malformed, but continue processing others
-                console.warn(`TaskTrackerWidget.setTasks: Task at index ${index} is missing an id or is invalid.`, task);
-            }
-        });
-        // Set the counter to the new size based on the input array length
-        this._orderCounter = newTasks.length;
-
-        // 3. Assign the new tasks array directly to the component's state.
-        //    Using the spread operator `[...newTasks]` creates a new array reference,
-        //    which helps LitElement reliably detect the property change.
+        this._taskMap.clear();
+        // Recursively build task map and order for FLIP+lookup
+        const buildMaps = (tasks, depth = 0) => {
+            tasks.forEach((task, idx) => {
+                if (!task || task.id == null) return;
+                this._taskMap.set(task.id, task);
+                if (!this._orderMap.has(task.id)) this._orderMap.set(task.id, this._orderCounter++);
+                if (task.children && Array.isArray(task.children)) buildMaps(task.children, depth + 1);
+            });
+        };
+        buildMaps(newTasks, 0);
         this.tasks = [...newTasks];
-
-        console.log( this._orderMap);
-        console.log( this.tasks);
-
-        // 4. Sort the tasks immediately based on status and the newly built order map.
-        //    This ensures the list is displayed in the correct sorted order right away.
-        this._sortTasks(); // This modifies this.tasks in place based on status and _orderMap
-
-        // 5. Request an update to re-render the component with the new state.
-        //    This happens synchronously within the current event loop turn (or microtask),
-        //    leading to a quick visual update without queued delays or animations.
+        // This is hierarchical so we won't sort here; render tree as is.
         this.requestUpdate();
-
-        // Note: We do NOT use _enqueue, await updateComplete, _wait, or _animateFLIP
-        // because the goal is an immediate, non-animated state change.
     }
 
     // Utility helpers for timing ------------------------------------------------
@@ -1110,7 +1181,8 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
     }
     // ------------------ render ------------------
     render() {
-        const completed = this.tasks.filter((t5) => t5.status === "completed").length;
+        const completed = this._countCompleted(this.tasks);
+        const total = this._countTotal(this.tasks);
         return x`
       <section class="ai-tasks-section">
         <header class="ai-section-header">
@@ -1118,15 +1190,11 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
             ${this._icon("pending", true)}
             Tasks
           </div>
-          <span class="ai-task-counter">${completed}/${this.tasks.length} completed</span>
+          <span class="ai-task-counter">${completed}/${total} completed</span>
         </header>
         <div class="ai-tasks-content">
           <ul class="ai-task-list">
-            ${c4(
-            this.tasks,
-            (task) => task.id,
-            (task) => this._taskTemplate(task)
-        )}
+            ${this._renderTaskTree(this.tasks, 0)}
           </ul>
         </div>
       </section>
@@ -1160,8 +1228,12 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
     /** Capture the bounding rect (top) of all list items keyed by id */
     _collectRects() {
         const map = /* @__PURE__ */ new Map();
-        const items = this.renderRoot.querySelectorAll(".ai-task-item");
-        items.forEach((el) => map.set(el.id, el.getBoundingClientRect()));
+        const items = this.renderRoot.querySelectorAll(".ai-task-tree-item");
+        items.forEach((el) => {
+            if (el.id) {
+                map.set(el.id, el.getBoundingClientRect());
+            }
+        });
         return map;
     }
     _animateFLIP(before, after) {
@@ -1180,12 +1252,59 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
             el.style.transform = "";
         });
     }
-    _taskTemplate(t5) {
-        const cls = `ai-task-item show ${t5.status}`;
-        return x`<li class=${cls} id=${t5.id}>
-      <span class="ai-task-checkbox">${this._icon(t5.status)}</span>
-      <span class="ai-task-text">${t5.text}</span>
-    </li>`;
+    _renderTaskTree(tasks, depth) {
+        if (!Array.isArray(tasks)) return null;
+        return tasks.map(task => this._taskTreeItem(task, depth));
+    }
+
+    _taskTreeItem(task, depth) {
+        const isCollapsed = this._collapsedMap.get(task.id);
+        const hasChildren = task.children && task.children.length > 0;
+        const liClass = `ai-task-item show ${task.status}`;
+        const style = `margin-left: ${depth * 22}px;`;
+        
+        // Each task is its own visual box, regardless of nesting
+        return x`
+      <li id=${task.id} style=${style} class="ai-task-tree-item">
+        <div class=${liClass}>
+          <div class="task-item-content">
+            ${hasChildren ? x`<span class="ai-task-chevron" @click=${() => this._toggleCollapse(task.id)}>${isCollapsed ? this._chevronRightIcon() : this._chevronDownIcon()}</span>` : null}
+            <span class="ai-task-checkbox">${this._icon(task.status)}</span>
+            <span class="ai-task-text">${task.title || task.text || 'Untitled Task'}</span>
+          </div>
+        </div>
+        ${hasChildren && !isCollapsed ? x`<ul class="ai-task-children">${this._renderTaskTree(task.children, depth + 1)}</ul>` : null}
+      </li>
+    `;
+    }
+
+    _toggleCollapse(id) {
+        this._collapsedMap.set(id, !this._collapsedMap.get(id));
+        this.requestUpdate();
+    }
+
+    _chevronDownIcon() {
+        return x`<svg width="13" height="13" viewBox="0 0 24 24" style="vertical-align: middle;"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none"/></svg>`;
+    }
+    _chevronRightIcon() {
+        return x`<svg width="13" height="13" viewBox="0 0 24 24" style="vertical-align: middle;"><path d="M10 7l5 5-5 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>`;
+    }
+
+    _countCompleted(tasks) {
+        let n = 0;
+        for (const t of tasks) {
+            if (t.status === 'completed') n++;
+            if (t.children && t.children.length) n += this._countCompleted(t.children);
+        }
+        return n;
+    }
+    _countTotal(tasks) {
+        let n = 0;
+        for (const t of tasks) {
+            n++;
+            if (t.children && t.children.length) n += this._countTotal(t.children);
+        }
+        return n;
     }
     _icon(status, mini = false) {
         const size = mini ? 14 : 18;

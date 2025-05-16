@@ -2,7 +2,11 @@
 All notable changes to **Localforge** will be documented in this file.  
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions and uses [Semantic Versioning](https://semver.org/).
 
-## [1.0.23] – 2025-05-15 (Stability Release)
+## [1.0.25] – TBD
+* Task tracker now supports sub-tasks
+
+
+## [1.0.24] – 2025-05-15 (Stability Release)
 
 * Various small bugs fixed
 * Added support for MCP commands via std. For example for Intelij MCP Server 

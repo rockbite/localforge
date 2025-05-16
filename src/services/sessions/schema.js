@@ -11,6 +11,7 @@ export const FIELD_NAMES = Object.freeze({
     HISTORY: 'history',                   // Canonical name for chat message history (replaces 'conversation')
     ACCOUNTING: 'accounting',             // Canonical name for usage/cost tracking (replaces 'accountingData')
     TASKS: 'tasks',                       // Canonical name for the list of tasks
+    
     TOOL_LOGS: 'toolLogs',                // Canonical name for tool execution logs
     AGENT_STATE: 'agentState',            // Canonical name for the agent's current operational state
     UPDATED_AT: 'updatedAt',              // Timestamp of the last update

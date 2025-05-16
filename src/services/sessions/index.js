@@ -5,7 +5,17 @@
 
 import store from '../../db/store.js';
 import { EventEmitter } from 'events';
-import { addTask, removeTask, editTask, setTaskStatus, listTasks, STATUSES as TASK_STATUSES } from '../tasks/index.js';
+import {
+    addTask,
+    removeTask,
+    editTask,
+    moveTask,
+    setTaskStatus,
+    listTasks,
+    flattenTasks,
+    STATUSES as TASK_STATUSES,
+    findTaskById
+} from '../tasks/index.js';
 import { addUsage as addAccountingUsage_ } from '../accounting/index.js';
 import { FIELD_NAMES, DEFAULT_SESSION_DATA } from './schema.js';
 
@@ -217,10 +227,12 @@ class ProjectSessionManager {
     /**
      * Get tasks for a session
      * @param {string} sessionId
-     * @returns {Promise<Array>} Array of tasks
+     * @param {object} opts — opts.flat forces legacy flat list
+     * @returns {Promise<Array>} Array of tasks (possibly hierarchical)
      */
-    async getTasks(sessionId) {
+    async getTasks(sessionId, opts = {}) {
         const sessionData = await this.getSession(sessionId);
+        if (opts.flat) return flattenTasks(sessionData[FIELD_NAMES.TASKS] || []);
         return listTasks(sessionData[FIELD_NAMES.TASKS] || []);
     }
 
@@ -228,21 +240,25 @@ class ProjectSessionManager {
      * Add a task to a session
      * @param {string} sessionId
      * @param {object} taskData
+     * @param {string|null} parentId — if supplied, adds as subtask
      * @returns {Promise<object>} The created task
      */
-    async addTask(sessionId, taskData) {
+    async addTask(sessionId, taskData, parentId = null, save = true) {
         const sessionData = await this.getSession(sessionId);
         sessionData[FIELD_NAMES.TASKS] = sessionData[FIELD_NAMES.TASKS] || [];
+        if (parentId) taskData.parentId = parentId;
         const newTask = addTask(sessionData[FIELD_NAMES.TASKS], taskData); // Mutates sessionData.tasks
-        
-        // Emit task update event
+        // Emit task update event, include parentId if relevant
         sessionTaskEvents.emit('task_diff_update', { 
             sessionId, 
             type: 'add', 
-            task: newTask 
+            task: newTask,
+            parentId: parentId || null
         });
-        
-        await this.saveSession(sessionId);
+
+        if(save) {
+            await this.saveSession(sessionId);
+        }
         return newTask;
     }
 
@@ -252,7 +268,7 @@ class ProjectSessionManager {
      * @param {string} taskId
      * @returns {Promise<boolean>} Success indicator
      */
-    async removeTask(sessionId, taskId) {
+    async removeTask(sessionId, taskId, save = true) {
         const sessionData = await this.getSession(sessionId);
         sessionData[FIELD_NAMES.TASKS] = sessionData[FIELD_NAMES.TASKS] || [];
         const success = removeTask(sessionData[FIELD_NAMES.TASKS], taskId);
@@ -263,7 +279,9 @@ class ProjectSessionManager {
                 type: 'remove', 
                 taskId 
             });
-            await this.saveSession(sessionId);
+            if (save) {
+                await this.saveSession(sessionId);
+            }
         }
         
         return success;
@@ -276,7 +294,13 @@ class ProjectSessionManager {
      * @param {object} updates
      * @returns {Promise<object|null>} Updated task or null
      */
-    async editTask(sessionId, taskId, updates) {
+    async editTask(sessionId, taskId, updates, save = true) {
+        // special case: changing parentId via updates.parentId
+        const { parentId } = updates || {};
+        if (parentId !== undefined) {
+            delete updates.parentId; // remove to avoid normal edit path processing
+            await this.moveTask(sessionId, taskId, parentId, save);
+        }
         const sessionData = await this.getSession(sessionId);
         sessionData[FIELD_NAMES.TASKS] = sessionData[FIELD_NAMES.TASKS] || [];
         const updatedTask = editTask(sessionData[FIELD_NAMES.TASKS], taskId, updates);
@@ -287,7 +311,9 @@ class ProjectSessionManager {
                 type: 'update', 
                 task: updatedTask 
             });
-            await this.saveSession(sessionId);
+            if(save) {
+                await this.saveSession(sessionId);
+            }
         }
         
         return updatedTask;
@@ -300,7 +326,36 @@ class ProjectSessionManager {
      * @param {string} status
      * @returns {Promise<object|null>} Updated task or null
      */
-    async setTaskStatus(sessionId, taskId, status) {
+    /**
+     * Move a task to a new parent (or root)
+     */
+    async moveTask(sessionId, taskId, newParentId = null, save = true) {
+        const sessionData = await this.getSession(sessionId);
+        sessionData[FIELD_NAMES.TASKS] = sessionData[FIELD_NAMES.TASKS] || [];
+        const oldTaskList = JSON.parse(JSON.stringify(sessionData[FIELD_NAMES.TASKS])); // deep copy pre-move
+        const success = moveTask(sessionData[FIELD_NAMES.TASKS], taskId, newParentId);
+        if (success) {
+            // Find the moved task in new tree
+            const movedTask = findTaskById(sessionData[FIELD_NAMES.TASKS], taskId);
+            // 1. emit removal from old location
+            sessionTaskEvents.emit('task_diff_update', {
+                sessionId,
+                type: 'remove',
+                taskId
+            });
+            // 2. emit add into new location (parentId null ⇒ root)
+            sessionTaskEvents.emit('task_diff_update', {
+                sessionId,
+                type: 'add',
+                task: movedTask,
+                parentId: newParentId || null
+            });
+            if (save) await this.saveSession(sessionId);
+        }
+        return success;
+    }
+
+    async setTaskStatus(sessionId, taskId, status, save = true) {
         const sessionData = await this.getSession(sessionId);
         sessionData[FIELD_NAMES.TASKS] = sessionData[FIELD_NAMES.TASKS] || [];
         const updatedTask = setTaskStatus(sessionData[FIELD_NAMES.TASKS], taskId, status);
@@ -311,7 +366,9 @@ class ProjectSessionManager {
                 type: 'update', 
                 task: updatedTask 
             });
-            await this.saveSession(sessionId);
+            if(save) {
+                await this.saveSession(sessionId);
+            }
         }
         
         return updatedTask;

@@ -10,13 +10,15 @@ import Replace from './list/ReplaceTool.js';
 import View from './list/ViewTool.js';
 import WebFetchTool from './list/WebFetchTool.js';
 import ExpertAdviceTool from './list/ExpertAdviceTool.js';
-import TaskTrackingTool from './list/TaskTrackingTool.js';
 import {getFilteredToolList} from "../src/utils.js";
 import BrowserClaim from "./list/browser/BrowserClaim.js";
 import BrowserNavigate from "./list/browser/BrowserNavigate.js";
 import BrowserInteract from "./list/browser/BrowserInteract.js";
 import BrowserScreenshot from "./list/browser/BrowserScreenshot.js";
 import mcpService from "../src/services/mcp/index.js";
+import AddOrEditTaskTool from "./list/AddOrEditTaskTool.js";
+import RemoveTaskTool from "./list/RemoveTaskTool.js";
+import ListTaskTool from "./list/ListTaskTool.js";
 
 // Explicit list of all tools
 const tools = [
@@ -31,7 +33,7 @@ const tools = [
   View,
   WebFetchTool,
   ExpertAdviceTool,
-  TaskTrackingTool,
+  AddOrEditTaskTool, RemoveTaskTool, ListTaskTool,
   BrowserClaim, BrowserNavigate, BrowserInteract, BrowserScreenshot
 ];
 
@@ -47,7 +49,7 @@ const defaultAllow = [
   View.name,
   WebFetchTool.name,
   ExpertAdviceTool.name,
-  TaskTrackingTool.name,
+  AddOrEditTaskTool.name, RemoveTaskTool.name, ListTaskTool.name
 ];
 
 
