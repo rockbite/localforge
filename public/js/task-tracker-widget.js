@@ -748,6 +748,12 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       background-color: var(--accent-primary);
     }
 
+    .ai-task-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     /* Content */
     .ai-tasks-content {
       background: var(--secondary-bg);
@@ -883,6 +889,7 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
   `;
     // ------------------ state ------------------
     tasks = [];
+    pinned = false;
     /**
      * For hierarchical mode: tasks is an array of root tasks, each may have children:[] recursively.
      * We keep a flat map for FLIP animation and direct id lookups (for add/remove/edit).
@@ -1105,6 +1112,11 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
         return [...this.tasks];
     }
 
+    togglePin() {
+        this.pinned = !this.pinned;
+        this.requestUpdate();
+    }
+
     /**
      * Sets the entire task list directly, bypassing the animation queue.
      * This provides an immediate, non-animated update to the displayed tasks.
@@ -1191,7 +1203,12 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
             ${this._icon("pending", true)}
             Tasks
           </div>
-          <span class="ai-task-counter">${completed}/${total} completed</span>
+          <div class="ai-task-controls">
+            <span class="ai-task-counter">${completed}/${total} completed</span>
+            <button class="secondary-button icon-button" title="Toggle Pin" @click=${() => this.togglePin()}>
+              <span class="material-icons" style=${this.pinned ? '' : 'transform: rotate(45deg);'}>push_pin</span>
+            </button>
+          </div>
         </header>
         <div class="ai-tasks-content">
           <ul class="ai-task-list">

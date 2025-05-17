@@ -25,6 +25,7 @@ const stopButton = document.getElementById('stop-button');
 const attachmentButton = document.getElementById('attachment-button');
 const fileInput = document.getElementById('file-input');
 const attachedFilename = document.getElementById('attached-filename');
+const taskTracker = document.getElementById('tracker');
 
 // Variable to store pending image data and the prompt editor instance
 let pendingImageDataUrl = null;
@@ -106,7 +107,8 @@ export function initChatForm() {
                 
                 try {
                     setStatus('thinking', `Clearing session ${sessionName}...`);
-                    await api.clearSessionMessages(sessionId);
+                    const preserveTasks = taskTracker && taskTracker.pinned;
+                    await api.clearSessionMessages(sessionId, { preserveTasks });
                     
                     console.log(`Reloading current session ${sessionId} after clear.`);
                     setStatus('connecting', 'Reloading session...');
