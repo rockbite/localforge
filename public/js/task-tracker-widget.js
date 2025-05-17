@@ -686,6 +686,23 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
         sans-serif;
       color: var(--text-color);
     }
+    
+    /* Material Icons font definition for shadow DOM */
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 16px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
 
     /* Outer section with a simple border */
     .ai-tasks-section {
@@ -715,7 +732,7 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 16px;
+      padding: 8px 10px;
       background-color: var(--tertiary-bg);
       border-radius: 0;
       border-bottom: 1px solid var(--border-color);
@@ -752,6 +769,39 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
       display: flex;
       align-items: center;
       gap: 4px;
+    }
+    
+    /* Specific styling for the pin button */
+    .secondary-button.icon-button {
+      background-color: var(--button-secondary-bg, #2a2a2a);
+      border: 1px solid var(--border-primary, #333);
+      border-radius: 4px;
+      width: 28px;
+      height: 28px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    .secondary-button.icon-button:hover {
+      background-color: var(--button-secondary-bg-hover, #333);
+    }
+    
+    .secondary-button.icon-button.pinned {
+      background-color: var(--accent-primary-transparent, rgba(64, 162, 227, 0.2));
+      border-color: var(--accent-primary, #40a2e3);
+    }
+    
+    .secondary-button.icon-button .material-icons {
+      color: var(--text-primary, #d9dfe7);
+      font-size: 18px;
+    }
+    
+    .secondary-button.icon-button.pinned .material-icons {
+      color: var(--accent-primary, #40a2e3);
     }
 
     /* Content */
@@ -1114,6 +1164,23 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
 
     togglePin() {
         this.pinned = !this.pinned;
+        
+        // Since we're now using CSS classes for pinned state,
+        // we only need to request an update to apply the class change.
+        // However, we'll still add a brief flash effect for immediate feedback
+        const button = this.renderRoot.querySelector('.icon-button');
+        if (button) {
+            // Add a quick flash effect for immediate feedback
+            button.style.backgroundColor = this.pinned ? 
+                'var(--accent-primary, #40a2e3)' : 
+                'var(--button-secondary-bg-hover, #333)';
+            
+            // Reset the inline style after a short delay so the class styles take over
+            setTimeout(() => {
+                button.style.backgroundColor = '';
+            }, 300);
+        }
+        
         this.requestUpdate();
     }
 
@@ -1205,8 +1272,8 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
           </div>
           <div class="ai-task-controls">
             <span class="ai-task-counter">${completed}/${total} completed</span>
-            <button class="secondary-button icon-button" title="Toggle Pin" @click=${() => this.togglePin()}>
-              <span class="material-icons" style=${this.pinned ? '' : 'transform: rotate(45deg);'}>push_pin</span>
+            <button class="secondary-button icon-button ${this.pinned ? 'pinned' : ''}" title="${this.pinned ? 'Unpin' : 'Pin'}" @click=${() => this.togglePin()}>
+              <span class="material-icons" style="${this.pinned ? '' : 'transform: rotate(45deg);'}">push_pin</span>
             </button>
           </div>
         </header>
