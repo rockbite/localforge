@@ -199,12 +199,14 @@ import {getSystemAndContext} from "../services/agent/index.js"; // Import manage
 routerSessions.post('/:id/clear', async (req, res) => {
   try {
     const { id: sessionId } = req.params;
+    const preserveTasks = req.query.preserveTasks === 'true';
     console.log(`Attempting to clear session: ${sessionId}`);
 
     let existingWorkingDirectory = null;
     let existingAgentId = null;
     let existingMcpAlias = null;
     let existingMcpUrl = null;
+    let existingTasks = [];
 
     // 1. Try to get the *current* working directory, agentId, and MCP data (handle potential legacy fields)
     try {
@@ -216,6 +218,7 @@ routerSessions.post('/:id/clear', async (req, res) => {
       existingAgentId = existingRawData?.[FIELD_NAMES.AGENT_ID] || null;
       existingMcpAlias = existingRawData?.[FIELD_NAMES.MCP_ALIAS] || null;
       existingMcpUrl = existingRawData?.[FIELD_NAMES.MCP_URL] || null;
+      existingTasks = existingRawData?.[FIELD_NAMES.TASKS] || [];
 
       console.log(`Found existing working directory for session ${sessionId}: ${existingWorkingDirectory}`);
       console.log(`Found existing agent ID for session ${sessionId}: ${existingAgentId}`);
@@ -238,6 +241,7 @@ routerSessions.post('/:id/clear', async (req, res) => {
       [FIELD_NAMES.AGENT_ID]: existingAgentId, // Preserve the found agent ID
       [FIELD_NAMES.MCP_ALIAS]: existingMcpAlias, // Preserve the found MCP alias
       [FIELD_NAMES.MCP_URL]: existingMcpUrl, // Preserve the found MCP URL
+      ...(preserveTasks ? { [FIELD_NAMES.TASKS]: existingTasks } : {}),
       // updatedAt will be added by setSessionData/saveSession
     };
 

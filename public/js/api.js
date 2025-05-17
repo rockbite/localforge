@@ -216,8 +216,11 @@ export async function updateSessionName(sessionId, name) {
  * @param {string} sessionId - The ID of the session to clear.
  * @returns {Promise<object>} The response data.
  */
-export async function clearSessionMessages(sessionId) {
-    const response = await fetch(`/api/sessions/${sessionId}/clear`, {
+export async function clearSessionMessages(sessionId, { preserveTasks = false } = {}) {
+    const url = preserveTasks
+        ? `/api/sessions/${sessionId}/clear?preserveTasks=true`
+        : `/api/sessions/${sessionId}/clear`;
+    const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
     });
