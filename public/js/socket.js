@@ -189,6 +189,7 @@ export function setupSocketEventHandlers(socket) {
                 setTimeout(() => {
                     tracker.setTasks(formattedTasks);
                 }, 0);
+                tracker.pinned = !!data.tasksPinned;
 
                 console.log("Initial tasks populated.");
             }
@@ -769,5 +770,15 @@ export function emitSetMcp(socket, mcpAlias, mcpUrl) {
         socket.emit('set_mcp', { mcpAlias, mcpUrl });
     } else {
         console.error("Cannot emit set_mcp: socket not connected.");
+    }
+}
+
+/** Emits 'set_tasks_pinned' */
+export function emitSetTasksPinned(socket, pinned) {
+    if (socket?.connected) {
+        console.log(`Emitting set_tasks_pinned: ${pinned}`);
+        socket.emit('set_tasks_pinned', { pinned });
+    } else {
+        console.error("Cannot emit set_tasks_pinned: socket not connected.");
     }
 }

@@ -468,6 +468,7 @@ io.on('connection', (socket) => {
                 mcpAlias: sessionData.mcpAlias,
                 mcpUrl: sessionData.mcpUrl,
                 toolLogs: sessionData.toolLogs || [],
+                tasksPinned: sessionData.tasksPinned || false,
                 agentState: sessionData.agentState || {
                     status: 'idle',
                     statusText: null,
@@ -761,6 +762,22 @@ io.on('connection', (socket) => {
 
         } catch (error) {
             console.error('Error setting MCP:', error);
+        }
+    });
+
+    // Handle task pinned state
+    socket.on('set_tasks_pinned', async (data) => {
+        try {
+            const { pinned } = data;
+            const sessionId = socket.userData.currentSessionId;
+            if (!sessionId) {
+                console.warn('Attempted to set tasks pinned with no active session');
+                return;
+            }
+            await projectSessionManager.setTasksPinned(sessionId, pinned);
+            console.log(`Set tasks pinned for session ${sessionId}: ${pinned}`);
+        } catch (error) {
+            console.error('Error setting tasks pinned state:', error);
         }
     });
     

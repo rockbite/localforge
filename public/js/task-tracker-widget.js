@@ -1,3 +1,5 @@
+import { appState } from './state.js';
+import { emitSetTasksPinned } from './socket.js';
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
 var e = t.ShadowRoot && (void 0 === t.ShadyCSS || t.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype;
@@ -1164,6 +1166,10 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
 
     togglePin() {
         this.pinned = !this.pinned;
+
+        if (appState.socket) {
+            emitSetTasksPinned(appState.socket, this.pinned);
+        }
         
         // Since we're now using CSS classes for pinned state,
         // we only need to request an update to apply the class change.

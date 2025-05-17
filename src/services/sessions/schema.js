@@ -11,6 +11,7 @@ export const FIELD_NAMES = Object.freeze({
     HISTORY: 'history',                   // Canonical name for chat message history (replaces 'conversation')
     ACCOUNTING: 'accounting',             // Canonical name for usage/cost tracking (replaces 'accountingData')
     TASKS: 'tasks',                       // Canonical name for the list of tasks
+    TASKS_PINNED: 'tasksPinned',         // Tracks whether task panel is pinned
     
     TOOL_LOGS: 'toolLogs',                // Canonical name for tool execution logs
     AGENT_STATE: 'agentState',            // Canonical name for the agent's current operational state
@@ -34,6 +35,7 @@ export const DEFAULT_SESSION_DATA = Object.freeze({
     [FIELD_NAMES.HISTORY]: [],
     [FIELD_NAMES.ACCOUNTING]: { models: {}, totalUSD: 0 },
     [FIELD_NAMES.TASKS]: [],
+    [FIELD_NAMES.TASKS_PINNED]: false,
     [FIELD_NAMES.TOOL_LOGS]: [],
     [FIELD_NAMES.AGENT_STATE]: {
         status: 'idle',
