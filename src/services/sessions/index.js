@@ -110,6 +110,11 @@ class ProjectSessionManager {
         // 4. Preserve Tasks
         normalized[FIELD_NAMES.TASKS] = Array.isArray(rawData[FIELD_NAMES.TASKS]) ? rawData[FIELD_NAMES.TASKS] : [];
 
+        // 4.1 Preserve task pinned state
+        normalized[FIELD_NAMES.TASKS_PINNED] = typeof rawData[FIELD_NAMES.TASKS_PINNED] === 'boolean'
+            ? rawData[FIELD_NAMES.TASKS_PINNED]
+            : false;
+
         // 5. Preserve Tool Logs (Handle legacy 'logs' if necessary - verify usage)
         const toolLogs = rawData[FIELD_NAMES.TOOL_LOGS] || rawData[FIELD_NAMES.LEGACY_LOGS]; // Check if 'logs' was used
         normalized[FIELD_NAMES.TOOL_LOGS] = Array.isArray(toolLogs) ? toolLogs : [];
@@ -620,6 +625,27 @@ class ProjectSessionManager {
         sessionData[FIELD_NAMES.MCP_ALIAS] = mcpAlias;
         sessionData[FIELD_NAMES.MCP_URL] = mcpUrl;
         await this.saveSession(sessionId);
+    }
+
+    /**
+     * Set whether the task panel is pinned
+     * @param {string} sessionId
+     * @param {boolean} pinned
+     */
+    async setTasksPinned(sessionId, pinned) {
+        const sessionData = await this.getSession(sessionId);
+        sessionData[FIELD_NAMES.TASKS_PINNED] = !!pinned;
+        await this.saveSession(sessionId);
+    }
+
+    /**
+     * Get pinned state for tasks
+     * @param {string} sessionId
+     * @returns {Promise<boolean>}
+     */
+    async getTasksPinned(sessionId) {
+        const sessionData = await this.getSession(sessionId);
+        return !!sessionData[FIELD_NAMES.TASKS_PINNED];
     }
 
     /**
