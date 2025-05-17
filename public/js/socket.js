@@ -631,22 +631,17 @@ export function setupSocketEventHandlers(socket) {
                     break;
 
                 case 'update':
-                    console.log(data.task);
                     if (data.task.title !== undefined || data.task.description !== undefined) {
-                        if (typeof tracker.renameTask === 'function') {
-                            tracker.renameTask(
-                                data.task.id,
-                                data.task.title || data.task.description || 'Untitled Task'
-                            );
-                        }
+                        tracker.renameTask(
+                            data.task.id,
+                            data.task.title
+                        );
                     }
                     if (data.task.status !== undefined) {
-                        if (typeof tracker.setStatus === 'function') {
-                            tracker.setStatus(
-                                data.task.id,
-                                data.task.status || 'pending'
-                            );
-                        }
+                        tracker.setStatus(
+                            data.task.id,
+                            data.task.status
+                        );
                     }
                     break;
 
