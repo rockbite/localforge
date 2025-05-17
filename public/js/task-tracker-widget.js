@@ -1203,8 +1203,13 @@ var TaskTrackerWidget = class _TaskTrackerWidget extends i4 {
     }
     // ------------------ helpers ------------------
     _patch(id, patch) {
-        this.tasks = this.tasks.map((t5) => t5.id === id ? { ...t5, ...patch } : t5);
-        this.requestUpdate();
+        // Use the flat map to locate the task anywhere in the tree and mutate
+        // it in place. This ensures updates work for nested tasks as well.
+        const task = this._taskMap.get(id);
+        if (task) {
+            Object.assign(task, patch);
+            this.requestUpdate();
+        }
     }
     /**
      * Sort tasks in-place according to status + insertion order.
