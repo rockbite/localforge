@@ -4,6 +4,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) co
 
 ## [1.0.25] – TBD
 * Task tracker now supports sub-tasks
+* LFE spec and LFE file exporting to share on agent marketplace with colleagues
 
 
 ## [1.0.24] – 2025-05-15 (Stability Release)
