@@ -1,0 +1,95 @@
+/* Export Tab Styles */
+
+.export-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Override checkbox styles for export list */
+.export-item-checkbox {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.export-item-checkbox input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.export-section {
+    margin-bottom: 20px;
+}
+
+.export-section h3 {
+    font-size: 15px;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.export-list {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.export-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-primary);
+    display: flex;
+    align-items: center;
+}
+
+.export-item:last-child {
+    border-bottom: none;
+}
+
+.export-item-checkbox {
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.export-item-name {
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.export-button-container {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 0;
+    margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--bg-secondary);
+    z-index: 2;
+}
+
+.export-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.export-btn .material-icons {
+    font-size: 18px;
+}
+
+/* Empty state for export lists */
+.export-list-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    color: var(--text-tertiary);
+    font-style: italic;
+}

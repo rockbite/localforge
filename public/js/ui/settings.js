@@ -1,5 +1,6 @@
 // Settings dialog functionality
 class SettingsUI {
+
     constructor() {
         this.dialog = document.getElementById('settings-modal');
         this.tabButtons = document.querySelectorAll('.settings-tab-button');
@@ -526,6 +527,9 @@ SettingsUI.prototype.populateMcpServersData = function(mcpServers) {
                 mcpListElement.appendChild(mcpItem);
             });
 
+            // Notify others that MCP data refreshed
+            window.dispatchEvent(new CustomEvent('mcp-updated', { detail: mcpServers }));
+
             // Add event listeners for edit and delete buttons
             mcpListElement.querySelectorAll('.edit-mcp').forEach(button => {
                 button.addEventListener('click', () => {
@@ -945,6 +949,9 @@ SettingsUI.prototype.saveProviderData = function() {
     // Close modal
     this.closeProviderEditModal();
 };
+
+// Expose SettingsUI class globally so other modules can extend it
+window.SettingsUI = SettingsUI;
 
 // Add global method to open settings dialog
 function openSettings() {

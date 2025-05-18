@@ -54,6 +54,8 @@ class AgentsManager {
                 
                 this.agents = agents;
                 this.renderAgentsList();
+                // Notify other components data is ready
+                window.dispatchEvent(new CustomEvent('agents-updated'));
             })
             .catch(error => {
                 console.error('Error loading agents:', error);
