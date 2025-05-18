@@ -13,6 +13,8 @@ class ExportUI {
         this.agentsExportList = this.exportTab.querySelector('.agents-export-list');
         this.mcpsExportList = this.exportTab.querySelector('.mcps-export-list');
         this.projectsExportList = this.exportTab.querySelector('.projects-export-list');
+
+        this.cachedProjects = [];
         
         // Buttons
         this.selectAllBtn = this.exportTab.querySelector('.select-all-btn');
@@ -70,29 +72,38 @@ class ExportUI {
         }
     }
     
-    handleExport() {
+    async handleExport() {
         // Get all selected items
         const selectedAgents = Array.from(this.agentsExportList.querySelectorAll('input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.dataset.name);
-        
+
         const selectedMcps = Array.from(this.mcpsExportList.querySelectorAll('input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.dataset.name);
-        
+
         const selectedProjects = Array.from(this.projectsExportList.querySelectorAll('input[type="checkbox"]:checked'))
-            .map(checkbox => checkbox.dataset.name);
-        
-        // Create export data object
-        const exportData = {
-            agents: selectedAgents,
-            mcps: selectedMcps,
-            projects: selectedProjects
-        };
-        
-        // For now we're just showing the file save dialog without actual content
-        this.showFileSaveDialog();
+            .map(checkbox => checkbox.dataset.id);
+
+        try {
+            const exportObj = await this.buildLfeExport({
+                agents: selectedAgents,
+                mcps: selectedMcps,
+                projects: selectedProjects
+            });
+
+            const isValid = await this.validateExport(exportObj);
+            if (!isValid) {
+                console.error('Export aborted due to validation errors');
+                return;
+            }
+
+            const dataStr = JSON.stringify(exportObj, null, 2);
+            this.showFileSaveDialog(dataStr);
+        } catch (err) {
+            console.error('Error preparing export:', err);
+        }
     }
-    
-    showFileSaveDialog() {
+
+    showFileSaveDialog(dataStr) {
         // Use the Electron API if available, otherwise use the web File System Access API
         if (window.electronAPI && typeof window.electronAPI.showSaveDialog === 'function') {
             window.electronAPI.showSaveDialog({
@@ -103,18 +114,22 @@ class ExportUI {
                 ]
             }).then(result => {
                 if (!result.canceled && result.filePath) {
-                    // In a real implementation, we would save the file here
-                    console.log('File would be saved to:', result.filePath);
-                    this.showExportSuccess();
+                    window.electronAPI.saveFile(result.filePath, dataStr)
+                        .then(() => {
+                            this.showExportSuccess();
+                        })
+                        .catch(err => {
+                            console.error('Error saving file:', err);
+                        });
                 }
             });
         } else {
             // Web browser file save
-            this.webFileSave();
+            this.webFileSave(dataStr);
         }
     }
-    
-    webFileSave() {
+
+    webFileSave(dataStr) {
         // Use the File System Access API if available
         if ('showSaveFilePicker' in window) {
             const opts = {
@@ -126,9 +141,10 @@ class ExportUI {
             };
             
             window.showSaveFilePicker(opts)
-                .then(fileHandle => {
-                    // In a real implementation, we would write to the file here
-                    console.log('File handle obtained for saving');
+                .then(async fileHandle => {
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(dataStr);
+                    await writable.close();
                     this.showExportSuccess();
                 })
                 .catch(err => {
@@ -138,8 +154,7 @@ class ExportUI {
                 });
         } else {
             // Fallback for browsers without File System Access API
-            // This just creates a empty download as a placeholder
-            const blob = new Blob([''], { type: 'application/octet-stream' });
+            const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -155,6 +170,79 @@ class ExportUI {
             showNotification('Export successful', 'check_circle', 'success');
         } else {
             console.log('Export successful');
+        }
+    }
+
+    async buildLfeExport(selection) {
+        const exportsArr = [];
+
+        // Agents
+        const allAgents = (window.agentsManager && window.agentsManager.agents) ||
+                          (this.settingsUI.agentsUI && this.settingsUI.agentsUI.agents) || [];
+        selection.agents.forEach(name => {
+            const a = allAgents.find(x => x.name === name);
+            if (!a) return;
+            const llms = a.agent?.llms || {};
+            const personalities = [];
+            if (llms.main?.provider) personalities.push({ role: 'main', provider: llms.main.provider, model: llms.main.model });
+            if (llms.expert?.provider) personalities.push({ role: 'expert', provider: llms.expert.provider, model: llms.expert.model });
+            if (llms.aux?.provider) personalities.push({ role: 'auxiliary', provider: llms.aux.provider, model: llms.aux.model });
+            exportsArr.push({ type: 'agent', data: {
+                name: a.name,
+                description: a.description || a.agent?.description || '',
+                personalities,
+                tools: a.agent?.tool_list || [],
+                promptOverrides: a.agent?.['prompt-overrides'] || {}
+            }});
+        });
+
+        // MCPs
+        const mcps = this.settingsUI.mcpServers || [];
+        selection.mcps.forEach(alias => {
+            const m = mcps.find(x => x.alias === alias);
+            if (m) exportsArr.push({ type: 'mcp', data: { name: m.alias, arg: m.url } });
+        });
+
+        // Projects
+        if (selection.projects && selection.projects.length) {
+            for (const id of selection.projects) {
+                try {
+                    const proj = (this.cachedProjects || []).find(p => p.id === id);
+                    if (!proj) continue;
+                    const sessions = await fetch(`/api/projects/${id}/sessions`).then(r => r.json());
+                    const sessionBlocks = [];
+                    for (const s of sessions) {
+                        const detail = await fetch(`/api/sessions/${s.id}`).then(r => r.json());
+                        const data = detail.data || {};
+                        const agentObj = allAgents.find(x => x.id === data.agentId);
+                        sessionBlocks.push({
+                            name: s.name,
+                            mcp: data.mcpAlias || '',
+                            agent: agentObj ? agentObj.name : (data.agentId || ''),
+                            taskList: data.tasks || []
+                        });
+                    }
+                    exportsArr.push({ type: 'project-prefab', data: { name: proj.name, sessions: sessionBlocks } });
+                } catch (err) {
+                    console.error('Error collecting project data', err);
+                }
+            }
+        }
+
+        return { lfeVersion: '1.0.0', exports: exportsArr };
+    }
+
+    async validateExport(obj) {
+        try {
+            const mod = await import('../../src/lfe/spec/lfe_spec_v1.js');
+            mod.lfe_spec_v1.parse(obj);
+            return true;
+        } catch (err) {
+            console.error('LFE validation failed:', err);
+            if (typeof showNotification === 'function') {
+                showNotification('Export validation failed', 'error', 'error');
+            }
+            return false;
         }
     }
     
@@ -429,6 +517,7 @@ class ExportUI {
             })
             .then(data => {
                 const projects = Array.isArray(data) ? data : (data.projects || []);
+                this.cachedProjects = projects;
                 console.log('Projects loaded:', projects);
                 if (!projects || projects.length === 0) {
                     console.log('No projects available to display');

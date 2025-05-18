@@ -15,7 +15,7 @@ import { startServer } from './server.js';
 import https from 'https';
 import fetch from 'node-fetch';
 import semver from 'semver';
-import { readFileSync } from 'fs';
+import fs, { readFileSync } from 'fs';
 import {exec} from "child_process";
 import {runUpdate} from "./updater.js";
 import net from 'net';
@@ -280,10 +280,35 @@ app.whenReady().then(async () => {
       };
     } catch (error) {
       console.error('Error showing directory picker:', error);
-      return { 
-        canceled: true, 
-        error: error.message 
+      return {
+        canceled: true,
+        error: error.message
       };
+    }
+  });
+
+  // Show a save dialog and return the path
+  ipcMain.handle('show-save-dialog', async (_event, options) => {
+    try {
+      const result = await dialog.showSaveDialog(win, options);
+      if (result.canceled) {
+        return { canceled: true };
+      }
+      return { canceled: false, filePath: result.filePath };
+    } catch (error) {
+      console.error('Error showing save dialog:', error);
+      return { canceled: true, error: error.message };
+    }
+  });
+
+  // Save file contents to disk
+  ipcMain.handle('save-file', async (_event, filePath, data) => {
+    try {
+      await fs.promises.writeFile(filePath, data, 'utf8');
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving file:', error);
+      return { success: false, error: error.message };
     }
   });
 });
