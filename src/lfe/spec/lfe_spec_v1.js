@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '/vendor/zod/index.mjs';
 
 /** ---  Shared primitives  --- */
 const nonEmptyStr = () => z.string().min(1);
@@ -43,8 +43,8 @@ const taskObjSchema = z
 const sessionSchema = z
     .object({
         name: nonEmptyStr(),
-        mcp: nonEmptyStr(),
-        agent: nonEmptyStr(),
+        mcp: nonEmptyStr().optional(),
+        agent: nonEmptyStr().optional(),
         taskList: z.array(z.union([nonEmptyStr(), taskObjSchema])).optional(),
     })
     .strict();
@@ -62,16 +62,16 @@ const exportBlockSchema = z.discriminatedUnion('type', [
     z.object({
         type: z.literal('project-prefab'),
         data: projectPrefabSchema,
-    }),
+    }).strict(),
     z.object({
         type: z.literal('mcp'),
         data: mcpSchema,
-    }),
+    }).strict(),
     z.object({
         type: z.literal('agent'),
         data: agentSchema,
-    }),
-]).strict();
+    }).strict(),
+]);
 
 /** ------------------------------------------------------------------
  *  Top-level Localforge Export spec

@@ -113,6 +113,14 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../../public')));
 
+// Expose LFE spec files to the renderer so dynamic `import()` works
+// NOTE: These files live in src/lfe/spec but aren't under the normal
+// public folder, so we explicitly mount a static route.
+app.use('/src/lfe/spec', express.static(path.join(__dirname, '../lfe/spec')));
+
+// Serve Zod (ESM build) to the renderer for validation
+app.use('/vendor/zod', express.static(path.join(__dirname, '../../node_modules/zod/lib')));
+
 import store from '../db/store.js';
 import {AUX_MODEL, callLLMByType, EXPERT_MODEL, getModelNameByType, MAIN_MODEL} from "../middleware/llm.js";
 

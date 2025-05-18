@@ -215,12 +215,14 @@ class ExportUI {
                         const detail = await fetch(`/api/sessions/${s.id}`).then(r => r.json());
                         const data = detail.data || {};
                         const agentObj = allAgents.find(x => x.id === data.agentId);
-                        sessionBlocks.push({
+                        const sessionBlock = {
                             name: s.name,
-                            mcp: data.mcpAlias || '',
-                            agent: agentObj ? agentObj.name : (data.agentId || ''),
                             taskList: data.tasks || []
-                        });
+                        };
+                        if (data.mcpAlias) sessionBlock.mcp = data.mcpAlias;
+                        if (agentObj) sessionBlock.agent = agentObj.name;
+                        else if (data.agentId) sessionBlock.agent = data.agentId;
+                        sessionBlocks.push(sessionBlock);
                     }
                     exportsArr.push({ type: 'project-prefab', data: { name: proj.name, sessions: sessionBlocks } });
                 } catch (err) {
@@ -235,6 +237,7 @@ class ExportUI {
     async validateExport(obj) {
         try {
             const mod = await import('../../src/lfe/spec/lfe_spec_v1.js');
+            console.log(obj);
             mod.lfe_spec_v1.parse(obj);
             return true;
         } catch (err) {
