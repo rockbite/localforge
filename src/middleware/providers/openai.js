@@ -1,7 +1,6 @@
 // src/middleware/providers/openai.js
 
 import OpenAI from "openai";
-import store from "../../db/store.js";
 
 /** @type {LLMProvider} */
 
@@ -133,7 +132,7 @@ export default {
         let signal = options.signal;
         delete options.signal;
 
-        const res = await client.chat.completions.create(options, {
+        const  res = await client.chat.completions.create(options, {
             signal: signal
         });
 
